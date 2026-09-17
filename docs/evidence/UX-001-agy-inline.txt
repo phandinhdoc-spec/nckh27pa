@@ -1,0 +1,97 @@
+# BÁO CÁO REVIEW UX ĐỘC LẬP: CHECKLIST NGHIỆM THU LÁT PHONE_ONLY (UX-001)
+
+Dưới góc nhìn **Reviewer UX Độc lập**, căn cứ theo quy tắc thiết kế sản phẩm (đơn giản, dễ nhận biết cho người cao tuổi, không gây hoang mang, an toàn tuyệt đối và **nghiêm cấm gửi cảnh báo thật ra người ngoài/người thân trong giai đoạn thử nghiệm**), dưới đây là bộ Checklist nghiệm thu UX và Bảng phân tích rủi ro cho lát cắt **PHONE_ONLY**.
+
+---
+
+## PHẦN 1: CHECKLIST NGHIỆM THU UX (LÁT PHONE_ONLY)
+
+### 1. Trạng thái thiếu hụt phần cứng, kết nối & quyền hệ thống (Degraded States)
+*Mục tiêu: Đảm bảo giao diện phản ánh đúng chế độ chỉ dùng điện thoại, không báo lỗi gây hoảng loạn nhưng đủ rõ ràng.*
+
+- [ ] **Chế độ nguồn giám sát:** Thẻ nguồn giám sát hiển thị chính xác trạng thái **"Điện thoại"** (không ở trạng thái "ESP32" hay "Cả hai").
+- [ ] **Trạng thái BLE (Bluetooth):**
+  - Hiển thị nhãn/icon màu **Xám** với nội dung rõ ràng: *"Chưa ghép nối thiết bị đeo (Đang chạy chế độ PHONE ONLY)"*.
+  - Không hiện pop-up chặn màn hình hoặc cảnh báo đỏ gây nhầm lẫn là sự cố khẩn cấp.
+- [ ] **Thiếu quyền truy cập (Quyền cảm biến, thông báo, vẽ đè màn hình khóa):**
+  - Xuất hiện banner cảnh báo màu **Vàng/Cam** có cả **Màu + Biểu tượng + Chữ** (tuân thủ §3.1).
+  - Có nút tắt dẫn trực tiếp vào cài đặt cấp quyền kèm lời giải thích dễ hiểu theo §7.
+- [ ] **Thiếu / Mất tín hiệu Vị trí (GPS):**
+  - Nếu tắt quyền vị trí hoặc chưa bắt được GPS: Hiển thị trạng thái cảnh báo vàng *"Vị trí: Chưa xác định được vị trí"*.
+  - **Quy tắc chặn trì hoãn (§7):** Tuyệt đối không treo/chặn luồng kiểm tra hoặc luồng cảnh báo chỉ để đợi tọa độ GPS.
+- [ ] **Cảnh báo máy không trên người (§3.3):**
+  - Khi cảm biến phát hiện điện thoại nằm yên trên mặt phẳng: Hiển thị cảnh báo màu vàng/cam *"Điện thoại có thể đang đặt trên bàn"*.
+
+---
+
+### 2. Luồng xác minh & Kích hoạt SOS / NO_RESPONSE (§3.4, §4.4)
+*Mục tiêu: Đếm ngược rõ ràng, dễ thao tác trong trạng thái hoảng loạn, tự động xử lý khi bất tỉnh.*
+
+- [ ] **Kích hoạt thủ công (Nút SOS Trang chủ):**
+  - Yêu cầu hành vi **GIỮ 2 GIÂY** (có phản hồi rung và tiến trình vòng tròn trực quan) để chống chạm nhầm.
+  - Sau khi giữ đủ 2 giây: Chuyển thẳng sang trạng thái `ALERTING` (§4.4).
+- [ ] **Kích hoạt tự động khi nghi ngờ té ngã (`SUSPECTED` $\rightarrow$ `VERIFYING`):**
+  - Mở giao diện toàn màn hình `VERIFYING` (kể cả khi máy đang khóa màn hình).
+  - Tiêu đề chữ cực lớn: **"Bạn có ổn không?"**.
+  - Đồng hồ đếm ngược trực quan: Mặc định **10 giây** (hiển thị số đếm lùi to, rõ).
+  - Đa phương thức tiếp cận: Phát đồng thời **Âm báo lớn + Rung nhịp điệu + Giọng nói đọc câu hỏi**.
+- [ ] **Hành vi nút bấm xác minh:**
+  - Hai nút kích thước lớn, tương phản cao, tách biệt rõ ràng để bấm bằng một tay:
+    - **[TÔI VẪN ỔN]**: Lập tức hủy đếm ngược, tắt âm/rung, chuyển về `MONITORING`, gắn nhãn sự kiện là *Báo động giả (False Alarm)* (§3.4, §3.6).
+    - **[CẦN GIÚP ĐỠ]**: Bỏ qua thời gian còn lại, lập tức kích hoạt gửi cảnh báo (`ALERTING`).
+- [ ] **Trường hợp không phản hồi (Hết 10 giây - `NO_RESPONSE`):**
+  - Khi đồng hồ về `0s` mà người dùng không bấm nút: Hệ thống tự động kích hoạt chuyển sang trạng thái `ALERTING` $\rightarrow$ `AWAITING_HELP`.
+  - **Chỉ thị nghiệm thu bắt buộc:** Tải trọng (payload) cảnh báo tự động gửi về **Test Sink / Mock Server cục bộ**, **TUYỆT ĐỐI KHÔNG** kích hoạt gửi tin nhắn SMS thật, quay số thật ra danh bạ người thân.
+
+---
+
+### 3. Hiển thị phân biệt trạng thái dữ liệu: Giả / Đang gửi / Đã gửi / Đã nhận (§3.5, §3.6)
+*Mục tiêu: Người dùng/người thử nghiệm biết chính xác tiến độ thông tin mà không bị nhầm lẫn.*
+
+- [ ] **Báo động giả (Người dùng ấn "Tôi vẫn ổn"):**
+  - Màn hình thông báo phản hồi màu xanh lá: *"Đã ghi nhận an toàn - Hủy kích hoạt cảnh báo"*.
+  - Mục ghi nhận trong tab *Sự kiện* hiển thị: Kết quả = *"Người dùng an toàn (Báo động giả)"*.
+- [ ] **Đang gửi (Trạng thái `ALERTING`):**
+  - Thẻ trạng thái màu **Đỏ**, hiển thị icon xoay/tiến trình gửi: *"Đang gửi cảnh báo thử nghiệm tới hệ thống..."*.
+- [ ] **Đã gửi từ thiết bị (Dispatched to Test Sink):**
+  - Màn hình chuyển sang trạng thái `AWAITING_HELP`.
+  - Hiển thị danh sách kênh nhận mô phỏng: *"Đã chuyển tín hiệu SOS tới Test Sink (Mã sự kiện: #xxxx)"*.
+  - Hiển thị thời điểm gửi, thông số pin điện thoại, và tình trạng vị trí kèm theo (tọa độ hoặc chuỗi *"Chưa xác định được vị trí"* theo §7).
+- [ ] **Đã nhận phản hồi (Acknowledged / Help confirmed):**
+  - Hiển thị nhãn trạng thái nhận diện rõ ràng nếu Test Sink trả mã xác nhận.
+  - Nút lớn: **"Tôi đã được hỗ trợ"** để đưa hệ thống trở lại chế độ giám sát bình thường (`MONITORING`), lưu sự kiện đầy đủ vào màn hình Lịch sử.
+
+---
+
+### 4. Xử lý lỗi truyền thông & Gửi thất bại
+*Mục tiêu: Thông báo lỗi minh bạch, cung cấp hướng xử lý dự phòng tức thì.*
+
+- [ ] **Lỗi mạng / Không gửi được tới Sink:**
+  - Nếu mất mạng 4G/Wifi hoặc Sink không phản hồi: Không được đứng đơ (freeze) hoặc âm thầm bỏ qua.
+  - Hiển thị trạng thái cảnh báo màu **Cam/Đỏ**: *"Gửi thử nghiệm thất bại - Đang thử lại..."* kèm số lần thử lại.
+- [ ] **Phương án dự phòng khẩn cấp tại chỗ:**
+  - Màn hình hiển thị nút lớn quay số khẩn cấp hệ thống (quay số bằng trình gọi điện thoại để người dùng tự xác nhận, không tự ý bấm ngầm) và tiếp tục phát chuông/còi báo động tại chỗ trên loa ngoài điện thoại.
+
+---
+
+## PHẦN 2: TỐI ĐA 5 RỦI RO UX NGUY HIỂM NHẤT TRONG LÁT CẮT NÀY
+
+1. **Rủi ro rò rỉ cảnh báo thật ra người thân (False Positive Emergency Outbound):**
+   - *Nguy cơ:* Nhầm lẫn giữa môi trường thật và test sink khiến điện thoại tự động kích hoạt SMS hoặc gọi điện thật đến người thân trong danh bạ khi hết 10 giây, gây hoảng loạn tâm lý nghiêm trọng cho gia đình.
+   - *Biện pháp UX:* Gắn nhãn đóng khung cố định màu vàng/đen trên đầu mọi màn hình: `[CHẾ ĐỘ THỬ NGHIỆM - KHÔNG GỬI NGOÀI]` và vô hiệu hóa cứng logic gửi SMS ra GSM provider trên bản build này.
+
+2. **Rủi ro kẹt/treo giao diện do chờ dữ liệu Vị trí (GPS Timeout Trap):**
+   - *Nguy cơ:* Ứng dụng cố gắng lấy vị trí GPS chính xác trong nhà (indoor) trước khi gửi SOS, làm trễ quá trình chuyển trạng thái từ `ALERTING` sang hiển thị cứu hộ, khiến người dùng nghĩ ứng dụng bị crash.
+   - *Khắc phục UX:* Tuân thủ triệt để §7: Gửi ngay payload với trạng thái *"Chưa xác định được vị trí"* và cập nhật tọa độ sau nếu có.
+
+3. **Rủi ro người cao tuổi bị kẹt trong màn hình xác minh do âm thanh/rung gây hoảng sợ:**
+   - *Nguy cơ:* Khi đếm ngược 10 giây với chuông báo dồn dập, người lớn tuổi dễ cuống, ấn trượt hoặc không hiểu 2 nút *"Tôi vẫn ổn"* và *"Cần giúp đỡ"* nút nào là nút tắt cảnh báo nhầm.
+   - *Khắc phục UX:* Phân biệt màu và độ nổi bật rõ ràng: Nút *"TÔI VẪN ỔN"* nền xanh lá/viền đậm tương phản cao; nút *"CẦN GIÚP ĐỠ"* nền đỏ nổi bật; chữ in hoa cỡ lớn, không dùng thuật ngữ công nghệ.
+
+4. **Rủi ro hiểu nhầm trạng thái ngắt BLE là hỏng toàn bộ hệ thống:**
+   - *Nguy cơ:* Vì đang chạy lát `PHONE_ONLY`, việc hiển thị trạng thái thiếu ESP32 có thể làm người dùng tưởng ứng dụng không hoạt động, mất niềm tin vào tính năng giám sát ngã của điện thoại.
+   - *Khắc phục UX:* Thẻ trạng thái phải khẳng định rõ ràng: *"Hệ thống đang bảo vệ bạn bằng cảm biến điện thoại"* (màu xanh lá), chỉ đặt icon BLE xám phụ ở phía dưới với chú thích *"Không dùng vòng đeo"*.
+
+5. **Rủi ro nút SOS bị che khuất hoặc khó chạm khi máy để trong túi/rơi:**
+   - *Nguy cơ:* Người dùng trong trạng thái choáng váng bấm nút SOS nhưng không giữ đủ 2 giây (§3.3), ứng dụng không có phản hồi haptic/âm thanh giải thích, dẫn đến người dùng lầm tưởng đã kích hoạt nhưng thực tế chưa có gì xảy ra.
+   - *Khắc phục UX:* Nếu người dùng chỉ chạm nhẹ (tap) vào nút SOS, hệ thống phải rung nhẹ và hiện thông báo chữ to: *"Vui lòng giữ nút trong 2 giây để kích hoạt cứu hộ"*.

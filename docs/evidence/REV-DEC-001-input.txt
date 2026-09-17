@@ -1,0 +1,119 @@
+REV-DEC-001: Independent static review, inline ONLY NO tools. Trả tiếng Việt tối đa300từ, PASS/FAIL với concrete bug file:line, không giả đã chạy tests. Scope sensor JSON v1 parser no BLE/no authentication/no dedupe. Required: JSON strict, duplicate key reject, finite floats, percentage0..100, required fields reject null/missing/wrong type; optional missing→null chosen prototype policy; version1 only; bounded4096chars, deviceId1..128, seq/time nonnegative exactLong. No secrets logging. Extra primitive keys ignored (forward tolerance), nested keys rejected; record as policy not protocol change. Values pressure/accel uncalibrated not physiological validation.
+
+FILE android/app/src/main/java/vn/nckh27pa/fallsafe/protocol/Esp32PacketDecoder.kt
+1|package vn.nckh27pa.fallsafe.protocol
+2|
+3|import com.google.gson.Strictness
+4|import com.google.gson.stream.JsonReader
+5|import com.google.gson.stream.JsonToken
+6|import java.io.StringReader
+7|
+8|/** Pure v1 sensor parser. No device authentication, transport ACK or stateful dedupe. */
+9|class Esp32PacketDecoder {
+10|    private data class NumberToken(val raw: String)
+11|    fun decodeSensor(json: String): Esp32SensorPacket? {
+12|        if (json.length !in 2..4096) return null
+13|        return try {
+14|            val fields = mutableMapOf<String, Any?>()
+15|            JsonReader(StringReader(json)).use { reader ->
+16|                reader.strictness = Strictness.STRICT
+17|                reader.beginObject()
+18|                while (reader.hasNext()) {
+19|                    val key = reader.nextName()
+20|                    require(!fields.containsKey(key)) { "Duplicate key" }
+21|                    fields[key] = when (reader.peek()) {
+22|                        JsonToken.STRING -> reader.nextString()
+23|                        JsonToken.NUMBER -> NumberToken(reader.nextString())
+24|                        JsonToken.BOOLEAN -> reader.nextBoolean()
+25|                        JsonToken.NULL -> { reader.nextNull(); null }
+26|                        else -> throw IllegalArgumentException("Primitive fields only")
+27|                    }
+28|                }
+29|                reader.endObject()
+30|                require(reader.peek() == JsonToken.END_DOCUMENT)
+31|            }
+32|            fun integer(name: String): Long {
+33|                val raw = (fields[name] as? NumberToken)?.raw ?: error("Required integer")
+34|                require(raw.matches(Regex("0|[1-9][0-9]*")))
+35|                return raw.toLong()
+36|            }
+37|            fun percentage(name: String): Int = integer(name).also { require(it in 0..100) }.toInt()
+38|            fun decimal(name: String): Float = ((fields[name] as? NumberToken)?.raw?.toFloatOrNull()
+39|                ?: error("Required number")).also { require(it.isFinite()) }
+40|            fun optional(name: String): Float? = if (fields[name] == null) null else decimal(name)
+41|            fun flag(name: String): Boolean = fields[name] as? Boolean ?: error("Required boolean")
+42|            val version = integer("protocolVersion"); require(version == 1L)
+43|            val id = fields["deviceId"] as? String ?: error("Required ID")
+44|            require(id.isNotBlank() && id.length <= 128)
+45|            val voltage = if (fields["batteryVoltageMv"] == null) null else integer("batteryVoltageMv").also { require(it <= Int.MAX_VALUE) }.toInt()
+46|            Esp32SensorPacket(version.toInt(), id, integer("sequenceNumber"), integer("timestampMs"),
+47|                decimal("accelXMs2"), decimal("accelYMs2"), decimal("accelZMs2"),
+48|                decimal("gyroXDps"), decimal("gyroYDps"), decimal("gyroZDps"),
+49|                optional("pressurePa"), optional("temperatureC"), optional("altitudeDeltaM"),
+50|                percentage("batteryPercent"), voltage, flag("isCharging"), flag("sosButtonPressed"), percentage("sensorQuality"))
+51|        } catch (_: Exception) {
+52|            // Do not retain raw payload or exception text in logs.
+53|            null
+54|        }
+55|    }
+56|}
+57|data class Esp32SensorPacket(
+58|    val protocolVersion: Int, val deviceId: String, val sequenceNumber: Long, val timestampMs: Long,
+59|    val accelXMs2: Float, val accelYMs2: Float, val accelZMs2: Float,
+60|    val gyroXDps: Float, val gyroYDps: Float, val gyroZDps: Float,
+61|    val pressurePa: Float?, val temperatureC: Float?, val altitudeDeltaM: Float?,
+62|    val batteryPercent: Int, val batteryVoltageMv: Int?, val isCharging: Boolean,
+63|    val sosButtonPressed: Boolean, val sensorQuality: Int
+64|)
+
+FILE android/app/src/test/java/vn/nckh27pa/fallsafe/protocol/DecoderTests.kt
+1|package vn.nckh27pa.fallsafe.protocol
+2|
+3|import com.google.gson.JsonParser
+4|import org.junit.Assert.*
+5|import org.junit.Test
+6|
+7|class DecoderTests {
+8|    private val decoder = Esp32PacketDecoder()
+9|    private val fixtures = JsonParser.parseString(requireNotNull(javaClass.getResourceAsStream("/protocol-v1.json")).bufferedReader().use { it.readText() }).asJsonArray
+10|    private fun valid() = fixtures.first().asJsonObject.getAsJsonObject("packet").toString()
+11|    @Test fun sourceFixtureKeepsNamesAndUnits() {
+12|        val p = requireNotNull(decoder.decodeSensor(valid()))
+13|        assertEquals(1, p.protocolVersion); assertEquals("FALLSAFE-01A2",p.deviceId)
+14|        assertEquals(18422L,p.sequenceNumber); assertEquals(1789363200123L,p.timestampMs)
+15|        assertEquals(9.62f,p.accelZMs2); assertEquals(-4.1f,p.gyroYDps)
+16|        assertEquals(100842.4f,p.pressurePa); assertEquals(78,p.batteryPercent)
+17|        assertFalse(p.isCharging); assertFalse(p.sosButtonPressed)
+18|    }
+19|    @Test fun sharedVectorsAcceptOrReject() {
+20|        for (v in fixtures) {
+21|            val o=v.asJsonObject
+22|            if(o.has("packet")) assertEquals(o["id"].asString,o["expect"].asString=="accept",decoder.decodeSensor(o["packet"].toString())!=null)
+23|        }
+24|    }
+25|    @Test fun pureDecodeDoesNotHideDuplicatesFromRepository() {
+26|        val packets=fixtures.last().asJsonObject.getAsJsonArray("packets")
+27|        val a=decoder.decodeSensor(packets[0].toString()); val b=decoder.decodeSensor(packets[1].toString())
+28|        assertNotNull(a); assertEquals(a,b) // caller must dedupe, decoder has no hidden mutable cache
+29|    }
+30|    @Test fun strictMalformedAndDuplicateKeys() {
+31|        for (bad in listOf("", "[]", "null", valid()+" {}", valid().replace("9.62","NaN"), valid().replace("9.62","1e999"), valid().dropLast(1)+",\"deviceId\":\"other\"}", valid().replace("false","\"false\""))) {
+32|            assertNull(bad,decoder.decodeSensor(bad))
+33|        }
+34|    }
+35|    @Test fun integralRequiredAndRanges() {
+36|        val original=fixtures.first().asJsonObject.getAsJsonObject("packet")
+37|        for ((key,value) in listOf("sequenceNumber" to "-1", "sequenceNumber" to "9223372036854775808", "batteryPercent" to "101", "sensorQuality" to "-1", "timestampMs" to "1.5", "accelXMs2" to "null")) {
+38|            val p=original.deepCopy(); p.add(key,JsonParser.parseString(value));assertNull(decoder.decodeSensor(p.toString()))
+39|        }
+40|    }
+41|    @Test fun nullableFieldsStayNullAndBoundsReject() {
+42|        val p=fixtures.first().asJsonObject.getAsJsonObject("packet").deepCopy()
+43|        for(k in listOf("pressurePa","temperatureC","altitudeDeltaM","batteryVoltageMv")) p.remove(k)
+44|        val v=requireNotNull(decoder.decodeSensor(p.toString()))
+45|        assertNull(v.pressurePa); assertNull(v.temperatureC); assertNull(v.altitudeDeltaM); assertNull(v.batteryVoltageMv)
+46|        p.addProperty("deviceId", "");assertNull(decoder.decodeSensor(p.toString()))
+47|        p.addProperty("deviceId", "x".repeat(129));assertNull(decoder.decodeSensor(p.toString()))
+48|        assertNull(decoder.decodeSensor(" ".repeat(4097)))
+49|    }
+50|}

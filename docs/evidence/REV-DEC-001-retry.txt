@@ -1,0 +1,13 @@
+**Kết quả đánh giá tĩnh:** **PASS** *(Đánh giá bằng phân tích mã nguồn tĩnh, không thực thi bộ test).*
+
+Mã nguồn tại [`Esp32PacketDecoder.kt`](file:///android/app/src/main/java/vn/nckh27pa/fallsafe/protocol/Esp32PacketDecoder.kt) đáp ứng đầy đủ các tiêu chí đặc tả bộ giải mã v1:
+
+1. **Strict JSON & Giới hạn độ dài:** Dòng 12 giới hạn payload trong khoảng `2..4096` ký tự; dòng 16 kích hoạt `Strictness.STRICT`; dòng 30 xác thực `END_DOCUMENT` chặn dữ liệu thừa phía sau.
+2. **Từ chối duplicate key & Nested structure:** Dòng 20 chặn trùng lặp key qua `fields.containsKey(key)`; dòng 26 giới hạn chỉ nhận kiểu primitive, từ chối mảng/object lồng nhau nhưng vẫn bỏ qua các key primitive thừa (forward tolerance).
+3. **Số nguyên chính xác & Khoảng giá trị:** Dòng 34–36 xác thực `0|[1-9][0-9]*` và gọi `toLong()` đảm bảo `sequenceNumber`/`timestampMs` là số nguyên không âm chuẩn `Long` (tràn số sẽ ném exception và được bắt); dòng 37 ép dải `0..100` cho `batteryPercent` và `sensorQuality`.
+4. **Số thực hữu hạn & Xử lý Optional:** Dòng 38–39 kiểm tra `isFinite()` loại bỏ `NaN`/`Infinity`; dòng 40 & 45 tuân thủ đúng chính sách prototype: trường optional vắng mặt/null chuyển thành `null`, trong khi trường bắt buộc sai kiểu hoặc thiếu sẽ bị từ chối.
+5. **Định danh & Phiên bản:** Dòng 42 ép `protocolVersion == 1L`; dòng 44 kiểm tra `deviceId` không rỗng/trắng và độ dài $\le 128$.
+6. **Bảo mật dữ liệu:** Dòng 51–54 bắt toàn bộ exception và trả về `null`, không ghi log payload hay stack trace.
+
+**Khuyến nghị tối ưu (không phải bug logic):**
+- [`Esp32PacketDecoder.kt:34`](file:///android/app/src/main/java/vn/nckh27pa/fallsafe/protocol/Esp32PacketDecoder.kt#L34): `Regex("0|[1-9][0-9]*")` được tạo mới mỗi lần phân tích trường integer. Nên chuyển thành hằng số `private val` ở cấp class/companion object để tránh cấp phát bộ nhớ lặp lại.

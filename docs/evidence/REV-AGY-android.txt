@@ -1,0 +1,8 @@
+ Dựa trên phân tích mã nguồn được cung cấp, dưới đây là kết quả review:
+
+**1. Kiểm tra các bản vá lỗi (Bug fixes) và Adapter wiring:**
+- **Lỗi bỏ sót accel không hợp lệ (Invalid accel dropped):** Đã được xử lý triệt để trong `PhoneNormalizer.update`. Khi phát hiện `Float.NaN` hoặc dữ liệu không hợp lệ, cảm biến ACCEL bị loại bỏ khỏi `readings`. Hàm `latest()` trả về `null` và kích hoạt luồng `onPacket(null)`. `DemoInputAdapter.acceptPhone()` nhận `null` và gọi rõ ràng `session.resetDetection()`, giúp bẻ gãy cửa sổ yên tĩnh (quiet window). Test `invalidAccelThroughNormalizerBreaksQuietWindow` đã xác nhận (GREEN) hành vi này.
+- **Tạm dừng (Pause) làm gián đoạn replay:** Đã được sửa. Hàm `DemoInputAdapter.paused()` sử dụng điều kiện `if (phoneOnly())` trước khi gọi `session.resetDetection()`. Do đó, khi Activity bị pause, nếu đang chạy replay (`phoneOnly() == false`), tiến trình replay sẽ không bị can thiệp. Test `replayImpactSurvivesActivityPauseAndSendsAtDeadline` pass thành công.
+- **Wiring của Controller:** `DemoController` uỷ quyền chính xác việc nhận dữ liệu thông qua `input` (`DemoInputAdapter`). Adapter phân luồng hoàn hảo giữa `PHONE_ONLY` và mô phỏng replay.
+
+[agy] print timeout after 4m0s with turn in progress; returning partial output

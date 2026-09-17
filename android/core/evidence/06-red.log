@@ -1,0 +1,12 @@
+PASS suspected, clear, confirmed and duplicate callbacks
+PASS deadline 10s, no response, absent location, one send
+PASS SAFE before deadline cancels; at and after deadline preserves alert
+PASS immediate NEED_HELP and SOS, dedup, completion permits new event
+PASS sink failure stays FAILED; reentrant calls cannot send or complete
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at core.CoreTestsKt.main$lambda$5(CoreTests.kt:63)
+	at core.CoreTestsKt.main$test(CoreTests.kt:6)
+	at core.CoreTestsKt.main(CoreTests.kt:62)
+	at core.CoreTestsKt.main(CoreTests.kt)
+
+EXIT 1

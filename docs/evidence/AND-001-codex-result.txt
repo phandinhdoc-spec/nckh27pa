@@ -1,0 +1,12 @@
+AND-001 **bị chặn, chưa hoàn thành**.
+
+- Đã đọc phiếu và toàn bộ kế hoạch.
+- Hai lần truy cập nguồn Gradle chính thức đều lỗi DNS, exit `6`.
+- Đã thực thi `./gradlew --no-daemon --max-workers=2 testDebugUnitTest assembleDebug`: exit `127`, thiếu Wrapper. Chưa có test chạy, RED/GREEN hoặc APK.
+- Chỉ ghi trong `android/evidence/`; giữ sandbox, không agent con, không sửa kế hoạch hay `docs/`.
+
+Bằng chứng: [AND-001-blocked.md](/home/pdd/nckh27pa/android/evidence/AND-001-blocked.md).
+
+Model: phiên Codex/GPT-6; chưa có bằng chứng runtime xác nhận `gpt-6-astra`.
+
+Cần Gradle và dependency truy cập được trong sandbox hoặc cache được cấp sẵn để tiếp tục.

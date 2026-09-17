@@ -1,0 +1,12 @@
+[
+  {
+    "name": "foreground-home-screen-off-stop",
+    "passed": true,
+    "elapsedSeconds": 50.76
+  },
+  {
+    "name": "notification-denied-local-restored",
+    "passed": true,
+    "elapsedSeconds": 19.8
+  }
+]

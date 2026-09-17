@@ -1,0 +1,124 @@
+UX-001: Chỉ phân tích văn bản được cung cấp, KHÔNG gọi tool hoặc đọc file. Bạn là reviewer UX độc lập. Trả tiếng Việt checklist nghiệm thu lát PHONE_ONLY: thiếu cảm biến/quyền/vị trí/BLE, SAFE/SOS/NO_RESPONSE/hết10giây tự gửi test sink, lỗi gửi, phân biệt giả/đã gửi/đã nhận. Tối đa5 rủi ro. Chỉ thị dự án yêu cầu không gửi người thật. Nguồn nguyên văn Android §3:
+## 3. Thiết kế frontend Android
+
+Frontend phải tạo cảm giác **gọn gàng, yên tâm và dễ thao tác**, không giống một bảng điều khiển kỹ thuật. Người lớn tuổi chỉ cần nhìn thấy trạng thái hiện tại và một nút cầu cứu lớn; thông số chuyên sâu được đặt ở màn hình dành cho người chăm sóc.
+
+### 3.1. Phong cách giao diện
+
+- Một màn hình chỉ có một nhiệm vụ chính.
+- Chữ lớn, tương phản cao, khoảng cách nút rộng.
+- Không dùng quá nhiều màu; màu thể hiện đúng ý nghĩa:
+  - Xanh lá: an toàn, hoạt động bình thường.
+  - Vàng/cam: cần chú ý.
+  - Đỏ: nguy hiểm hoặc đang gửi cảnh báo.
+  - Xám: chưa kết nối hoặc chưa có dữ liệu.
+- Trạng thái luôn có cả **màu + biểu tượng + chữ**, không chỉ dựa vào màu.
+- Nút quan trọng đủ lớn để bấm bằng một tay.
+- Hạn chế nhập liệu; ưu tiên lựa chọn, công tắc và giá trị mặc định hợp lý.
+- Hỗ trợ cỡ chữ hệ thống, chế độ sáng/tối và TalkBack.
+
+### 3.2. Thanh điều hướng
+
+Ứng dụng chỉ cần bốn mục chính:
+
+1. **Trang chủ** – trạng thái an toàn, kết nối, pin và nút SOS.
+2. **Sự kiện** – lịch sử cảnh báo và kết quả xác minh.
+3. **Người thân** – danh sách người nhận cảnh báo, thứ tự ưu tiên.
+4. **Cài đặt** – thiết bị, quyền, ngưỡng và kiểm tra hệ thống.
+
+### 3.3. Màn hình Trang chủ
+
+Các thành phần theo thứ tự từ trên xuống:
+
+- Thẻ trạng thái lớn: **An toàn / Cần chú ý / Đang xác minh / Đang cảnh báo**.
+- Tên thiết bị đeo và trạng thái BLE.
+- Nguồn đang giám sát: **Điện thoại**, **ESP32** hoặc **Cả hai**.
+- Trạng thái cảm biến điện thoại và cảnh báo “Điện thoại có thể đang đặt trên bàn” khi dữ liệu cho thấy máy không đi cùng người dùng.
+- Pin thiết bị đeo, trạng thái đang sạc và pin điện thoại.
+- Dòng thông tin ngắn: “Dữ liệu mới nhất cách đây 2 giây”.
+- Nút đỏ **SOS – GIỮ 2 GIÂY** để tránh chạm nhầm.
+- Nút **Kiểm tra hệ thống** nhỏ hơn để thử rung, âm thanh, vị trí và liên lạc.
+
+Không đưa biểu đồ gia tốc liên tục lên Trang chủ. Biểu đồ chỉ xuất hiện trong chế độ kiểm thử dành cho giáo viên/học sinh nghiên cứu.
+
+### 3.4. Màn hình xác minh nguy cơ
+
+Khi phát hiện dấu hiệu đáng ngờ, ứng dụng mở giao diện toàn màn hình ngay cả khi máy đang khóa, nếu Android và quyền hệ thống cho phép:
+
+- Tiêu đề lớn: **Bạn có ổn không?**
+- Đếm ngược rõ ràng, mặc định 10 giây nhưng cho phép cấu hình trong thử nghiệm.
+- Âm báo, rung và đọc bằng giọng nói.
+- Hai nút lớn:
+  - **TÔI VẪN ỔN** – hủy cảnh báo và ghi nhận báo động giả.
+  - **CẦN GIÚP ĐỠ** – gửi cảnh báo ngay, không chờ hết thời gian.
+- Có thể nhận lệnh hủy từ nút vật lý trên thiết bị đeo nếu đã thiết kế nút xác nhận.
+
+### 3.5. Màn hình cảnh báo đã gửi
+
+- Hiển thị người đã được liên hệ và kênh liên hệ.
+- Hiển thị bản đồ/vị trí gần nhất cùng thời điểm lấy vị trí.
+- Có nút gọi số khẩn cấp và gọi người thân ưu tiên.
+- Có nút **Tôi đã được hỗ trợ** để kết thúc sự kiện nhưng không xóa nhật ký.
+
+### 3.6. Màn hình Sự kiện
+
+Mỗi sự kiện hiển thị ngắn gọn:
+
+- Thời gian.
+- Loại: té ngã, mất thăng bằng, SOS, mất kết nối hoặc pin yếu.
+- Mức tin cậy/nguy cơ: thấp, vừa, cao.
+- Kết quả: người dùng an toàn, đã gửi cảnh báo, người thân xác nhận hoặc chưa rõ.
+
+Khi mở chi tiết mới hiển thị biểu đồ, dữ liệu cảm biến, vị trí và lý do thuật toán đưa ra quyết định.
+
+### 3.7. Màn hình cấu hình thiết bị
+
+- Quét và ghép nối ESP32.
+- Hiển thị mã thiết bị để tránh ghép nhầm.
+- Kiểm tra luồng dữ liệu theo thời gian thực.
+- Kiểm tra nút SOS, pin, rung/còi và cảm biến.
+- Không cho người dùng phổ thông sửa trực tiếp UUID hoặc địa chỉ API; đặt các mục này trong **Chế độ nhà phát triển**.
+
+---
+
+
+Nguồn Android §4.4:
+### 4.4. Máy trạng thái phát hiện
+
+| Trạng thái | Ý nghĩa | Điều kiện chuyển chính |
+|---|---|---|
+| `MONITORING` | Theo dõi bình thường | Có dấu hiệu bất thường → `SUSPECTED` |
+| `SUSPECTED` | Thu thập thêm dữ liệu vài giây | Hết nguy cơ → `MONITORING`; đủ bằng chứng → `VERIFYING` |
+| `VERIFYING` | Hỏi người dùng và đếm ngược | Người dùng báo ổn → `MONITORING`; cần giúp/hết giờ → `ALERTING` |
+| `ALERTING` | Đang gửi cảnh báo | Đã gửi → `AWAITING_HELP` |
+| `AWAITING_HELP` | Chờ xác nhận đã được hỗ trợ | Kết thúc sự kiện → `MONITORING` |
+
+Nút SOS được phép chuyển trực tiếp từ mọi trạng thái sang `ALERTING`.
+
+---
+
+
+Android §7:
+## 7. Kết hợp vị trí và gửi cảnh báo
+
+Thứ tự chọn vị trí:
+
+1. Vị trí mới, đủ chính xác từ điện thoại.
+2. Vị trí GNSS của thiết bị đeo nếu có và tốt hơn.
+3. Vị trí cuối cùng kèm thời gian và sai số.
+4. Nếu không có tọa độ, vẫn gửi cảnh báo cùng thời điểm, trạng thái kết nối và lời nhắn “chưa xác định được vị trí”.
+
+Không được trì hoãn cảnh báo khẩn cấp chỉ để chờ GPS. Nội dung gửi đi nên gồm:
+
+- Tên người dùng.
+- Loại nguy cơ.
+- Thời điểm.
+- Liên kết bản đồ nếu có.
+- Độ chính xác và tuổi của vị trí.
+- Pin thiết bị đeo và pin điện thoại.
+- Số điện thoại gọi lại.
+
+Ứng dụng phải xin quyền Android theo từng tính năng và giải thích dễ hiểu. Cần kiểm thử riêng giới hạn SMS, cuộc gọi, thông báo, vị trí nền và chạy nền trên từng hãng điện thoại.
+
+---
+

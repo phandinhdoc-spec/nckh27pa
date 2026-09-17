@@ -1,0 +1,1048 @@
+OpenAI Codex v0.154.0
+--------
+workdir: /home/pdd/nckh27pa
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: none
+reasoning summaries: none
+session id: 01a0a086-2146-7311-a9f1-73e72a2f8dc6
+--------
+user
+Review theo docs/tasks/REV-ESP-CORE-001.md. Read-only, không agent con/network/build. Phân tích độc lập source/test local C++, PASS/FAIL và findings file:line có repro. Đừng giả đã firmware/hardware.
+codex
+Tôi sẽ đọc yêu cầu review và source/test C++ liên quan, chỉ dùng dữ liệu local; không sửa file, gọi network, build hay tạo agent con. Kết quả sẽ có PASS/FAIL và findings kèm file:line, cách tái hiện, với giới hạn rõ ràng về firmware/hardware.
+
+exec
+/bin/bash -lc 'pwd; rg --files -g AGENTS.md -g REV-ESP-CORE-001.md' in /home/pdd/nckh27pa
+ succeeded in 0ms:
+/home/pdd/nckh27pa
+docs/tasks/REV-ESP-CORE-001.md
+
+exec
+/bin/bash -lc 'cat docs/tasks/REV-ESP-CORE-001.md' in /home/pdd/nckh27pa
+ succeeded in 0ms:
+# REV-ESP-CORE-001
+Mục tiêu review độc lập local C++ alert. Người Codex gpt-6-astra phiên riêng read-only. Nguồn ESP-CORE-001, ESP7/11 (đọc phiếu đủ); input esp/core/{local_alert.h,local_alert.cpp,tests,README.md}, docs/evidence/esp-core-*-hermes.log.
+Phạm vi không sửa; CLI ghi docs/evidence/REV-ESP-CORE-001.txt. Phụ thuộc impl và Hermes test. Bàn giao PASS/FAIL, security/logic findings file:line/repro. Check bounded ID, countdown/overflow/clock regression, ACK != cancellation, stop buzzer vs pending deadline, SOS DEGRADED, no-response disconnect, wrong-ID/replay commands, action semantics timeout+cancel.
+Nghiệm thu no blocker phạm vi host, không coi là firmware Arduino. Không build/network/agent con; chỉ đọc.2 fix/review tối đa. TDD source dùng nhóm test trước cả implementation, ghi đúng giới hạn không per-behavior strict nếu thấy.
+
+exec
+/bin/bash -lc "rg --files -g '*AGENTS*' -g '*.cpp' -g '*.h' -g '*.hpp' -g '*test*' -g '*CMake*' -g 'platformio.ini'" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+esp/core/demo.cpp
+esp/core/local_alert.cpp
+esp/core/tests/local_alert_test.cpp
+esp/core/run-tests.sh
+esp/core/local_alert.h
+protocol-lab/cpp/main.cpp
+protocol-lab/cpp/framing.hpp
+docs/test-report.md
+docs/evidence/core-tests-hermes.log
+android/core/run-tests.sh
+android/core/evidence/core-002-tests.log
+android/core/evidence/final-tests.log
+android/evidence/FIX-AND-001B-test.sh
+android/evidence/test-build-blocked.log
+android/evidence/AND-001B-final-tests.log
+android/evidence/AND-001B-test.sh
+
+exec
+/bin/bash -lc 'rg --files docs/tasks docs/evidence esp/core' in /home/pdd/nckh27pa
+ succeeded in 0ms:
+esp/core/demo.cpp
+esp/core/local_alert.cpp
+esp/core/tests/local_alert_test.cpp
+esp/core/run-tests.sh
+esp/core/run-demo.sh
+esp/core/README.md
+docs/tasks/REV-CORE-002.md
+docs/tasks/AND-001B.md
+docs/tasks/CORE-002.md
+docs/tasks/CORE-001.md
+docs/tasks/AND-001.md
+docs/tasks/REV-ESP-CORE-001.md
+docs/tasks/FIX-AND-001B.md
+docs/tasks/UX-001.md
+docs/tasks/IF-003.md
+docs/tasks/ESP-CORE-001.md
+docs/tasks/ENV-002.md
+docs/tasks/REV-CORE-001.md
+docs/tasks/REV-AND-001B.md
+esp/core/evidence/tdd-green.log
+esp/core/evidence/demo.log
+esp/core/evidence/sanitizer.log
+esp/core/evidence/tdd-red.log
+esp/core/evidence/sanitizer-retry.log
+esp/core/local_alert.h
+docs/evidence/REV-CORE-002.log
+docs/evidence/UX-001-agy-inline.txt
+docs/evidence/UX-001-inline-prompt.txt
+docs/evidence/CORE-002-result.txt
+docs/evidence/source-integrity.json
+docs/evidence/ESP-CORE-001-codex.log
+docs/evidence/AND-001B-result.txt
+docs/evidence/IF-003-codex.log
+docs/evidence/AND-001-codex-result.txt
+docs/evidence/UX-001-agy.txt
+docs/evidence/REV-AND-001B.txt
+docs/evidence/REV-ESP-CORE-001.log
+docs/evidence/AND-001B-codex.log
+docs/evidence/CORE-001-codex-result.txt
+docs/evidence/IF-003-result.txt
+docs/evidence/REV-AND-001B.log
+docs/evidence/AND-001-codex.log
+docs/evidence/core-tests-hermes.log
+docs/evidence/esp-core-sanitizer-hermes.log
+docs/evidence/CORE-001-codex.log
+docs/evidence/esp-core-hermes.log
+docs/evidence/ESP-CORE-001-result.txt
+docs/evidence/core-demo-hermes.log
+docs/evidence/REV-CORE-001.json
+docs/evidence/CORE-002-codex.log
+docs/evidence/UX-001-hermes-review.md
+docs/evidence/FIX-AND-001B.log
+docs/evidence/baseline.json
+docs/evidence/tool-inventory.txt
+docs/evidence/CORE-002-hermes.log
+docs/evidence/core-static-scan.json
+docs/evidence/REV-CORE-002.txt
+docs/evidence/android-env/diagnosis.md
+docs/evidence/android-env/emulator.log
+docs/evidence/android-env/build-1.log
+docs/evidence/android-env/host-network.log
+docs/evidence/android-env/dependencies.log
+docs/evidence/android-env/sdk.log
+docs/evidence/android-env/wrapper-generation.log
+
+exec
+/bin/bash -lc 'for p in /AGENTS.md /home/AGENTS.md /home/pdd/AGENTS.md /home/pdd/nckh27pa/AGENTS.md; do if [ -f "$p" ]; then cat "$p"; fi; done' in /home/pdd/nckh27pa
+ succeeded in 0ms:
+exec
+/bin/bash -lc 'nl -ba esp/core/local_alert.h; nl -ba esp/core/local_alert.cpp' in /home/pdd/nckh27pa
+ succeeded in 0ms:
+     1	#ifndef FALLSAFE_LOCAL_ALERT_H
+     2	#define FALLSAFE_LOCAL_ALERT_H
+     3	#include <array>
+     4	#include <cstdint>
+     5	#include <string_view>
+     6	namespace fallsafe {
+     7	enum class State { MONITORING, SUSPECTED, VERIFYING, LOCAL_ALERTING, DEGRADED };
+     8	enum class Kind { Suspect, Countdown, Sos, Tick, AckEvent, StopBuzzer, CancelAlert, Safe, SensorError, SensorRecovered, Connected, Disconnected };
+     9	enum class Status { Applied, Ignored, Invalid, Busy, WrongId, ClockReversed };
+    10	enum Action : unsigned { None = 0, Publish = 1, StartBuzzer = 2, StopBuzzer = 4, RecordUpdated = 8, SensorChanged = 16 };
+    11	struct Input { Kind kind; std::uint64_t now; std::string_view eventId{}; std::uint64_t remainingMs = 0; };
+    12	struct Result { Status status; unsigned actions; };
+    13	struct Record {
+    14	    std::array<char, 33> id{};
+    15	    bool present = false;
+    16	    bool acknowledged = false;
+    17	    bool alerted = false;
+    18	    bool safe = false;
+    19	    bool cancelled = false;
+    20	    std::string_view eventId() const noexcept { return {id.data()}; }
+    21	};
+    22	class LocalAlertStateMachine {
+    23	public:
+    24	    static constexpr std::uint64_t maxCountdownMs = 60000;
+    25	    Result handle(const Input& input) noexcept;
+    26	    State state() const noexcept { return state_; }
+    27	    const Record& active() const noexcept { return active_; }
+    28	    const Record& last() const noexcept { return last_; }
+    29	    bool buzzer() const noexcept { return buzzer_; }
+    30	    bool sensorHealthy() const noexcept { return healthy_; }
+    31	    bool connected() const noexcept { return connected_; }
+    32	    std::uint64_t deadline() const noexcept { return deadline_; }
+    33	private:
+    34	    State state_ = State::MONITORING;
+    35	    Record active_{}, last_{};
+    36	    bool buzzer_ = false, healthy_ = true, connected_ = false;
+    37	    bool clockSet_ = false, timed_ = false;
+    38	    std::uint64_t now_ = 0, deadline_ = 0;
+    39	    void alert(unsigned& actions) noexcept;
+    40	    void finish(bool safe, unsigned& actions) noexcept;
+    41	};
+    42	}
+    43	#endif
+     1	#include "local_alert.h"
+     2	#include <algorithm>
+     3	#include <limits>
+     4	namespace fallsafe {
+     5	namespace {
+     6	bool validId(std::string_view id) noexcept {
+     7	    return !id.empty() && id.size() <= 32 && id.find('\0') == std::string_view::npos;
+     8	}
+     9	}
+    10	void LocalAlertStateMachine::alert(unsigned& actions) noexcept {
+    11	    if (active_.alerted) return;
+    12	    active_.alerted = true;
+    13	    timed_ = false;
+    14	    state_ = State::LOCAL_ALERTING;
+    15	    buzzer_ = true;
+    16	    actions |= Publish | StartBuzzer | RecordUpdated;
+    17	}
+    18	void LocalAlertStateMachine::finish(bool safe, unsigned& actions) noexcept {
+    19	    active_.safe = safe;
+    20	    active_.cancelled = !safe;
+    21	    last_ = active_;
+    22	    active_ = {};
+    23	    timed_ = false;
+    24	    deadline_ = 0;
+    25	    if (buzzer_) actions |= StopBuzzer;
+    26	    buzzer_ = false;
+    27	    state_ = healthy_ ? State::MONITORING : State::DEGRADED;
+    28	    actions |= RecordUpdated | Publish;
+    29	}
+    30	Result LocalAlertStateMachine::handle(const Input& input) noexcept {
+    31	    if (clockSet_ && input.now < now_) return {Status::ClockReversed, None};
+    32	    clockSet_ = true;
+    33	    now_ = input.now;
+    34	    unsigned actions = None;
+    35	    // Process elapsed time first, including when a SAFE arrives at the deadline.
+    36	    if (timed_ && now_ >= deadline_) alert(actions);
+    37	    const auto result = [&actions](Status status) { return Result{status, actions}; };
+    38	    switch (input.kind) {
+    39	    case Kind::Tick: return result(Status::Applied);
+    40	    case Kind::Connected:
+    41	    case Kind::Disconnected:
+    42	        connected_ = input.kind == Kind::Connected;
+    43	        return result(Status::Applied);
+    44	    case Kind::SensorError:
+    45	    case Kind::SensorRecovered: {
+    46	        const bool healthy = input.kind == Kind::SensorRecovered;
+    47	        if (healthy == healthy_) return result(Status::Ignored);
+    48	        healthy_ = healthy;
+    49	        actions |= SensorChanged;
+    50	        if (!active_.present) state_ = healthy_ ? State::MONITORING : State::DEGRADED;
+    51	        return result(Status::Applied);
+    52	    }
+    53	    case Kind::Suspect:
+    54	    case Kind::Countdown:
+    55	    case Kind::Sos: {
+    56	        if (!validId(input.eventId)) return result(Status::Invalid);
+    57	        if (input.kind == Kind::Countdown &&
+    58	            (input.remainingMs == 0 || input.remainingMs > maxCountdownMs ||
+    59	             input.remainingMs > std::numeric_limits<std::uint64_t>::max() - now_))
+    60	            return result(Status::Invalid);
+    61	        if (active_.present) {
+    62	            // A physical SOS escalates the existing event, preserving its identity.
+    63	            if (input.kind == Kind::Sos) {
+    64	                const bool already = active_.alerted;
+    65	                alert(actions);
+    66	                return result(already ? Status::Ignored : Status::Applied);
+    67	            }
+    68	            if (active_.eventId() != input.eventId) return result(Status::Busy);
+    69	            if (input.kind == Kind::Suspect || active_.alerted) return result(Status::Ignored);
+    70	        } else {
+    71	            if (last_.present && last_.eventId() == input.eventId) return result(Status::Ignored);
+    72	            active_ = {};
+    73	            std::copy(input.eventId.begin(), input.eventId.end(), active_.id.begin());
+    74	            active_.present = true;
+    75	            actions |= Publish | RecordUpdated;
+    76	        }
+    77	        if (input.kind == Kind::Sos) {
+    78	            alert(actions);
+    79	        } else if (input.kind == Kind::Suspect) {
+    80	            state_ = State::SUSPECTED;
+    81	        } else {
+    82	            const auto candidate = now_ + input.remainingMs;
+    83	            if (timed_) {
+    84	                if (candidate >= deadline_) return result(Status::Ignored);
+    85	                deadline_ = candidate;
+    86	            } else {
+    87	                deadline_ = candidate;
+    88	                timed_ = true;
+    89	                state_ = State::VERIFYING;
+    90	                buzzer_ = true;
+    91	                actions |= StartBuzzer;
+    92	            }
+    93	        }
+    94	        return result(Status::Applied);
+    95	    }
+    96	    case Kind::AckEvent:
+    97	    case Kind::StopBuzzer:
+    98	    case Kind::CancelAlert:
+    99	    case Kind::Safe:
+   100	        if (!validId(input.eventId)) return result(Status::Invalid);
+   101	        if (!active_.present) {
+   102	            if (last_.present && last_.eventId() == input.eventId) return result(Status::Ignored);
+   103	            return result(Status::WrongId);
+   104	        }
+   105	        if (active_.eventId() != input.eventId) return result(Status::WrongId);
+   106	        if (input.kind == Kind::AckEvent) {
+   107	            if (active_.acknowledged) return result(Status::Ignored);
+   108	            active_.acknowledged = true;
+   109	            actions |= RecordUpdated;
+   110	        } else if (input.kind == Kind::StopBuzzer) {
+   111	            if (!buzzer_) return result(Status::Ignored);
+   112	            buzzer_ = false;
+   113	            actions |= StopBuzzer;
+   114	        } else {
+   115	            finish(input.kind == Kind::Safe, actions);
+   116	        }
+   117	        return result(Status::Applied);
+   118	    }
+   119	    return result(Status::Invalid);
+   120	}
+   121	}
+
+exec
+/bin/bash -lc 'nl -ba esp/core/tests/local_alert_test.cpp; cat esp/core/README.md' in /home/pdd/nckh27pa
+exec
+/bin/bash -lc "cat docs/tasks/ESP-CORE-001.md; rg -n 'ESP7|ESP11|ESP-7|ESP-11' docs esp" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+     1	#include "local_alert.h"
+     2	#include <cstdlib>
+     3	#include <iostream>
+     4	#include <limits>
+     5	#include <stdexcept>
+     6	#include <string>
+     7	#include <type_traits>
+     8	using namespace fallsafe;
+     9	#define CHECK(x) do { if (!(x)) throw std::runtime_error(#x); } while (false)
+    10	static_assert(std::is_trivially_copyable<LocalAlertStateMachine>::value, "bounded value state");
+    11	static_assert(sizeof(LocalAlertStateMachine) <= 160, "bounded state size");
+    12	void suspected() {
+    13	 LocalAlertStateMachine m;
+    14	 auto r=m.handle({Kind::Suspect,0,"e"});
+    15	 CHECK(m.state()==State::SUSPECTED); CHECK(r.actions & Publish);
+    16	 CHECK(m.handle({Kind::Suspect,1,"other"}).status==Status::Busy);
+    17	 CHECK(m.active().eventId()=="e");
+    18	}
+    19	void no_response() {
+    20	 LocalAlertStateMachine m;
+    21	 CHECK(m.handle({Kind::Countdown,100,"e",10000}).status==Status::Applied);
+    22	 CHECK(m.state()==State::VERIFYING); CHECK(m.buzzer());
+    23	 m.handle({Kind::Tick,10099}); CHECK(!m.active().alerted);
+    24	 auto r=m.handle({Kind::Tick,10100}); CHECK(m.state()==State::LOCAL_ALERTING);
+    25	 CHECK(m.active().alerted); CHECK(r.actions & Publish);
+    26	 CHECK(m.handle({Kind::Tick,10101}).actions==None);
+    27	}
+    28	void sos() {
+    29	 for (int scenario=0;scenario<4;++scenario) {
+    30	 LocalAlertStateMachine m;
+    31	 if(scenario==1) m.handle({Kind::SensorError,0});
+    32	 if(scenario==2) m.handle({Kind::Suspect,0,"original"});
+    33	 if(scenario==3) m.handle({Kind::Countdown,0,"original",100});
+    34	 auto r=m.handle({Kind::Sos,1,"sos"});
+    35	 CHECK(m.state()==State::LOCAL_ALERTING); CHECK(m.buzzer()); CHECK(r.actions & Publish);
+    36	 CHECK(m.active().eventId()==(scenario>=2 ? "original" : "sos"));
+    37	 CHECK(m.handle({Kind::Sos,2,"sos"}).actions==None);
+    38	 }
+    39	}
+    40	void disconnect() {
+    41	 LocalAlertStateMachine m;
+    42	 m.handle({Kind::Connected,0}); CHECK(m.connected());
+    43	 m.handle({Kind::Countdown,1,"e",10});
+    44	 m.handle({Kind::Disconnected,5}); CHECK(!m.connected()); CHECK(m.deadline()==11);
+    45	 m.handle({Kind::Tick,11}); CHECK(m.active().alerted);
+    46	}
+    47	void duplicate() {
+    48	 LocalAlertStateMachine m;
+    49	 m.handle({Kind::Countdown,0,"e",100});
+    50	 CHECK(m.handle({Kind::Suspect,1,"e"}).status==Status::Ignored);
+    51	 m.handle({Kind::Countdown,50,"e",100}); CHECK(m.deadline()==100);
+    52	 m.handle({Kind::Countdown,60,"e",10}); CHECK(m.deadline()==70);
+    53	 CHECK(m.handle({Kind::Countdown,61,"other",1}).status==Status::Busy);
+    54	 m.handle({Kind::Tick,70}); CHECK(m.active().alerted);
+    55	 m.handle({Kind::CancelAlert,71,"e"});
+    56	 CHECK(m.handle({Kind::Countdown,72,"e",10}).status==Status::Ignored);
+    57	 CHECK(!m.active().present);
+    58	}
+    59	void cancellation() {
+    60	 LocalAlertStateMachine m; m.handle({Kind::Countdown,0,"e",10});
+    61	 for(auto k:{Kind::CancelAlert,Kind::AckEvent,Kind::StopBuzzer,Kind::Safe}) {
+    62	 CHECK(m.handle({k,1,"wrong"}).status==Status::WrongId);
+    63	 CHECK(m.active().present); CHECK(m.buzzer());
+    64	 }
+    65	 auto r=m.handle({Kind::CancelAlert,2,"e"});
+    66	 CHECK(!m.active().present); CHECK(!m.buzzer()); CHECK(r.actions & StopBuzzer);
+    67	 CHECK(m.last().cancelled); CHECK(m.last().eventId()=="e");
+    68	 CHECK(m.state()==State::MONITORING);
+    69	}
+    70	void ack_stop() {
+    71	 LocalAlertStateMachine m; m.handle({Kind::Countdown,0,"e",10});
+    72	 m.handle({Kind::AckEvent,1,"e"}); CHECK(m.active().acknowledged); CHECK(m.buzzer());
+    73	 m.handle({Kind::StopBuzzer,2,"e"}); CHECK(!m.buzzer()); CHECK(m.active().present);
+    74	 m.handle({Kind::Tick,10}); CHECK(m.buzzer()); CHECK(m.active().alerted);
+    75	 m.handle({Kind::AckEvent,11,"e"}); CHECK(m.buzzer());
+    76	 m.handle({Kind::StopBuzzer,12,"e"}); m.handle({Kind::Tick,13});
+    77	 CHECK(!m.buzzer()); CHECK(m.active().alerted);
+    78	}
+    79	void monotonic() {
+    80	 LocalAlertStateMachine m; const auto top=std::numeric_limits<std::uint64_t>::max();
+    81	 m.handle({Kind::Countdown,top-10,"e",10}); CHECK(m.deadline()==top);
+    82	 CHECK(m.handle({Kind::Tick,top-11}).status==Status::ClockReversed);
+    83	 CHECK(!m.active().alerted); m.handle({Kind::Tick,top}); CHECK(m.active().alerted);
+    84	 LocalAlertStateMachine n;
+    85	 CHECK(n.handle({Kind::Countdown,top-5,"e",10}).status==Status::Invalid);
+    86	 CHECK(!n.active().present);
+    87	}
+    88	void invalid() {
+    89	 LocalAlertStateMachine m;
+    90	 for(auto duration:{std::uint64_t{0},std::uint64_t{60001},std::numeric_limits<std::uint64_t>::max()})
+    91	 CHECK(m.handle({Kind::Countdown,0,"e",duration}).status==Status::Invalid);
+    92	 const std::string large(33,'x'); const std::string embedded("a\0b",3);
+    93	 for(auto id:{std::string{},large,embedded})
+    94	 CHECK(m.handle({Kind::Countdown,0,id,10}).status==Status::Invalid);
+    95	 CHECK(!m.active().present);
+    96	 const std::string maxId(32,'x');
+    97	 CHECK(m.handle({Kind::Countdown,0,maxId,10}).status==Status::Applied);
+    98	 CHECK(m.active().eventId()==maxId);
+    99	 CHECK(m.handle({Kind::Countdown,1,maxId,0}).status==Status::Invalid);
+   100	 CHECK(m.deadline()==10);
+   101	}
+   102	void recovery() {
+   103	 LocalAlertStateMachine m; m.handle({Kind::SensorError,0}); CHECK(m.state()==State::DEGRADED);
+   104	 m.handle({Kind::SensorRecovered,1}); CHECK(m.state()==State::MONITORING);
+   105	 m.handle({Kind::Countdown,2,"e",10}); m.handle({Kind::SensorError,3});
+   106	 CHECK(!m.sensorHealthy()); CHECK(m.state()==State::VERIFYING);
+   107	 m.handle({Kind::Tick,12}); m.handle({Kind::SensorRecovered,13});
+   108	 CHECK(m.sensorHealthy()); CHECK(m.active().alerted); CHECK(m.state()==State::LOCAL_ALERTING);
+   109	 m.handle({Kind::SensorError,14}); m.handle({Kind::CancelAlert,15,"e"}); CHECK(m.state()==State::DEGRADED);
+   110	}
+   111	void safe_record() {
+   112	 LocalAlertStateMachine m; m.handle({Kind::Countdown,0,"e",10});
+   113	 m.handle({Kind::Safe,10,"e"}); CHECK(m.last().alerted); CHECK(m.last().safe);
+   114	 CHECK(!m.active().present); CHECK(m.last().eventId()=="e");
+   115	 CHECK(m.handle({Kind::Safe,11,"e"}).status==Status::Ignored);
+   116	 CHECK(m.last().alerted);
+   117	 m.handle({Kind::Countdown,12,"next",10}); m.handle({Kind::Safe,13,"next"});
+   118	 CHECK(m.last().safe); CHECK(!m.last().alerted);
+   119	}
+   120	int main() {
+   121	 struct Test { const char* name; void (*run)(); };
+   122	 const Test tests[]={{"suspected",suspected},{"no-response",no_response},{"SOS",sos},{"disconnect",disconnect},{"duplicate/deadline",duplicate},{"cancel/wrong-ID",cancellation},{"ACK/STOP",ack_stop},{"monotonic/max",monotonic},{"invalid countdown/ID",invalid},{"sensor recovery",recovery},{"late SAFE record",safe_record}};
+   123	 int failures=0;
+   124	 for(const auto& t:tests) { try {t.run(); std::cout<<"PASS "<<t.name<<'\n';} catch(const std::exception& e) {++failures; std::cout<<"FAIL "<<t.name<<": "<<e.what()<<'\n';} }
+   125	 std::cout<<"tests="<<11<<" failures="<<failures<<'\n'; return failures ? EXIT_FAILURE : EXIT_SUCCESS;
+   126	}
+# ESP local alert core (ESP-CORE-001)
+
+Thư viện C++17 thuần, không phụ thuộc Arduino/ESP-IDF, GPIO, transport hoặc heap
+trong state machine. Chưa build Arduino hoặc kiểm tra bo thật. Không phải thuật
+toán phát hiện ngã: caller quyết định dấu hiệu/nguy cơ, debounce/giữ nút SOS,
+và thời điểm bắt đầu xác minh.
+
+## Chạy local
+
+```sh
+esp/core/run-tests.sh
+esp/core/run-tests.sh --sanitize
+esp/core/run-demo.sh
+```
+
+Nếu môi trường ptrace không hỗ trợ LeakSanitizer như phiên này:
+
+```sh
+ASAN_OPTIONS=detect_leaks=0 esp/core/run-tests.sh --sanitize
+```
+
+Runner dùng g++ với `-std=c++17 -Wall -Wextra -Werror -pedantic`.
+Demo dùng clock giả lập 0–11000 ms, không chờ thực 10 giây. Countdown 10 giây
+chỉ là cấu hình thử. Output và log thật nằm trong `evidence/`.
+
+## API và quy tắc
+
+Include `local_alert.h`, biên dịch cùng `local_alert.cpp`. Một caller tuần tự gọi
+`handle(Input)` và đọc snapshot qua getters; không thread-safe. Mọi `now` là
+`uint64_t` monotonic milliseconds cùng một epoch, không phải Unix time. Caller
+phải gọi Tick định kỳ; thư viện không có thread/timer tự chạy. Mọi input cũng
+kiểm tra timeout trước khi xử lý lệnh. Clock đi lùi bị từ chối không đổi state.
+Không hỗ trợ wrap clock; countdown làm tràn phép cộng bị từ chối.
+
+- `Suspect`: giữ ID, phát action Publish, chuyển SUSPECTED. Chưa đủ nguy cơ nên
+  chưa có timeout; caller dùng Countdown khi cần xác minh hoặc Sos khi khẩn.
+- `Countdown`: tạo hoặc nâng sự kiện sang VERIFYING, bật âm, đặt deadline.
+  Thời lượng hợp lệ 1–60000 ms (giới hạn nội bộ thử nghiệm). Cùng ID chỉ được
+  rút ngắn deadline; lặp không bật lại âm đã STOP. ID khác bị Busy.
+- `Sos`: báo ngay, kể cả DEGRADED. Nếu đang có sự kiện, nâng khẩn sự kiện đó và
+  giữ ID gốc, không tạo sự kiện thứ hai. SOS khi đã cảnh báo là no-op.
+- `Tick`: tới hoặc qua deadline chuyển LOCAL_ALERTING, bật lại âm, đánh dấu
+  alerted và yêu cầu Publish một lần.
+- `AckEvent`: ghi nhận Android đã nhận, không tắt âm hoặc hủy timeout.
+- `StopBuzzer`: chỉ tắt âm. Timeout còn chờ vẫn phát cảnh báo và bật âm lại.
+- `CancelAlert`/`Safe`: chỉ kết thúc active đúng ID, tắt âm, giữ bản ghi kết thúc.
+  SAFE đến đúng/sau deadline vẫn giữ `alerted=true` cùng `safe=true`; không xóa
+  dấu vết cảnh báo. Lệnh cho ID kết thúc gần nhất là no-op.
+- `SensorError`/`SensorRecovered`: cờ sức khỏe độc lập; chỉ đổi trạng thái sang
+  DEGRADED/MONITORING khi không có active. Không xóa sự kiện hoặc deadline.
+- `Connected`/`Disconnected`: chỉ đổi cờ kết nối, không reset countdown.
+
+ID dài 1–32 byte, không chứa NUL; được copy vào buffer 33 byte. Một active và
+một record kết thúc gần nhất, không tăng bộ nhớ theo số lệnh. ID kết thúc gần
+nhất không được tái sử dụng; lịch sử khử trùng cũ hơn nằm ngoài phạm vi. Caller
+cấp ID mới cho sự kiện/SOS mới. Không có queue bền vững, journal flash hoặc
+khôi phục qua reboot; adapter tương lai phải lưu các cập nhật nếu cần lịch sử
+lâu dài. Record kết thúc cũ bị thay khi sự kiện kế tiếp kết thúc.
+
+`Result.status` mô tả kết quả input; `actions` là bitmask yêu cầu caller xử lý:
+Publish=1, StartBuzzer=2, StopBuzzer=4, RecordUpdated=8, SensorChanged=16.
+Actions vẫn có thể xuất hiện cùng status từ chối lệnh vì timeout vừa hết.
+Nếu cùng một lần gọi có cả StartBuzzer và StopBuzzer (SAFE đúng deadline),
+caller dùng getter `buzzer()` làm trạng thái âm cuối cùng; lưu snapshot `last()`
+để giữ cả dấu vết cảnh báo và kết thúc. Publish là yêu cầu xuất bản snapshot,
+không có nghĩa transport đã gửi hoặc người thân đã nhận.
+
+Caller phải xác thực/ủy quyền lệnh trước khi gọi; thư viện không giả xác thực
+BLE. API enum/struct là nội bộ, không bổ sung wire fields hoặc tuyên bố tương
+thích decoder Android. Không xử lý JSON, commandId cache, pairing hoặc bonding.
+
+## Bằng chứng TDD
+
+`tests/local_alert_test.cpp` được viết trước phần triển khai. Lần RED biên dịch
+thành công với handle chỉ trả Ignored: cả 11 nhóm fail bằng assertion (exit 1),
+không phải lỗi build. Sau đó thay stub bằng logic; cùng bộ test không sửa chạy
+GREEN (exit 0). Các nhóm gồm SUSPECTED/one active, no-response, SOS, disconnect,
+duplicate/deadline, cancel/wrong ID, ACK/STOP, monotonic near max, invalid
+countdown/ID, sensor recovery và SAFE late. Static assertions kiểm tra object
+trivially copyable và kích thước tối đa 160 byte.
+
+- `evidence/tdd-red.log`: 11/11 fail trước triển khai.
+- `evidence/tdd-green.log`: 11/11 pass.
+- `evidence/sanitizer.log`: lần đầu exit 1, LeakSanitizer không hỗ trợ ptrace.
+- `evidence/sanitizer-retry.log`: ASan/UBSan pass, exit 0, tắt riêng leak check.
+- `evidence/demo.log`: demo exit 0, giữ record alerted + safe sau mất BLE.
+
+Chưa có kết quả Hermes chạy lại hoặc reviewer độc lập trong phiên này.
+
+ succeeded in 29ms:
+exec
+/bin/bash -lc "rg -n '"'^##|''^#|ACK|CANCEL|STOP_BUZZER'"' esp/esp32-plan.md docs/interface-contract.md" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+docs/interface-contract.md:1:# Hợp đồng Android–ESP32
+docs/interface-contract.md:4:## Phần đã định nghĩa
+docs/interface-contract.md:7:## 6. Chuẩn giao tiếp Android – ESP32
+docs/interface-contract.md:9:### 6.1. Quy ước chung
+docs/interface-contract.md:19:### 6.2. Tên biến cấu hình giao tiếp trong Android
+docs/interface-contract.md:46:    const val COMMAND_ACK_CHARACTERISTIC_UUID =
+docs/interface-contract.md:61:### 6.3. Biến dữ liệu cảm biến
+docs/interface-contract.md:103:### 6.4. Biến trạng thái thiết bị
+docs/interface-contract.md:125:### 6.5. Biến sự kiện ưu tiên từ ESP32
+docs/interface-contract.md:153:- `SOS_CANCELLED`
+docs/interface-contract.md:159:### 6.6. Lệnh Android gửi cho ESP32
+docs/interface-contract.md:182:- `STOP_BUZZER`
+docs/interface-contract.md:183:- `ACK_EVENT`
+docs/interface-contract.md:184:- `CANCEL_ALERT`
+docs/interface-contract.md:201:### 6.7. Gói xác nhận lệnh
+docs/interface-contract.md:219:### 6.8. Ví dụ JSON dữ liệu ESP32 gửi Android
+docs/interface-contract.md:244:### 6.9. Tần số và truyền dữ liệu
+docs/interface-contract.md:256:## Ràng buộc thời gian, ACK và an toàn
+docs/interface-contract.md:259:- ACK GATT ≠ ACK_EVENT ≠ lệnh COMPLETED ≠ người thân nhận. ACCEPTED chưa thành công cấu hình. ACK_EVENT không hủy, STOP_BUZZER chỉ tắt âm.
+docs/interface-contract.md:260:- Sensor/event có sequenceNumber; Status/ACK không có (mâu thuẫn câu “mỗi gói” Android §6.1 được ghi C02, không tự thêm trường).
+docs/interface-contract.md:265:## Tham số lệnh bổ sung và từ vựng lỗi (chưa duyệt)
+docs/interface-contract.md:279:| `STOP_BUZZER` | `eventId` | Tắt âm, không xóa sự kiện |
+docs/interface-contract.md:280:| `ACK_EVENT` | `eventId` | Android đã nhận/lưu sự kiện |
+docs/interface-contract.md:281:| `CANCEL_ALERT` | `eventId`, `reason` | Hủy cảnh báo đang hoạt động đúng ID |
+docs/interface-contract.md:288:`commandStatus`: `ACCEPTED`, `COMPLETED`, `REJECTED`, `FAILED`. Nhận lệnh chưa có nghĩa hoàn thành. Lưu kết quả các `commandId` gần nhất để lệnh lặp trả lại ACK và không lặp tác dụng, đặc biệt với hủy và reboot.
+docs/interface-contract.md:291:## Bổ sung từ ESP32 — đề xuất, chưa chốt tương thích
+docs/interface-contract.md:292:### 8.6. Thời gian, thứ tự và truyền lại
+docs/interface-contract.md:301:- Gói trạng thái và ACK trong v1 không có `sequenceNumber`; không tự thêm rồi coi là quy ước đã tồn tại.
+docs/interface-contract.md:305:### 8.7. Kích thước gói BLE là điểm phải hoàn thiện trước lập trình tích hợp
+docs/interface-contract.md:309:Phương án cho nguyên mẫu: JSON UTF-8 được chia mảnh theo MTU đã thương lượng, có lớp frame ngoài gồm ID thông điệp, chỉ số mảnh, tổng số mảnh và độ dài toàn bộ. Bộ nhận giới hạn bộ nhớ và thời gian ráp, bỏ thông điệp thiếu mảnh; sự kiện có cơ chế ACK ứng dụng và thử lại. Phải viết đặc tả byte và vector kiểm thử chung trước khi bật truyền này trên Android.
+docs/interface-contract.md:313:### 8.8. HTTP phục vụ kỹ thuật
+docs/interface-contract.md:327:## Điểm phải quyết định trước BLE (IF-002)
+docs/interface-contract.md:329:2. ACK timeout, số retry, thời gian ráp mảnh, cache dedupe và cửa sổ reorder, reconnect backoff: hai kế hoạch chưa chốt giá trị. IF-002 phải trình bảng cấu hình + vector byte hai phía; không mặc định proposal là approved.
+docs/interface-contract.md:332:5. SOS_CANCELLED thiếu relatedEventId: không phát lại hủy và đoán liên kết; chỉ một cảnh báo cục bộ theo ESP §8.4. Cần phiên bản mới nếu mở rộng.
+docs/interface-contract.md:335:## Dữ liệu kiểm thử chung
+docs/interface-contract.md:336:Tệp docs/fixtures/protocol-v1.json chứa mẫu sensor chính xác từ cả hai kế hoạch và các biến thể sai/thiếu/trùng. Đây là vector logic JSON, KHÔNG phải frame BLE đã thiết kế. Chưa có decoder chạy qua các vector này. IF-002 bổ sung vector byte, ACK mất, reboot, reorder, ngắt giữa ráp mảnh.
+esp/esp32-plan.md:1:# KẾ HOẠCH PHÁT TRIỂN THIẾT BỊ ESP32
+esp/esp32-plan.md:3:## Thiết bị đeo hỗ trợ phát hiện té ngã, mất thăng bằng và cảnh báo khẩn cấp
+esp/esp32-plan.md:10:## 1. Mục tiêu và những nguyên tắc đã thống nhất
+esp/esp32-plan.md:26:## 2. Phạm vi phiên bản đầu và hướng mở rộng
+esp/esp32-plan.md:41:## 3. Thiết kế phần cứng
+esp/esp32-plan.md:43:### 3.1. Các khối chức năng
+esp/esp32-plan.md:58:### 3.2. Chọn ESP32
+esp/esp32-plan.md:64:### 3.3. IMU và khí áp kế không thay thế nhau
+esp/esp32-plan.md:74:### 3.4. Pin, sạc và hiển thị năng lượng
+esp/esp32-plan.md:85:### 3.5. Quy ước tên chân, chưa gán số GPIO
+esp/esp32-plan.md:101:## 4. Trải nghiệm sử dụng gọn và thuận tiện
+esp/esp32-plan.md:125:## 5. Firmware rành mạch và tinh giản
+esp/esp32-plan.md:127:### 5.1. Cách tổ chức
+esp/esp32-plan.md:147:### 5.2. Tần số và bộ đệm đề xuất
+esp/esp32-plan.md:160:## 6. Xử lý cảm biến và giới hạn suy luận
+esp/esp32-plan.md:162:### 6.1. Chuẩn hóa và hiệu chuẩn
+esp/esp32-plan.md:171:### 6.2. Độ cao tương đối
+esp/esp32-plan.md:179:### 6.3. Gia tốc, vận tốc và quãng rơi
+esp/esp32-plan.md:185:## 7. Phát hiện và cảnh báo tự động
+esp/esp32-plan.md:187:### 7.1. Phân chia quyết định
+esp/esp32-plan.md:202:### 7.2. Máy trạng thái cục bộ
+esp/esp32-plan.md:215:### 7.3. Tránh chờ hai lần và tránh báo trùng
+esp/esp32-plan.md:222:- `ACK_EVENT` chỉ cho biết Android đã tiếp nhận sự kiện; không được tắt báo động chỉ vì ACK. `CANCEL_ALERT` mới thực hiện hủy có chủ đích.
+esp/esp32-plan.md:223:- `STOP_BUZZER` chỉ tắt âm, không xóa sự kiện hoặc vô hiệu hóa cảnh báo đang chờ.
+esp/esp32-plan.md:228:### 7.4. Trường hợp mất kết nối
+esp/esp32-plan.md:236:## 8. Hợp đồng API giữ nguyên với Android
+esp/esp32-plan.md:238:### 8.1. Định danh BLE
+esp/esp32-plan.md:249:| `COMMAND_ACK_CHARACTERISTIC_UUID` | `7d2a0006-6f45-4c2b-9a1e-38a8f5c10001` | Notify |
+esp/esp32-plan.md:253:### 8.2. `Esp32SensorPacket`
+esp/esp32-plan.md:299:### 8.3. `Esp32DeviceStatus`
+esp/esp32-plan.md:309:### 8.4. `Esp32EventPacket`
+esp/esp32-plan.md:323:- `SOS_CANCELLED`
+esp/esp32-plan.md:329:Hợp đồng v1 chưa có `relatedEventId` cho `SOS_CANCELLED`. Trong bản đầu chỉ cho một cảnh báo cục bộ hoạt động tại một thời điểm; hủy từ nút áp dụng cho cảnh báo đó. Nếu cần nhiều cảnh báo đồng thời hoặc phát lại hủy sau mất kết nối, phải bổ sung liên kết sự kiện trong phiên bản giao thức kế tiếp, không suy đoán nhầm từ thời gian.
+esp/esp32-plan.md:331:### 8.5. `Esp32Command` và xác nhận
+esp/esp32-plan.md:346:| `STOP_BUZZER` | `eventId` | Tắt âm, không xóa sự kiện |
+esp/esp32-plan.md:347:| `ACK_EVENT` | `eventId` | Android đã nhận/lưu sự kiện |
+esp/esp32-plan.md:348:| `CANCEL_ALERT` | `eventId`, `reason` | Hủy cảnh báo đang hoạt động đúng ID |
+esp/esp32-plan.md:355:`commandStatus`: `ACCEPTED`, `COMPLETED`, `REJECTED`, `FAILED`. Nhận lệnh chưa có nghĩa hoàn thành. Lưu kết quả các `commandId` gần nhất để lệnh lặp trả lại ACK và không lặp tác dụng, đặc biệt với hủy và reboot.
+esp/esp32-plan.md:357:### 8.6. Thời gian, thứ tự và truyền lại
+esp/esp32-plan.md:366:- Gói trạng thái và ACK trong v1 không có `sequenceNumber`; không tự thêm rồi coi là quy ước đã tồn tại.
+esp/esp32-plan.md:370:### 8.7. Kích thước gói BLE là điểm phải hoàn thiện trước lập trình tích hợp
+esp/esp32-plan.md:374:Phương án cho nguyên mẫu: JSON UTF-8 được chia mảnh theo MTU đã thương lượng, có lớp frame ngoài gồm ID thông điệp, chỉ số mảnh, tổng số mảnh và độ dài toàn bộ. Bộ nhận giới hạn bộ nhớ và thời gian ráp, bỏ thông điệp thiếu mảnh; sự kiện có cơ chế ACK ứng dụng và thử lại. Phải viết đặc tả byte và vector kiểm thử chung trước khi bật truyền này trên Android.
+esp/esp32-plan.md:378:### 8.8. HTTP phục vụ kỹ thuật
+esp/esp32-plan.md:391:## 9. GNSS và 4G: giữ hướng nghiên cứu, triển khai sau lõi
+esp/esp32-plan.md:399:## 10. Kế hoạch năng lượng
+esp/esp32-plan.md:411:## 11. Độ tin cậy và bảo mật thiết bị
+esp/esp32-plan.md:421:## 12. Kế hoạch kiểm thử và nghiên cứu khoa học
+esp/esp32-plan.md:423:### 12.1. Câu hỏi nghiên cứu
+esp/esp32-plan.md:434:### 12.2. Ma trận thử nghiệm
+esp/esp32-plan.md:447:| Lệnh | ACK mất, hủy lặp, hủy sai ID, STOP_STREAM | Không thực hiện sai tác dụng |
+esp/esp32-plan.md:453:### 12.3. Thiết kế đối chứng và chỉ số
+esp/esp32-plan.md:465:## 13. Lộ trình triển khai và điều kiện hoàn thành
+esp/esp32-plan.md:480:## 14. Bộ bàn giao cho nhóm ESP32
+
+exec
+/bin/bash -lc 'cat docs/evidence/esp-core-hermes.log docs/evidence/esp-core-sanitizer-hermes.log; cat esp/core/evidence/tdd-red.log esp/core/evidence/tdd-green.log; nl -ba esp/core/run-tests.sh; nl -ba esp/core/demo.cpp' in /home/pdd/nckh27pa
+ succeeded in 0ms:
++ g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. local_alert.cpp tests/local_alert_test.cpp -o .build/tests
++ .build/tests
+PASS suspected
+PASS no-response
+PASS SOS
+PASS disconnect
+PASS duplicate/deadline
+PASS cancel/wrong-ID
+PASS ACK/STOP
+PASS monotonic/max
+PASS invalid countdown/ID
+PASS sensor recovery
+PASS late SAFE record
+tests=11 failures=0
++ g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. local_alert.cpp demo.cpp -o .build/demo
++ .build/demo
+ms=0 state=MONITORING buzzer=0 actions=0
+ms=0 state=SUSPECTED buzzer=0 actions=9
+ms=0 state=VERIFYING buzzer=1 actions=2
+ms=1000 state=VERIFYING buzzer=1 actions=8
+ms=2000 state=VERIFYING buzzer=1 actions=0
+ms=3000 state=VERIFYING buzzer=0 actions=4
+ms=10000 state=LOCAL_ALERTING buzzer=1 actions=11
+ms=11000 state=MONITORING buzzer=0 actions=13
+retained=demo-1 alerted=1 safe=1
+exit_code=0
++ g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. -fsanitize=address,undefined -fno-omit-frame-pointer -g local_alert.cpp tests/local_alert_test.cpp -o .build/tests
++ .build/tests
+PASS suspected
+PASS no-response
+PASS SOS
+PASS disconnect
+PASS duplicate/deadline
+PASS cancel/wrong-ID
+PASS ACK/STOP
+PASS monotonic/max
+PASS invalid countdown/ID
+PASS sensor recovery
+PASS late SAFE record
+tests=11 failures=0
+exit_code=0
++ g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. local_alert.cpp tests/local_alert_test.cpp -o .build/tests
++ .build/tests
+FAIL suspected: m.state()==State::SUSPECTED
+FAIL no-response: m.handle({Kind::Countdown,100,"e",10000}).status==Status::Applied
+FAIL SOS: m.state()==State::LOCAL_ALERTING
+FAIL disconnect: m.connected()
+FAIL duplicate/deadline: m.deadline()==100
+FAIL cancel/wrong-ID: m.handle({k,1,"wrong"}).status==Status::WrongId
+FAIL ACK/STOP: m.active().acknowledged
+FAIL monotonic/max: m.deadline()==top
+FAIL invalid countdown/ID: m.handle({Kind::Countdown,0,"e",duration}).status==Status::Invalid
+FAIL sensor recovery: m.state()==State::DEGRADED
+FAIL late SAFE record: m.last().alerted
+tests=11 failures=11
+exit=1
++ g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. local_alert.cpp tests/local_alert_test.cpp -o .build/tests
++ .build/tests
+PASS suspected
+PASS no-response
+PASS SOS
+PASS disconnect
+PASS duplicate/deadline
+PASS cancel/wrong-ID
+PASS ACK/STOP
+PASS monotonic/max
+PASS invalid countdown/ID
+PASS sensor recovery
+PASS late SAFE record
+tests=11 failures=0
+exit=0
+     1	#!/usr/bin/env bash
+     2	set -euo pipefail
+     3	cd -- "$(dirname -- "$0")"
+     4	mkdir -p .build
+     5	flags=(-std=c++17 -Wall -Wextra -Werror -pedantic -I.)
+     6	case "${1:-}" in
+     7	  '') ;;
+     8	  --sanitize) flags+=(-fsanitize=address,undefined -fno-omit-frame-pointer -g) ;;
+     9	  *) echo 'usage: run-tests.sh [--sanitize]' >&2; exit 2 ;;
+    10	esac
+    11	set -x
+    12	g++ "${flags[@]}" local_alert.cpp tests/local_alert_test.cpp -o .build/tests
+    13	.build/tests
+     1	#include "local_alert.h"
+     2	#include <iostream>
+     3	using namespace fallsafe;
+     4	int main() {
+     5	    LocalAlertStateMachine machine;
+     6	    // Virtual caller-owned monotonic clock: no sleeping, hardware, or transport.
+     7	    const Input script[] = {
+     8	        {Kind::Connected, 0},
+     9	        {Kind::Suspect, 0, "demo-1"},
+    10	        {Kind::Countdown, 0, "demo-1", 10000},
+    11	        {Kind::AckEvent, 1000, "demo-1"},
+    12	        {Kind::Disconnected, 2000},
+    13	        {Kind::StopBuzzer, 3000, "demo-1"},
+    14	        {Kind::Tick, 10000},
+    15	        {Kind::Safe, 11000, "demo-1"}
+    16	    };
+    17	    const char* names[] = {"MONITORING", "SUSPECTED", "VERIFYING", "LOCAL_ALERTING", "DEGRADED"};
+    18	    for (const auto& input : script) {
+    19	        const auto result = machine.handle(input);
+    20	        std::cout << "ms=" << input.now << " state=" << names[static_cast<unsigned>(machine.state())]
+    21	                  << " buzzer=" << machine.buzzer() << " actions=" << result.actions << '\n';
+    22	    }
+    23	    std::cout << "retained=" << machine.last().eventId() << " alerted=" << machine.last().alerted
+    24	              << " safe=" << machine.last().safe << '\n';
+    25	    return machine.last().alerted && machine.last().safe && !machine.active().present ? 0 : 1;
+    26	}
+
+codex
+Source xử lý timeout trước lệnh, nên SAFE/CANCEL đúng deadline có thể trả cả StartBuzzer và StopBuzzer; README đã quy định lấy `buzzer()` làm trạng thái âm cuối cùng. Log Hermes ghi 11/11 nhóm test pass và ASan/UBSan exit 0; tôi chỉ đọc bằng chứng này, không chạy lại. Tôi đang đối chiếu yêu cầu gốc và các nhánh replay/action mà test chưa kiểm tra trực tiếp.
+
+exec
+/bin/bash -lc "sed -n '185,235p' esp/esp32-plan.md; sed -n '411,420p' esp/esp32-plan.md; sed -n '256,289p' docs/interface-contract.md" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+## 7. Phát hiện và cảnh báo tự động
+
+### 7.1. Phân chia quyết định
+
+Khi kết nối tốt, Android là bộ điều phối cảnh báo chính. ESP32 phát sự kiện sớm, giữ dữ liệu và chấp hành lệnh còi/rung. ESP32 vẫn có luật dự phòng tối thiểu để báo động tại chỗ nếu Android không phản hồi.
+
+| Dấu hiệu | Cách xử lý đề xuất |
+|---|---|
+| Một đỉnh va đập | `IMPACT_DETECTED`; Android đánh giá thêm, không khẳng định ngã |
+| Giảm tải + đổi tư thế + va đập + bất động | Chuỗi có nguy cơ cao; có thể nâng khẩn theo luật đã hiệu chỉnh |
+| Ngã thấp không có giảm tải rõ | Xét đổi tư thế, va chạm vừa và diễn biến sau đó |
+| Loạng choạng/bám vật | Sự kiện mất ổn định, mức chú ý; không mặc định là đột quỵ |
+| Chỉ bất động | Cần ngữ cảnh; có thể đang ngủ hoặc đã tháo thiết bị |
+| Giữ SOS đủ thời gian | Khẩn cấp ngay, không đếm ngược trước khi gửi |
+
+`eventConfidence` là điểm luật 0–100, không phải xác suất y khoa đã hiệu chuẩn. Không dùng mức chất lượng thấp để tăng độ chắc chắn.
+
+### 7.2. Máy trạng thái cục bộ
+
+| Trạng thái nội bộ | Hành vi | Chuyển trạng thái |
+|---|---|---|
+| `BOOT_SELF_TEST` | Kiểm tra nguồn, cảm biến, cấu hình | Đạt → `MONITORING`; lỗi thiết yếu → `DEGRADED` |
+| `MONITORING` | Đo, lưu bộ đệm, truyền | Có dấu hiệu → `SUSPECTED` |
+| `SUSPECTED` | Giữ cửa sổ dữ liệu, phát sự kiện | Đủ nguy cơ → `VERIFYING`; hết dấu hiệu → theo dõi |
+| `VERIFYING` | Còi/rung và hạn chót xác minh | Xác nhận an toàn → theo dõi; hết hạn → `LOCAL_ALERTING` |
+| `LOCAL_ALERTING` | Báo động tại chỗ, giữ sự kiện để truyền lại | Có xác nhận hợp lệ → kết thúc và ghi nhật ký |
+| `DEGRADED` | Báo lỗi, giữ các chức năng còn dùng được | Khôi phục cảm biến → theo dõi |
+
+SOS hoặc chuỗi đủ điều kiện khẩn được phép đi trực tiếp tới `LOCAL_ALERTING` từ bất kỳ trạng thái nào. Trạng thái kết nối và sạc là các cờ riêng, không biến thành hàng chục trạng thái kết hợp.
+
+### 7.3. Tránh chờ hai lần và tránh báo trùng
+
+- Khi liên kết hoạt động, Android quản lý một hạn chót xác minh; lệnh điều khiển cục bộ gắn cùng `eventId`.
+- Đề xuất `TRIGGER_BUZZER` nhận `eventId`, `pattern` và `remainingMs` để ESP32 phản hồi theo thời gian còn lại. Đây là quy ước tham số bổ sung, phải triển khai ở cả hai nhóm trước khi dùng.
+- Hạn chót ESP32 không được lùi về sau vì gói lệnh đến chậm hoặc bị gửi lặp. Mất BLE giữa đếm ngược vẫn chạy tới hạn cục bộ.
+- Với `HIGH_RISK`, thời gian 10 giây trong bản Android là cấu hình thử cho bước xác minh, không phải tổng độ trễ cam kết. Phải đo từ thời điểm sự kiện đến khi người thân nhận thông báo.
+- Với `CRITICAL_RISK`/SOS, phát sự kiện và cảnh báo ban đầu ngay khi đủ điều kiện; không chờ người dùng trả lời.
+- `ACK_EVENT` chỉ cho biết Android đã tiếp nhận sự kiện; không được tắt báo động chỉ vì ACK. `CANCEL_ALERT` mới thực hiện hủy có chủ đích.
+- `STOP_BUZZER` chỉ tắt âm, không xóa sự kiện hoặc vô hiệu hóa cảnh báo đang chờ.
+- Sau khi đã gửi cảnh báo từ xa, xác nhận an toàn tạo bản cập nhật; không xóa lịch sử cảnh báo đã gửi.
+
+Để gửi khẩn theo hợp đồng hiện có, Android phải kiểm thử ánh xạ `eventSeverity=CRITICAL` đến đường cảnh báo khẩn, đặc biệt khi điện thoại không mang theo người. Không tạo tên sự kiện mới rồi kỳ vọng decoder Android tự hiểu.
+
+### 7.4. Trường hợp mất kết nối
+
+- BLE mất: giữ đo, nút SOS, xử lý cơ bản, còi/rung và bộ đệm.
+- Tự quảng bá lại với nhịp hợp lý; không quét/kết nối bận liên tục làm cạn pin.
+- Sự kiện chưa được Android xác nhận được lưu vào hàng đợi bền vững có giới hạn; khi kết nối lại gửi sự kiện trước dữ liệu thông thường.
+- Bản BLE không có đường truyền khác phải hiển thị rõ chưa chuyển được cảnh báo đến điện thoại. Còi không tương đương liên lạc người thân.
+- Mất Internet nhưng BLE còn: Android quyết định kênh khả dụng; ESP32 không tự coi mạng đã hoạt động chỉ vì BLE kết nối.
+
+## 11. Độ tin cậy và bảo mật thiết bị
+
+- Ghép nối có chủ đích bằng thao tác vật lý; chỉ cho thiết bị đã được ủy quyền gửi lệnh cấu hình/hủy. Tên `FALLSAFE-...` không phải xác thực.
+- Dùng mã hóa BLE và bonding phù hợp khả năng thiết bị; không tuyên bố chống giả mạo đầy đủ nếu dùng phương thức ghép nối không xác minh được hai phía.
+- Mỗi lệnh kiểm tra phiên bản, độ dài, loại, giá trị và trạng thái hiện tại; từ chối thay mốc hoặc self-test gây gián đoạn khi đang cảnh báo.
+- Watchdog phát hiện treo; thời gian chờ bus cảm biến có giới hạn. Một cảm biến hỏng không được chặn nút SOS.
+- Giới hạn ghi flash, giữ nhật ký sự kiện quan trọng có khả năng phục hồi sau mất điện; không lưu vô hạn mẫu thô.
+- Kiểm tra cập nhật firmware, giữ bản khôi phục; không cập nhật giữa cảnh báo hoặc lúc pin không đủ.
+- Log kỹ thuật không ghi khóa, số điện thoại và vị trí đầy đủ nếu không cần cho thử nghiệm có cho phép.
+
+## Ràng buộc thời gian, ACK và an toàn
+- timestampMs: Unix milliseconds; timestampNs điện thoại: monotonic nanoseconds. Đếm ngược dùng monotonic, chỉnh giờ không được kéo dài hạn.
+- eventId xác định sự kiện; truyền lại giữ eventId, sequenceNumber, payload. Không khử trùng bằng “nhỏ hơn số lớn nhất”; sự kiện có thể tới muộn.
+- ACK GATT ≠ ACK_EVENT ≠ lệnh COMPLETED ≠ người thân nhận. ACCEPTED chưa thành công cấu hình. ACK_EVENT không hủy, STOP_BUZZER chỉ tắt âm.
+- Sensor/event có sequenceNumber; Status/ACK không có (mâu thuẫn câu “mỗi gói” Android §6.1 được ghi C02, không tự thêm trường).
+- Mất BLE không được reset xác minh, mất Internet không tắt báo tại chỗ, thiếu GPS không chặn cảnh báo.
+- Cảm biến không có: null cho trường nullable; IMU/pin lỗi không phát mẫu giả. Pin cũ phải ghi rõ cũ. Chưa từng có pin hợp lệ: SENSOR_ERROR thay vì pin0% giả.
+- gnssStatus chỉ phản ánh tình trạng. V1 chưa có gói tọa độ ESP32; vị trí điện thoại dùng latitude/longitude (độ), locationAccuracyM (m), locationTimestampMs (Unix ms), nullable khi không có (Android §9). Không nhét tọa độ mới vào v1.
+
+## Tham số lệnh bổ sung và từ vựng lỗi (chưa duyệt)
+Nguồn ESP §8.3,8.5. temperatureC là °C cảm biến khí áp, không thân nhiệt. lastErrorCode đề xuất: IMU_READ_FAILED, BAROMETER_READ_FAILED, BATTERY_READ_FAILED, TIME_NOT_SYNCED, BUFFER_OVERFLOW. Các lớp UI/decoder hai phía cần cập nhật và kiểm thử trước dùng; không coi là từ vựng đã có ở Android.
+
+| `commandType` | Tham số đề xuất để hai nhóm triển khai | Hành vi |
+|---|---|---|
+| `PING` | Không | Kiểm tra phản hồi |
+| `GET_STATUS` | Không | Phát trạng thái hiện tại |
+| `START_STREAM` | Không | Bắt đầu truyền mẫu |
+| `STOP_STREAM` | Không | Dừng truyền mẫu, vẫn đo và xử lý SOS |
+| `SET_SAMPLE_RATE` | `sampleRateHz` | Chấp nhận các mức thực sự hỗ trợ |
+| `SET_REFERENCE_ALTITUDE` | Không | Lấy áp suất ổn định hiện tại làm mốc 0 m |
+| `SET_DEVICE_TIME` | `unixTimeMs` | Đồng bộ giờ; thuật toán vẫn dùng đồng hồ đơn điệu |
+| `START_SELF_TEST` | Không | Kiểm tra có giới hạn thời gian |
+| `TRIGGER_BUZZER` | `eventId`, `pattern`, `remainingMs` | Mẫu báo `VERIFYING`, `CRITICAL` hoặc `TEST` |
+| `STOP_BUZZER` | `eventId` | Tắt âm, không xóa sự kiện |
+| `ACK_EVENT` | `eventId` | Android đã nhận/lưu sự kiện |
+| `CANCEL_ALERT` | `eventId`, `reason` | Hủy cảnh báo đang hoạt động đúng ID |
+| `REBOOT_DEVICE` | Không | Từ chối nếu đang cảnh báo; ghi nhận trước khởi động lại |
+
+Ngoài `sampleRateHz` đã có ví dụ trong tài liệu Android, các tên tham số trên là đề xuất hoàn thiện phần còn thiếu. Chưa được tuyên bố tương thích thực thi cho đến khi kiểm thử hai phía.
+
+Gói `Esp32CommandAck` giữ nguyên: `protocolVersion`, `commandId`, `deviceId`, `timestampMs`, `commandStatus`, `errorCode`, `message`. Kiểu lần lượt: int, string, string, long, string, string/null, string/null.
+
+`commandStatus`: `ACCEPTED`, `COMPLETED`, `REJECTED`, `FAILED`. Nhận lệnh chưa có nghĩa hoàn thành. Lưu kết quả các `commandId` gần nhất để lệnh lặp trả lại ACK và không lặp tác dụng, đặc biệt với hủy và reboot.
+
+
+exec
+/bin/bash -lc 'git status --short; nl -ba docs/evidence/esp-core-hermes.log; nl -ba docs/evidence/esp-core-sanitizer-hermes.log' in /home/pdd/nckh27pa
+ succeeded in 0ms:
+?? .gitignore
+?? android/
+?? docs/
+?? esp/
+?? protocol-lab/
+?? setup-nckh27pa-26.04.sh
+     1	+ g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. local_alert.cpp tests/local_alert_test.cpp -o .build/tests
+     2	+ .build/tests
+     3	PASS suspected
+     4	PASS no-response
+     5	PASS SOS
+     6	PASS disconnect
+     7	PASS duplicate/deadline
+     8	PASS cancel/wrong-ID
+     9	PASS ACK/STOP
+    10	PASS monotonic/max
+    11	PASS invalid countdown/ID
+    12	PASS sensor recovery
+    13	PASS late SAFE record
+    14	tests=11 failures=0
+    15	+ g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. local_alert.cpp demo.cpp -o .build/demo
+    16	+ .build/demo
+    17	ms=0 state=MONITORING buzzer=0 actions=0
+    18	ms=0 state=SUSPECTED buzzer=0 actions=9
+    19	ms=0 state=VERIFYING buzzer=1 actions=2
+    20	ms=1000 state=VERIFYING buzzer=1 actions=8
+    21	ms=2000 state=VERIFYING buzzer=1 actions=0
+    22	ms=3000 state=VERIFYING buzzer=0 actions=4
+    23	ms=10000 state=LOCAL_ALERTING buzzer=1 actions=11
+    24	ms=11000 state=MONITORING buzzer=0 actions=13
+    25	retained=demo-1 alerted=1 safe=1
+    26	exit_code=0
+     1	+ g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. -fsanitize=address,undefined -fno-omit-frame-pointer -g local_alert.cpp tests/local_alert_test.cpp -o .build/tests
+     2	+ .build/tests
+     3	PASS suspected
+     4	PASS no-response
+     5	PASS SOS
+     6	PASS disconnect
+     7	PASS duplicate/deadline
+     8	PASS cancel/wrong-ID
+     9	PASS ACK/STOP
+    10	PASS monotonic/max
+    11	PASS invalid countdown/ID
+    12	PASS sensor recovery
+    13	PASS late SAFE record
+    14	tests=11 failures=0
+    15	exit_code=0
+
+exec
+/bin/bash -lc "nl -ba esp/core/README.md; rg -n 'stub|Ignored|local_alert_test|local_alert.cpp|tdd-red|tdd-green' docs/evidence/ESP-CORE-001-codex.log" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+     1	# ESP local alert core (ESP-CORE-001)
+     2	
+     3	Thư viện C++17 thuần, không phụ thuộc Arduino/ESP-IDF, GPIO, transport hoặc heap
+     4	trong state machine. Chưa build Arduino hoặc kiểm tra bo thật. Không phải thuật
+     5	toán phát hiện ngã: caller quyết định dấu hiệu/nguy cơ, debounce/giữ nút SOS,
+     6	và thời điểm bắt đầu xác minh.
+     7	
+     8	## Chạy local
+     9	
+    10	```sh
+    11	esp/core/run-tests.sh
+    12	esp/core/run-tests.sh --sanitize
+    13	esp/core/run-demo.sh
+    14	```
+    15	
+    16	Nếu môi trường ptrace không hỗ trợ LeakSanitizer như phiên này:
+    17	
+    18	```sh
+    19	ASAN_OPTIONS=detect_leaks=0 esp/core/run-tests.sh --sanitize
+    20	```
+    21	
+    22	Runner dùng g++ với `-std=c++17 -Wall -Wextra -Werror -pedantic`.
+    23	Demo dùng clock giả lập 0–11000 ms, không chờ thực 10 giây. Countdown 10 giây
+    24	chỉ là cấu hình thử. Output và log thật nằm trong `evidence/`.
+    25	
+    26	## API và quy tắc
+    27	
+    28	Include `local_alert.h`, biên dịch cùng `local_alert.cpp`. Một caller tuần tự gọi
+    29	`handle(Input)` và đọc snapshot qua getters; không thread-safe. Mọi `now` là
+    30	`uint64_t` monotonic milliseconds cùng một epoch, không phải Unix time. Caller
+    31	phải gọi Tick định kỳ; thư viện không có thread/timer tự chạy. Mọi input cũng
+    32	kiểm tra timeout trước khi xử lý lệnh. Clock đi lùi bị từ chối không đổi state.
+    33	Không hỗ trợ wrap clock; countdown làm tràn phép cộng bị từ chối.
+    34	
+    35	- `Suspect`: giữ ID, phát action Publish, chuyển SUSPECTED. Chưa đủ nguy cơ nên
+    36	  chưa có timeout; caller dùng Countdown khi cần xác minh hoặc Sos khi khẩn.
+    37	- `Countdown`: tạo hoặc nâng sự kiện sang VERIFYING, bật âm, đặt deadline.
+    38	  Thời lượng hợp lệ 1–60000 ms (giới hạn nội bộ thử nghiệm). Cùng ID chỉ được
+    39	  rút ngắn deadline; lặp không bật lại âm đã STOP. ID khác bị Busy.
+    40	- `Sos`: báo ngay, kể cả DEGRADED. Nếu đang có sự kiện, nâng khẩn sự kiện đó và
+    41	  giữ ID gốc, không tạo sự kiện thứ hai. SOS khi đã cảnh báo là no-op.
+    42	- `Tick`: tới hoặc qua deadline chuyển LOCAL_ALERTING, bật lại âm, đánh dấu
+    43	  alerted và yêu cầu Publish một lần.
+    44	- `AckEvent`: ghi nhận Android đã nhận, không tắt âm hoặc hủy timeout.
+    45	- `StopBuzzer`: chỉ tắt âm. Timeout còn chờ vẫn phát cảnh báo và bật âm lại.
+    46	- `CancelAlert`/`Safe`: chỉ kết thúc active đúng ID, tắt âm, giữ bản ghi kết thúc.
+    47	  SAFE đến đúng/sau deadline vẫn giữ `alerted=true` cùng `safe=true`; không xóa
+    48	  dấu vết cảnh báo. Lệnh cho ID kết thúc gần nhất là no-op.
+    49	- `SensorError`/`SensorRecovered`: cờ sức khỏe độc lập; chỉ đổi trạng thái sang
+    50	  DEGRADED/MONITORING khi không có active. Không xóa sự kiện hoặc deadline.
+    51	- `Connected`/`Disconnected`: chỉ đổi cờ kết nối, không reset countdown.
+    52	
+    53	ID dài 1–32 byte, không chứa NUL; được copy vào buffer 33 byte. Một active và
+    54	một record kết thúc gần nhất, không tăng bộ nhớ theo số lệnh. ID kết thúc gần
+    55	nhất không được tái sử dụng; lịch sử khử trùng cũ hơn nằm ngoài phạm vi. Caller
+    56	cấp ID mới cho sự kiện/SOS mới. Không có queue bền vững, journal flash hoặc
+    57	khôi phục qua reboot; adapter tương lai phải lưu các cập nhật nếu cần lịch sử
+    58	lâu dài. Record kết thúc cũ bị thay khi sự kiện kế tiếp kết thúc.
+    59	
+    60	`Result.status` mô tả kết quả input; `actions` là bitmask yêu cầu caller xử lý:
+    61	Publish=1, StartBuzzer=2, StopBuzzer=4, RecordUpdated=8, SensorChanged=16.
+    62	Actions vẫn có thể xuất hiện cùng status từ chối lệnh vì timeout vừa hết.
+    63	Nếu cùng một lần gọi có cả StartBuzzer và StopBuzzer (SAFE đúng deadline),
+    64	caller dùng getter `buzzer()` làm trạng thái âm cuối cùng; lưu snapshot `last()`
+    65	để giữ cả dấu vết cảnh báo và kết thúc. Publish là yêu cầu xuất bản snapshot,
+    66	không có nghĩa transport đã gửi hoặc người thân đã nhận.
+    67	
+    68	Caller phải xác thực/ủy quyền lệnh trước khi gọi; thư viện không giả xác thực
+    69	BLE. API enum/struct là nội bộ, không bổ sung wire fields hoặc tuyên bố tương
+    70	thích decoder Android. Không xử lý JSON, commandId cache, pairing hoặc bonding.
+    71	
+    72	## Bằng chứng TDD
+    73	
+    74	`tests/local_alert_test.cpp` được viết trước phần triển khai. Lần RED biên dịch
+    75	thành công với handle chỉ trả Ignored: cả 11 nhóm fail bằng assertion (exit 1),
+    76	không phải lỗi build. Sau đó thay stub bằng logic; cùng bộ test không sửa chạy
+    77	GREEN (exit 0). Các nhóm gồm SUSPECTED/one active, no-response, SOS, disconnect,
+    78	duplicate/deadline, cancel/wrong ID, ACK/STOP, monotonic near max, invalid
+    79	countdown/ID, sensor recovery và SAFE late. Static assertions kiểm tra object
+    80	trivially copyable và kích thước tối đa 160 byte.
+    81	
+    82	- `evidence/tdd-red.log`: 11/11 fail trước triển khai.
+    83	- `evidence/tdd-green.log`: 11/11 pass.
+    84	- `evidence/sanitizer.log`: lần đầu exit 1, LeakSanitizer không hỗ trợ ptrace.
+    85	- `evidence/sanitizer-retry.log`: ASan/UBSan pass, exit 0, tắt riêng leak check.
+    86	- `evidence/demo.log`: demo exit 0, giữ record alerted + safe sau mất BLE.
+    87	
+    88	Chưa có kết quả Hermes chạy lại hoặc reviewer độc lập trong phiên này.
+307:enum class Status { Applied, Ignored, Invalid, Busy, WrongId, ClockReversed };
+343:cat > esp/core/local_alert.cpp <<'EOF'
+346:Result LocalAlertStateMachine::handle(const Input&) noexcept { return {Status::Ignored, None}; }
+349:cat > esp/core/tests/local_alert_test.cpp <<'EOF'
+399: CHECK(m.handle({Kind::Suspect,1,"e"}).status==Status::Ignored);
+405: CHECK(m.handle({Kind::Countdown,72,"e",10}).status==Status::Ignored);
+464: CHECK(m.handle({Kind::Safe,11,"e"}).status==Status::Ignored);
+489:g++ \""'${flags[@]}" local_alert.cpp tests/local_alert_test.cpp -o .build/tests
+494:esp/core/run-tests.sh > esp/core/evidence/tdd-red.log 2>&1
+496:cat esp/core/evidence/tdd-red.log
+497:printf '"'exit=%s\\n' \""'$result" | tee -a esp/core/evidence/tdd-red.log
+500:+ g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. local_alert.cpp tests/local_alert_test.cpp -o .build/tests
+517:/bin/bash -lc "cat > esp/core/local_alert.cpp <<'EOF'
+564:        if (healthy == healthy_) return result(Status::Ignored);
+583:                return result(already ? Status::Ignored : Status::Applied);
+586:            if (input.kind == Kind::Suspect || active_.alerted) return result(Status::Ignored);
+588:            if (last_.present && last_.eventId() == input.eventId) return result(Status::Ignored);
+601:                if (candidate >= deadline_) return result(Status::Ignored);
+619:            if (last_.present && last_.eventId() == input.eventId) return result(Status::Ignored);
+624:            if (active_.acknowledged) return result(Status::Ignored);
+628:            if (!buzzer_) return result(Status::Ignored);
+641:esp/core/run-tests.sh > esp/core/evidence/tdd-green.log 2>&1
+643:cat esp/core/evidence/tdd-green.log
+644:printf '"'exit=%s\\n' \""'$result" | tee -a esp/core/evidence/tdd-green.log
+647:+ g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. local_alert.cpp tests/local_alert_test.cpp -o .build/tests
+701:g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. local_alert.cpp demo.cpp -o .build/demo
+715:+ g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. -fsanitize=address,undefined -fno-omit-frame-pointer -g local_alert.cpp tests/local_alert_test.cpp -o .build/tests
+740:+ g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. local_alert.cpp demo.cpp -o .build/demo
+754:+ g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. -fsanitize=address,undefined -fno-omit-frame-pointer -g local_alert.cpp tests/local_alert_test.cpp -o .build/tests
+799:Include `local_alert.h`, biên dịch cùng `local_alert.cpp`. Một caller tuần tự gọi
+845:`tests/local_alert_test.cpp` được viết trước phần triển khai. Lần RED biên dịch
+846:thành công với handle chỉ trả Ignored: cả 11 nhóm fail bằng assertion (exit 1),
+847:không phải lỗi build. Sau đó thay stub bằng logic; cùng bộ test không sửa chạy
+853:- `evidence/tdd-red.log`: 11/11 fail trước triển khai.
+854:- `evidence/tdd-green.log`: 11/11 pass.
+865:esp/core/local_alert.cpp
+867:esp/core/tests/local_alert_test.cpp
+872:esp/core/evidence/tdd-green.log
+875:esp/core/evidence/tdd-red.log
+
+codex
+**PASS trong phạm vi review tĩnh local C++ host** theo REV-ESP-CORE-001. Không phát hiện blocker logic/security trong hợp đồng API đã ghi rõ.
+
+Đã đối chiếu source/test với ESP-CORE-001, ESP §7/§11 và ACK/CANCEL trong interface contract:
+
+- ID giới hạn 1–32 byte, loại NUL, buffer có terminator; state không tăng theo số lệnh.
+- Countdown không kéo dài deadline; kiểm tra overflow trước phép cộng; clock regression bị từ chối trước mọi thay đổi.
+- ACK không hủy/tắt âm; STOP không xóa deadline; timeout bật âm lại.
+- SOS hoạt động trong DEGRADED; disconnect không reset countdown; phục hồi cảm biến không xóa alert.
+- Lệnh sai ID không tác động lên sự kiện khác. Replay ID vừa kết thúc là no-op; lịch sử xa hơn và xác thực thuộc caller theo phạm vi công bố.
+- SAFE/CANCEL tại deadline giữ `last().alerted=true`; hai action Start/Stop đồng thời phù hợp quy tắc snapshot trong README.
+
+**Findings không chặn nghiệm thu — thiếu coverage test:**
+
+1. **P3 — Chưa assert action khi timeout trùng lệnh kết thúc**, tại [local_alert_test.cpp:113](/home/pdd/nckh27pa/esp/core/tests/local_alert_test.cpp:113). Test SAFE chỉ kiểm tra record, chưa kiểm tra mask; CANCEL chưa có ca đúng deadline.  
+   Repro đề xuất, **chưa chạy**: máy mới → `Countdown(0,"e",10)` → `CancelAlert(10,"e")`. Theo [local_alert.cpp:36](/home/pdd/nckh27pa/esp/core/local_alert.cpp:36), kỳ vọng `Applied`, actions `15`, buzzer false, active rỗng, last có `alerted=true,cancelled=true`. Làm tương tự với SAFE, kỳ vọng `safe=true`.
+
+2. **P3 — Chưa kiểm tra lệnh bị từ chối vẫn trả action timeout**, tại [local_alert_test.cpp:61](/home/pdd/nckh27pa/esp/core/tests/local_alert_test.cpp:61). Các ca wrong-ID hiện đều trước deadline.  
+   Repro đề xuất, **chưa chạy**: `Countdown(0,"e",10)` → `CancelAlert(10,"wrong")`. Kỳ vọng `WrongId` **và actions `11`**, active `"e"` vẫn tồn tại, alerted/buzzer true. Caller phải xử lý actions dù status không Applied, đúng [README.md:62](/home/pdd/nckh27pa/esp/core/README.md:62).
+
+Bằng chứng có sẵn: [Hermes host log:14](/home/pdd/nckh27pa/docs/evidence/esp-core-hermes.log:14) ghi 11/11 pass, demo exit 0; [sanitizer log:14](/home/pdd/nckh27pa/docs/evidence/esp-core-sanitizer-hermes.log:14) ghi 11/11 pass, exit 0. Đây là log được đọc, không phải kết quả tôi chạy lại.
+
+TDD có bằng chứng **viết cả nhóm test trước implementation rồi RED/GREEN**, không phải strict TDD từng hành vi. Không build/chạy test, network, agent con hay sửa file; không tạo report `.txt` vì yêu cầu read-only. **Không có xác nhận firmware Arduino, GPIO/BLE thực tế hoặc hardware.**
+tokens used
+40,660
+**PASS trong phạm vi review tĩnh local C++ host** theo REV-ESP-CORE-001. Không phát hiện blocker logic/security trong hợp đồng API đã ghi rõ.
+
+Đã đối chiếu source/test với ESP-CORE-001, ESP §7/§11 và ACK/CANCEL trong interface contract:
+
+- ID giới hạn 1–32 byte, loại NUL, buffer có terminator; state không tăng theo số lệnh.
+- Countdown không kéo dài deadline; kiểm tra overflow trước phép cộng; clock regression bị từ chối trước mọi thay đổi.
+- ACK không hủy/tắt âm; STOP không xóa deadline; timeout bật âm lại.
+- SOS hoạt động trong DEGRADED; disconnect không reset countdown; phục hồi cảm biến không xóa alert.
+- Lệnh sai ID không tác động lên sự kiện khác. Replay ID vừa kết thúc là no-op; lịch sử xa hơn và xác thực thuộc caller theo phạm vi công bố.
+- SAFE/CANCEL tại deadline giữ `last().alerted=true`; hai action Start/Stop đồng thời phù hợp quy tắc snapshot trong README.
+
+**Findings không chặn nghiệm thu — thiếu coverage test:**
+
+1. **P3 — Chưa assert action khi timeout trùng lệnh kết thúc**, tại [local_alert_test.cpp:113](/home/pdd/nckh27pa/esp/core/tests/local_alert_test.cpp:113). Test SAFE chỉ kiểm tra record, chưa kiểm tra mask; CANCEL chưa có ca đúng deadline.  
+   Repro đề xuất, **chưa chạy**: máy mới → `Countdown(0,"e",10)` → `CancelAlert(10,"e")`. Theo [local_alert.cpp:36](/home/pdd/nckh27pa/esp/core/local_alert.cpp:36), kỳ vọng `Applied`, actions `15`, buzzer false, active rỗng, last có `alerted=true,cancelled=true`. Làm tương tự với SAFE, kỳ vọng `safe=true`.
+
+2. **P3 — Chưa kiểm tra lệnh bị từ chối vẫn trả action timeout**, tại [local_alert_test.cpp:61](/home/pdd/nckh27pa/esp/core/tests/local_alert_test.cpp:61). Các ca wrong-ID hiện đều trước deadline.  
+   Repro đề xuất, **chưa chạy**: `Countdown(0,"e",10)` → `CancelAlert(10,"wrong")`. Kỳ vọng `WrongId` **và actions `11`**, active `"e"` vẫn tồn tại, alerted/buzzer true. Caller phải xử lý actions dù status không Applied, đúng [README.md:62](/home/pdd/nckh27pa/esp/core/README.md:62).
+
+Bằng chứng có sẵn: [Hermes host log:14](/home/pdd/nckh27pa/docs/evidence/esp-core-hermes.log:14) ghi 11/11 pass, demo exit 0; [sanitizer log:14](/home/pdd/nckh27pa/docs/evidence/esp-core-sanitizer-hermes.log:14) ghi 11/11 pass, exit 0. Đây là log được đọc, không phải kết quả tôi chạy lại.
+
+TDD có bằng chứng **viết cả nhóm test trước implementation rồi RED/GREEN**, không phải strict TDD từng hành vi. Không build/chạy test, network, agent con hay sửa file; không tạo report `.txt` vì yêu cầu read-only. **Không có xác nhận firmware Arduino, GPIO/BLE thực tế hoặc hardware.**

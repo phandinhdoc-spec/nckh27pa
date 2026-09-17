@@ -1,0 +1,142 @@
+{
+  "source_plans_and_setup_unchanged": {
+    "setup-nckh27pa-26.04.sh": true,
+    "android/android-plan.md": true,
+    "esp/esp32-plan.md": true
+  },
+  "apk_path": "/home/pdd/nckh27pa/android/app/build/outputs/apk/debug/app-debug.apk",
+  "apk_bytes": 13851838,
+  "apk_sha256": "4639f9410927f9d77c46bbaecbfe5c48fde3f066022489e0fee5848173dda9d2",
+  "android_unit_suites": [
+    {
+      "name": "vn.nckh27pa.fallsafe.DemoTests",
+      "tests": "14",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.nckh27pa.fallsafe.OwnershipTests",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.nckh27pa.fallsafe.protocol.DecoderTests",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "android_unit_test_total": 21,
+  "emulator_scenarios": {
+    "smoke": [
+      {
+        "name": "no-response",
+        "passed": true,
+        "elapsedSeconds": 24.42
+      },
+      {
+        "name": "safe",
+        "passed": true,
+        "elapsedSeconds": 28.29
+      },
+      {
+        "name": "sos-short-long",
+        "passed": true,
+        "elapsedSeconds": 12.99
+      },
+      {
+        "name": "sink-failure",
+        "passed": true,
+        "elapsedSeconds": 33.96
+      },
+      {
+        "name": "replay-survives-pause",
+        "passed": true,
+        "elapsedSeconds": 23.05
+      },
+      {
+        "name": "tabs-and-sensors",
+        "passed": true,
+        "elapsedSeconds": 23.33
+      }
+    ],
+    "background": [
+      {
+        "name": "foreground-home-screen-off-stop",
+        "passed": true,
+        "elapsedSeconds": 50.76
+      },
+      {
+        "name": "notification-denied-local-restored",
+        "passed": true,
+        "elapsedSeconds": 19.8
+      }
+    ],
+    "sensor_api_scroll": [
+      {
+        "name": "sensor-api-scroll-verification-timeout",
+        "passed": true,
+        "elapsedSeconds": 24.54
+      }
+    ]
+  },
+  "lint_issues": [
+    {
+      "id": "HighSamplingRate",
+      "severity": "Warning",
+      "message": "Most apps don't need access to high sensor sampling rate."
+    },
+    {
+      "id": "AndroidGradlePluginVersion",
+      "severity": "Warning",
+      "message": "A newer version of Gradle than 8.13 is available: 8.14.5"
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning",
+      "message": "A newer version of androidx.compose:compose-bom than 2025.08.01 is available: 2026.09.00"
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning",
+      "message": "A newer version of androidx.activity:activity-compose than 1.10.1 is available: 1.13.0"
+    },
+    {
+      "id": "NewerVersionAvailable",
+      "severity": "Warning",
+      "message": "A newer version of com.google.code.gson:gson than 2.11.0 is available: 2.14.0"
+    },
+    {
+      "id": "DataExtractionRules",
+      "severity": "Warning",
+      "message": "The attribute `android:allowBackup` is deprecated from Android 12 and higher and may be removed in future versions. Consider adding the attribute `android:dataExtractionRules` specifying an `@xml` resource which configures cloud backups and device transfers on Android 12 and higher."
+    },
+    {
+      "id": "MissingApplicationIcon",
+      "severity": "Warning",
+      "message": "Should explicitly set `android:icon`, there is no default"
+    }
+  ],
+  "independent_reviews": [
+    "REV-CORE-002.txt",
+    "REV-ESP-CORE-001.txt",
+    "REV-AGY-protocol.txt",
+    "REV-AGY-android-narrow.txt",
+    "REV-DEC-001-retry.txt",
+    "REV-AND-002A-final.txt"
+  ],
+  "not_verified": [
+    "physical phone",
+    "Arduino firmware with actual FQBN",
+    "real BLE",
+    "real recipients",
+    "fall accuracy",
+    "battery duration",
+    "OEM background/Doze reliability",
+    "process-death recovery"
+  ]
+}

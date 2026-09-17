@@ -1,0 +1,15 @@
++ g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. local_alert.cpp tests/local_alert_test.cpp -o .build/tests
++ .build/tests
+FAIL suspected: m.state()==State::SUSPECTED
+FAIL no-response: m.handle({Kind::Countdown,100,"e",10000}).status==Status::Applied
+FAIL SOS: m.state()==State::LOCAL_ALERTING
+FAIL disconnect: m.connected()
+FAIL duplicate/deadline: m.deadline()==100
+FAIL cancel/wrong-ID: m.handle({k,1,"wrong"}).status==Status::WrongId
+FAIL ACK/STOP: m.active().acknowledged
+FAIL monotonic/max: m.deadline()==top
+FAIL invalid countdown/ID: m.handle({Kind::Countdown,0,"e",duration}).status==Status::Invalid
+FAIL sensor recovery: m.state()==State::DEGRADED
+FAIL late SAFE record: m.last().alerted
+tests=11 failures=11
+exit=1

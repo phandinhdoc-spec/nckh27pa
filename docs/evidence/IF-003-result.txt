@@ -1,0 +1,12 @@
+Đã triển khai chỉ trong `protocol-lab/`:
+
+- Encoder/reassembler Kotlin và C++, golden vectors chung, runner cross-language.
+- TDD: 104 kiểm tra đỏ trước implementation; sau đó **52 scenario × 2 ngôn ngữ + 56 lượt cross-language đều pass**.
+- ASan/UBSan pass; LeakSanitizer chưa chạy được vì ptrace.
+- Có giới hạn state, timeout, duplicate/conflict, capacity và disconnect/generation.
+
+Chạy: `./protocol-lab/run.sh`
+
+[README](/home/pdd/nckh27pa/protocol-lab/README.md) ghi rõ proposal **chưa approved**, thiếu review độc lập, tổng heap Kotlin, kiểm thử thiết bị và ACK/retry/dedupe.
+
+Không bật BLE, sửa payload v1/app/ESP core, dùng network, agent con, Gradle, commit hoặc FQBN.

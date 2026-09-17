@@ -1,0 +1,29 @@
+{
+  "task": "REV-CORE-001",
+  "passed": true,
+  "security_concerns": [],
+  "logic_errors": [],
+  "scope": "Kotlin core offline only; not Android/APK acceptance",
+  "reviewer_model": "Runtime returned Model: ?; exact model not verified",
+  "suggestions": [
+    {
+      "file": "android/core/tests/CoreTests.kt:51-60",
+      "action": "Add permanent regression coverage for successful reentrant sink."
+    },
+    {
+      "file": "android/core/tests/CoreTests.kt:16-38",
+      "action": "Add permanent regression coverage near Long.MAX_VALUE and maximum timeout with valid elapsed time."
+    },
+    {
+      "file": "android/core/README.md:30-32",
+      "action": "Update independent verification status; retain TDD limitations."
+    }
+  ],
+  "self_report": "Reviewer ran 9 test groups, demo and three extra probe groups successfully. Probe files were temporary and removed; do not represent them as committed regression tests.",
+  "parent_evidence": [
+    "docs/evidence/core-tests-hermes.log",
+    "docs/evidence/core-demo-hermes.log"
+  ],
+  "transcript": "/home/pdd/.hermes/cache/delegation/live/deleg_2f71dc80/task-0.log",
+  "integration_gate": "Code review passed. Full CORE-001 strict TDD acceptance still unmet; no Android integration."
+}

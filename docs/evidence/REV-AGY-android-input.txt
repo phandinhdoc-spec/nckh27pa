@@ -1,0 +1,1076 @@
+Bạn là reviewer độc lập. CHỈ phân tích văn bản inline; KHÔNG gọi tool/read_file/network/write. Không giả đã chạy test. Trả tiếng Việt. Android demo reviewer: previous P2 invalid accel dropped before detector and replay pause reset have been fixed with tested adapter. Verify actual wiring uses adapter, null resets real detector but pause leaves replay alone; countdown no-response and SAFE/SOS semantics, no real contact. Core test assertion moved outside throwing sink. No foreground service/process death support is disclosed limitation, not within demo acceptance. Focus actual logic bugs; return PASS/FAIL and file:line/repro. Tests post-implementation for existing core, RED/GREEN for actual app bug fixes.
+
+FILE android/app/src/main/java/vn/nckh27pa/fallsafe/DemoLogic.kt
+1|package vn.nckh27pa.fallsafe
+2|
+3|import core.*
+4|import kotlin.math.abs
+5|import kotlin.math.sqrt
+6|
+7|/** Names/types follow plan §4.5.2. Confidence 0 + UNKNOWN means unestimated. */
+8|data class PhoneSensorPacket(
+9|    val timestampNs: Long, val wallClockTimestampMs: Long,
+10|    val accelXMs2: Float, val accelYMs2: Float, val accelZMs2: Float,
+11|    val linearAccelXMs2: Float? = null, val linearAccelYMs2: Float? = null,
+12|    val linearAccelZMs2: Float? = null,
+13|    val gyroXDps: Float? = null, val gyroYDps: Float? = null, val gyroZDps: Float? = null,
+14|    val pitchDeg: Float? = null, val rollDeg: Float? = null, val yawDeg: Float? = null,
+15|    val pressurePa: Float? = null, val altitudeDeltaM: Float? = null,
+16|    val stepCount: Long? = null, val stepDetected: Boolean? = null,
+17|    val phoneMotionState: String = "UNKNOWN", val phonePlacementConfidence: Int = 0,
+18|    val sensorQuality: Int = 0
+19|)
+20|enum class SensorKind { ACCEL, LINEAR, GYRO, ORIENTATION, PRESSURE }
+21|class PhoneNormalizer {
+22|    private data class Reading(val ns: Long, val values: List<Float>)
+23|    private val readings = mutableMapOf<SensorKind, Reading>()
+24|    fun clear() = readings.clear()
+25|    fun update(kind: SensorKind, ns: Long, values: FloatArray) {
+26|        val count = if (kind == SensorKind.PRESSURE) 1 else 3
+27|        if (ns < 0 || values.size < count || values.take(count).any { !it.isFinite() } ||
+28|            (kind == SensorKind.PRESSURE && values[0] <= 0f)) {
+29|            readings.remove(kind); return
+30|        }
+31|        if (ns < (readings[kind]?.ns ?: -1)) return
+32|        val scale = when (kind) {
+33|            SensorKind.GYRO -> (180.0 / Math.PI).toFloat()
+34|            SensorKind.PRESSURE -> 100f
+35|            else -> 1f
+36|        }
+37|        val converted = values.take(count).map { it * scale }
+38|        if (converted.any { !it.isFinite() }) { readings.remove(kind); return }
+39|        readings[kind] = Reading(ns, converted)
+40|    }
+41|    fun packet(nowNs: Long, wallMs: Long): PhoneSensorPacket? {
+42|        fun fresh(kind: SensorKind) = readings[kind]?.takeIf {
+43|            nowNs >= it.ns && nowNs - it.ns <= 500_000_000
+44|        }
+45|        val a = fresh(SensorKind.ACCEL) ?: return null
+46|        val l = fresh(SensorKind.LINEAR)?.values
+47|        val g = fresh(SensorKind.GYRO)?.values
+48|        val o = fresh(SensorKind.ORIENTATION)?.values
+49|        return PhoneSensorPacket(a.ns, wallMs, a.values[0], a.values[1], a.values[2],
+50|            l?.get(0), l?.get(1), l?.get(2), g?.get(0), g?.get(1), g?.get(2),
+51|            o?.get(0), o?.get(1), o?.get(2), fresh(SensorKind.PRESSURE)?.values?.get(0))
+52|    }
+53|}
+54|
+55|/** DEMO only: impact >=25 m/s², then >=1 s quiet at 9.81±1 within 3 s.
+56| * At least 6 quiet samples; gaps >250 ms, invalid or reversed times break evidence.
+57| * These illustrative thresholds are not a validated fall detector.
+58| */
+59|class DemoDetector {
+60|    private var last: Long? = null
+61|    private var impact: Long? = null
+62|    private var quiet: Long? = null
+63|    private var count = 0
+64|    fun reset() { last = null; impact = null; quiet = null; count = 0 }
+65|    fun accept(p: PhoneSensorPacket): Boolean {
+66|        val t = p.timestampNs
+67|        val a = listOf(p.accelXMs2, p.accelYMs2, p.accelZMs2)
+68|        if (t < 0 || a.any { !it.isFinite() }) { reset(); return false }
+69|        val previous = last
+70|        if (previous != null && (t <= previous || t - previous > 250_000_000)) {
+71|            reset(); last = t; return false
+72|        }
+73|        last = t
+74|        val magnitude = sqrt(a.sumOf { it.toDouble() * it.toDouble() })
+75|        if (magnitude >= 25) { impact = t; quiet = null; count = 0; return false }
+76|        val hit = impact ?: return false
+77|        if (t - hit > 3_000_000_000L) { impact = null; quiet = null; count = 0; return false }
+78|        if (abs(magnitude - 9.81) > 1) { quiet = null; count = 0; return false }
+79|        if (quiet == null) quiet = t
+80|        count++
+81|        if (count >= 6 && t - quiet!! >= 1_000_000_000) { reset(); return true }
+82|        return false
+83|    }
+84|}
+85|class DemoReplay(private val startMs: Long) {
+86|    private var index = 0
+87|    val finished get() = index > 16
+88|    fun due(nowMs: Long): List<PhoneSensorPacket> {
+89|        val result = mutableListOf<PhoneSensorPacket>()
+90|        while (!finished && nowMs >= startMs && nowMs - startMs >= index * 100L) {
+91|            result += PhoneSensorPacket((startMs + index * 100L) * 1_000_000, 0,
+92|                0f, 0f, if (index == 2) 30f else 9.81f)
+93|            index++
+94|        }
+95|        return result
+96|    }
+97|}
+98|class LocalDemoSink : AlertSink {
+99|    var fail = false
+100|    private val received = ArrayDeque<Alert>()
+101|    override fun send(alert: Alert) {
+102|        if (fail) error("Lỗi mô phỏng")
+103|        received.addLast(alert)
+104|        while (received.size > 32) received.removeFirst()
+105|    }
+106|    fun alerts() = received.toList()
+107|}
+108|class DemoSession(clock: MonotonicClock, val sink: LocalDemoSink = LocalDemoSink()) {
+109|    private val core = AlertCore(clock, sink)
+110|    private val detector = DemoDetector()
+111|    fun resetDetection() = detector.reset()
+112|    fun accept(packet: PhoneSensorPacket) {
+113|        if (core.snapshot().state == State.MONITORING && detector.accept(packet)) {
+114|            core.suspected(); core.evidenceConfirmed()
+115|        }
+116|    }
+117|    fun snapshot() = core.snapshot()
+118|    fun events() = core.events()
+119|    fun tick() = core.tick()
+120|    fun safe() { core.safe(); detector.reset() }
+121|    fun needHelp() { core.needHelp(); detector.reset() }
+122|    fun complete() { core.complete(); detector.reset() }
+123|}
+124|class SosHold {
+125|    private var started: Long? = null
+126|    fun start(nowMs: Long) { started = nowMs }
+127|    fun cancel() { started = null }
+128|    fun ready(nowMs: Long): Boolean {
+129|        val start = started ?: return false
+130|        if (nowMs >= start && nowMs - start >= 2000) { cancel(); return true }
+131|        return false
+132|    }
+133|}
+134|
+135|/** Shared by the Android collector and offline pipeline tests. */
+136|class PhoneInputPipeline(private val onPacket: (PhoneSensorPacket?) -> Unit) {
+137|    private val normalizer = PhoneNormalizer()
+138|    fun clear() = normalizer.clear()
+139|    fun latest(nowNs: Long, wallMs: Long) = normalizer.packet(nowNs, wallMs)
+140|    fun update(kind: SensorKind, ns: Long, values: FloatArray, nowNs: Long, wallMs: Long) {
+141|        normalizer.update(kind, ns, values)
+142|        if (kind == SensorKind.ACCEL) onPacket(latest(nowNs, wallMs))
+143|    }
+144|}
+145|
+146|/** Input and pause policy shared with the process-scoped controller. */
+147|class DemoInputAdapter(
+148|    private val session: DemoSession,
+149|    private val phoneOnly: () -> Boolean,
+150|    private val display: (PhoneSensorPacket?) -> Unit
+151|) {
+152|    fun acceptPhone(packet: PhoneSensorPacket?) {
+153|        if (!phoneOnly()) return
+154|        display(packet)
+155|        if (packet != null) session.accept(packet) else session.resetDetection()
+156|    }
+157|    fun acceptReplay(packet: PhoneSensorPacket) { display(packet); session.accept(packet) }
+158|    fun paused() {
+159|        if (phoneOnly()) { display(null); session.resetDetection() }
+160|    }
+161|}
+
+FILE android/app/src/main/java/vn/nckh27pa/fallsafe/DemoApplication.kt
+1|package vn.nckh27pa.fallsafe
+2|
+3|import android.app.Application
+4|import android.os.Handler
+5|import android.os.Looper
+6|import android.os.SystemClock
+7|import androidx.compose.runtime.getValue
+8|import androidx.compose.runtime.mutableStateOf
+9|import androidx.compose.runtime.setValue
+10|import core.MonotonicClock
+11|import core.State
+12|
+13|/** Process-scoped session survives Activity recreation. No foreground service. */
+14|class DemoApplication : Application() {
+15|    lateinit var controller: DemoController; private set
+16|    override fun onCreate() { super.onCreate(); controller = DemoController() }
+17|}
+18|class DemoController {
+19|    var foreground by mutableStateOf(false)
+20|    val session = DemoSession(MonotonicClock { SystemClock.elapsedRealtime() })
+21|    var snapshot by mutableStateOf(session.snapshot()); private set
+22|    var events by mutableStateOf(session.events()); private set
+23|    var source by mutableStateOf("PHONE_ONLY • cảm biến thật"); private set
+24|    var packet by mutableStateOf<PhoneSensorPacket?>(null); private set
+25|    var replaying by mutableStateOf(false); private set
+26|    var fail by mutableStateOf(false); private set
+27|    private val input = DemoInputAdapter(session, { source.startsWith("PHONE_ONLY") }, { packet = it })
+28|    private var replay: DemoReplay? = null
+29|    private val handler = Handler(Looper.getMainLooper())
+30|    private val tick = object : Runnable {
+31|        override fun run() {
+32|            val now = SystemClock.elapsedRealtime()
+33|            replay?.let { r ->
+34|                r.due(now).forEach(input::acceptReplay)
+35|                if (r.finished) { replay = null; replaying = false }
+36|            }
+37|            session.tick()
+38|            refresh()
+39|            if (replay != null || snapshot.state == State.VERIFYING) handler.postDelayed(this, 50)
+40|        }
+41|    }
+42|    fun refresh() { snapshot = session.snapshot(); events = session.events() }
+43|    private fun schedule() { handler.removeCallbacks(tick); handler.post(tick) }
+44|    fun acceptPhone(p: PhoneSensorPacket?) {
+45|        if (!source.startsWith("PHONE_ONLY")) return
+46|        input.acceptPhone(p)
+47|        refresh()
+48|        if (snapshot.state == State.VERIFYING) schedule()
+49|    }
+50|    fun displayPhone(p: PhoneSensorPacket?) {
+51|        if (source.startsWith("PHONE_ONLY")) packet = p
+52|    }
+53|    fun runReplay() {
+54|        if (snapshot.state != State.MONITORING || replaying) return
+55|        source = "MÔ PHỎNG • dữ liệu giả"
+56|        session.resetDetection()
+57|        packet = null
+58|        replay = DemoReplay(SystemClock.elapsedRealtime())
+59|        replaying = true
+60|        schedule()
+61|    }
+62|    fun usePhone() {
+63|        if (snapshot.state != State.MONITORING) return
+64|        replay = null; replaying = false; packet = null
+65|        source = "PHONE_ONLY • cảm biến thật"
+66|        session.resetDetection()
+67|    }
+68|    fun safe() { session.safe(); refresh() }
+69|    fun sos() { if (foreground) help() }
+70|    fun help() { session.needHelp(); refresh() }
+71|    fun complete() { replay = null; replaying = false; session.complete(); refresh() }
+72|    fun setFailure(value: Boolean) { fail = value; session.sink.fail = value }
+73|    fun paused() { input.paused(); refresh() }
+74|    fun resumed() { session.tick(); refresh(); schedule() }
+75|}
+
+FILE android/app/src/main/java/vn/nckh27pa/fallsafe/PhoneSensorCollector.kt
+1|package vn.nckh27pa.fallsafe
+2|
+3|import android.content.Context
+4|import android.hardware.Sensor
+5|import android.hardware.SensorEvent
+6|import android.hardware.SensorEventListener
+7|import android.hardware.SensorManager
+8|import android.os.Handler
+9|import android.os.Looper
+10|import android.os.SystemClock
+11|
+12|/** Activity starts/stops collection; all callbacks are confined to main looper. */
+13|class PhoneSensorCollector(context: Context, private val onPacket: (PhoneSensorPacket?) -> Unit) : SensorEventListener {
+14|    private val manager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+15|    private val pipeline = PhoneInputPipeline(onPacket)
+16|    private val kinds = mapOf(
+17|        Sensor.TYPE_ACCELEROMETER to SensorKind.ACCEL,
+18|        Sensor.TYPE_LINEAR_ACCELERATION to SensorKind.LINEAR,
+19|        Sensor.TYPE_GYROSCOPE to SensorKind.GYRO,
+20|        Sensor.TYPE_ROTATION_VECTOR to SensorKind.ORIENTATION,
+21|        Sensor.TYPE_PRESSURE to SensorKind.PRESSURE
+22|    )
+23|    var activeSensors: Set<SensorKind> = emptySet(); private set
+24|    private var running = false
+25|    fun start() {
+26|        stop()
+27|        running = true
+28|        activeSensors = kinds.mapNotNull { (type, kind) ->
+29|            val sensor = manager.getDefaultSensor(type) ?: return@mapNotNull null
+30|            val registered = try {
+31|                manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME, Handler(Looper.getMainLooper()))
+32|            } catch (_: SecurityException) { false }
+33|            if (registered) kind else null
+34|        }.toSet()
+35|    }
+36|    fun stop() {
+37|        running = false
+38|        manager.unregisterListener(this)
+39|        pipeline.clear()
+40|        activeSensors = emptySet()
+41|    }
+42|    fun latest(): PhoneSensorPacket? = pipeline.latest(SystemClock.elapsedRealtimeNanos(), System.currentTimeMillis())
+43|    override fun onSensorChanged(event: SensorEvent) {
+44|        if (!running) return
+45|        val kind = kinds[event.sensor.type] ?: return
+46|        if (kind == SensorKind.ORIENTATION) {
+47|            if (event.values.size < 3 || event.values.any { !it.isFinite() }) {
+48|                update(kind, event.timestamp, floatArrayOf(Float.NaN)); return
+49|            }
+50|            val rotation = FloatArray(9)
+51|            val orientation = FloatArray(3)
+52|            SensorManager.getRotationMatrixFromVector(rotation, event.values)
+53|            SensorManager.getOrientation(rotation, orientation)
+54|            update(kind, event.timestamp, floatArrayOf(
+55|                Math.toDegrees(orientation[1].toDouble()).toFloat(),
+56|                Math.toDegrees(orientation[2].toDouble()).toFloat(),
+57|                Math.toDegrees(orientation[0].toDouble()).toFloat()
+58|            ))
+59|        } else update(kind, event.timestamp, event.values)
+60|    }
+61|    private fun update(kind: SensorKind, ns: Long, values: FloatArray) {
+62|        pipeline.update(kind, ns, values, SystemClock.elapsedRealtimeNanos(), System.currentTimeMillis())
+63|    }
+64|    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+65|}
+
+FILE android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
+1|package vn.nckh27pa.fallsafe
+2|
+3|import android.os.Bundle
+4|import android.os.Handler
+5|import android.os.Looper
+6|import android.os.SystemClock
+7|import androidx.activity.ComponentActivity
+8|import androidx.activity.compose.setContent
+9|import androidx.compose.foundation.background
+10|import androidx.compose.foundation.gestures.detectTapGestures
+11|import androidx.compose.foundation.isSystemInDarkTheme
+12|import androidx.compose.foundation.layout.*
+13|import androidx.compose.foundation.rememberScrollState
+14|import androidx.compose.foundation.verticalScroll
+15|import androidx.compose.material3.*
+16|import androidx.compose.runtime.*
+17|import androidx.compose.runtime.saveable.rememberSaveable
+18|import androidx.compose.ui.Modifier
+19|import androidx.compose.ui.input.pointer.pointerInput
+20|import androidx.compose.ui.semantics.*
+21|import androidx.compose.ui.unit.dp
+22|import androidx.compose.ui.unit.sp
+23|import core.State
+24|import core.Status
+25|
+26|class MainActivity : ComponentActivity() {
+27|    private lateinit var collector: PhoneSensorCollector
+28|    private val controller get() = (application as DemoApplication).controller
+29|    private val handler = Handler(Looper.getMainLooper())
+30|    private var sensorSummary by mutableStateOf("Chưa thu cảm biến")
+31|    private val poll = object : Runnable {
+32|        override fun run() {
+33|            controller.displayPhone(collector.latest())
+34|            handler.postDelayed(this, 250)
+35|        }
+36|    }
+37|    override fun onCreate(savedInstanceState: Bundle?) {
+38|        super.onCreate(savedInstanceState)
+39|        collector = PhoneSensorCollector(this, controller::acceptPhone)
+40|        setContent {
+41|            MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
+42|                DemoScreen(controller, sensorSummary)
+43|            }
+44|        }
+45|    }
+46|    override fun onResume() {
+47|        super.onResume()
+48|        controller.foreground = true
+49|        collector.start()
+50|        sensorSummary = collector.activeSensors.joinToString().ifEmpty { "Không có cảm biến khả dụng" }
+51|        controller.resumed()
+52|        handler.post(poll)
+53|    }
+54|    override fun onPause() {
+55|        controller.foreground = false
+56|        collector.stop()
+57|        handler.removeCallbacks(poll)
+58|        controller.paused()
+59|        super.onPause()
+60|    }
+61|}
+62|
+63|@Composable
+64|private fun DemoScreen(c: DemoController, sensorSummary: String) {
+65|    var tab by rememberSaveable { mutableIntStateOf(0) }
+66|    val tabs = listOf("Trang chủ", "Sự kiện", "Người thân", "Cài đặt")
+67|    Scaffold(bottomBar = {
+68|        NavigationBar {
+69|            tabs.forEachIndexed { i, title ->
+70|                NavigationBarItem(selected = tab == i, onClick = { tab = i },
+71|                    icon = { Text(listOf("⌂", "≡", "♡", "⚙")[i]) }, label = { Text(title) })
+72|            }
+73|        }
+74|    }) { inset ->
+75|        Column(Modifier.fillMaxSize().padding(inset).verticalScroll(rememberScrollState())
+76|            .padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+77|            Text("THỬ NGHIỆM — không gửi ra ngoài", fontSize = 22.sp,
+78|                color = MaterialTheme.colorScheme.error)
+79|            Text(c.source, style = MaterialTheme.typography.titleMedium)
+80|            // Verification remains accessible from every tab, with no blocking modal.
+81|            if (c.snapshot.state == State.VERIFYING) {
+82|                Text("! Bạn có ổn không?", style = MaterialTheme.typography.headlineMedium)
+83|                Text("Còn ${((c.snapshot.remainingMs ?: 0) + 999) / 1000} giây",
+84|                    fontSize = 32.sp, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+85|                Action("TÔI VẪN ỔN", c::safe)
+86|                Action("CẦN GIÚP ĐỠ", c::help)
+87|            }
+88|            when (tab) {
+89|                0 -> {
+90|                    Text(stateLabel(c), style = MaterialTheme.typography.headlineSmall)
+91|                    Text("BLE: chưa tích hợp • PHONE_ONLY vẫn dùng được")
+92|                    Text(if (c.packet == null) "! Thiếu hoặc cũ dữ liệu; không thể đánh giá nguy cơ."
+93|                        else "Có mẫu gia tốc • chưa thể kết luận an toàn.")
+94|                    Text("Mang theo người: UNKNOWN — chưa có thuật toán xác định.")
+95|                    Text("Vị trí: chưa lấy vị trí; không chờ GPS.")
+96|                    if (c.foreground) SosButton(c::sos)
+97|                    Action("Chạy dữ liệu mô phỏng", c::runReplay,
+98|                        c.snapshot.state == State.MONITORING && !c.replaying)
+99|                    if (c.replaying) Text("Đang cấp chuỗi va đập rồi yên mô phỏng…")
+100|                    Action("Dùng cảm biến điện thoại", c::usePhone, c.snapshot.state == State.MONITORING)
+101|                    if (c.snapshot.state == State.ALERTING || c.snapshot.state == State.AWAITING_HELP) {
+102|                        Text("Người nhận: Người thân mô phỏng 1 • kênh: bộ nhớ tại máy")
+103|                        Text(if (c.snapshot.status == Status.SENT) "Đã nhận GIẢ tại sink; không phải người thật xác nhận."
+104|                            else "Gửi GIẢ thất bại; không tự gửi lại.")
+105|                        Action("Hoàn tất sự kiện để thử lại", c::complete)
+106|                    }
+107|                }
+108|                1 -> {
+109|                    Text("Sự kiện thử nghiệm", style = MaterialTheme.typography.headlineSmall)
+110|                    Text("32 chuyển trạng thái gần nhất trong phiên; ID không lưu qua khởi động lại. Độ tin cậy: chưa đánh giá.")
+111|                    if (c.events.isEmpty()) Text("Chưa có sự kiện.")
+112|                    c.events.asReversed().forEach {
+113|                        Text("#${it.eventId} • ${it.state}\n${statusLabel(it.status)}")
+114|                    }
+115|                }
+116|                2 -> {
+117|                    Text("Người thân mô phỏng", style = MaterialTheme.typography.headlineSmall)
+118|                    Text("Ưu tiên 1 • Người thân mô phỏng 1\nKênh nhận: bộ nhớ tại máy; không số điện thoại, không danh bạ thật.")
+119|                    Text("Sink đã nhận ${c.session.sink.alerts().size} cảnh báo giả (tối đa 32).")
+120|                    Text("Không SMS, cuộc gọi hoặc liên lạc mạng.")
+121|                }
+122|                3 -> {
+123|                    Text("Kiểm tra hệ thống", style = MaterialTheme.typography.headlineSmall)
+124|                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+125|                        Text("Giả lập lỗi gửi", Modifier.weight(1f), fontSize = 20.sp)
+126|                        Switch(c.fail, c::setFailure, Modifier.semantics { contentDescription = "Giả lập lỗi gửi" })
+127|                    }
+128|                    Text("Đã đăng ký: $sensorSummary")
+129|                    val p = c.packet
+130|                    Text("Gia tốc m/s²: ${p?.let { "${it.accelXMs2}, ${it.accelYMs2}, ${it.accelZMs2}" } ?: "không có / quá 500 ms"}")
+131|                    Text("Gyro °/s: ${p?.gyroXDps ?: "—"}, ${p?.gyroYDps ?: "—"}, ${p?.gyroZDps ?: "—"}")
+132|                    Text("Pitch/roll/yaw °: ${p?.pitchDeg ?: "—"}, ${p?.rollDeg ?: "—"}, ${p?.yawDeg ?: "—"}")
+133|                    Text("Áp suất Pa: ${p?.pressurePa ?: "—"}; gia tốc tuyến tính: ${p?.linearAccelXMs2 ?: "—"}, ${p?.linearAccelYMs2 ?: "—"}, ${p?.linearAccelZMs2 ?: "—"}")
+134|                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, độ cao, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
+135|                    Text("Luật DEMO: va đập ≥25 m/s² rồi yên ≥1 giây trong cửa sổ 3 giây; chưa kiểm chứng độ chính xác phát hiện ngã.")
+136|                    Text("Thu cảm biến khi màn hình app hoạt động. Countdown tiếp tục khi tạm rời app nếu process còn sống; máy ngủ có thể trễ. Không có foreground service, không phục hồi sau process chết.")
+137|                }
+138|            }
+139|        }
+140|    }
+141|}
+142|@Composable
+143|private fun Action(label: String, action: () -> Unit, enabled: Boolean = true) {
+144|    Button(onClick = action, enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+145|        Text(label, fontSize = 20.sp)
+146|    }
+147|}
+148|@Composable
+149|private fun SosButton(onSos: () -> Unit) {
+150|    val currentAction by rememberUpdatedState(onSos)
+151|    val hold = remember { SosHold() }
+152|    val handler = remember { Handler(Looper.getMainLooper()) }
+153|    var holding by remember { mutableStateOf(false) }
+154|    var accessibleArmed by remember { mutableStateOf(false) }
+155|    val fire = remember { Runnable {
+156|        if (hold.ready(SystemClock.elapsedRealtime())) {
+157|            holding = false; accessibleArmed = false; currentAction()
+158|        }
+159|    } }
+160|    DisposableEffect(Unit) {
+161|        onDispose { handler.removeCallbacks(fire); hold.cancel() }
+162|    }
+163|    Box(Modifier.fillMaxWidth().heightIn(min = 80.dp)
+164|        .background(MaterialTheme.colorScheme.errorContainer)
+165|        .semantics {
+166|            role = Role.Button
+167|            contentDescription = "SOS giữ 2 giây. Với TalkBack, kích hoạt để bắt đầu, kích hoạt lần nữa để hủy."
+168|            onClick {
+169|                if (accessibleArmed) { hold.cancel(); handler.removeCallbacks(fire); accessibleArmed = false; holding = false }
+170|                else { accessibleArmed = true; holding = true; hold.start(SystemClock.elapsedRealtime()); handler.postDelayed(fire, 2000) }
+171|                true
+172|            }
+173|        }
+174|        .pointerInput(Unit) {
+175|            detectTapGestures(onPress = {
+176|                holding = true
+177|                hold.start(SystemClock.elapsedRealtime())
+178|                handler.postDelayed(fire, 2000)
+179|                try { tryAwaitRelease() } finally {
+180|                    handler.removeCallbacks(fire); hold.cancel(); holding = false
+181|                }
+182|            })
+183|        }.padding(20.dp)) {
+184|        Text(if (holding) "Đang giữ SOS…" else "SOS — GIỮ 2 GIÂY", fontSize = 24.sp,
+185|            color = MaterialTheme.colorScheme.onErrorContainer)
+186|    }
+187|}
+188|private fun statusLabel(status: Status): String = when (status) {
+189|    Status.NOT_REQUIRED -> "Chưa yêu cầu gửi"
+190|    Status.COUNTDOWN -> "Đang đếm ngược"
+191|    Status.SENDING -> "Đang gửi GIẢ"
+192|    Status.SENT -> "Đã gửi THỬ NGHIỆM"
+193|    Status.FAILED -> "Gửi GIẢ thất bại"
+194|    Status.ACKNOWLEDGED -> "Đã hoàn tất tại máy (không phải biên nhận)"
+195|}
+196|private fun stateLabel(c: DemoController): String = when (c.snapshot.state) {
+197|    State.MONITORING -> if (c.snapshot.status == Status.ACKNOWLEDGED) "✓ Đã hoàn tất sự kiện" else "○ Theo dõi thử nghiệm"
+198|    State.SUSPECTED -> "! Cần chú ý"
+199|    State.VERIFYING -> "! Đang xác minh"
+200|    State.ALERTING, State.AWAITING_HELP -> statusLabel(c.snapshot.status)
+201|}
+
+FILE android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt
+1|package vn.nckh27pa.fallsafe
+2|
+3|import core.*
+4|import org.junit.Assert.*
+5|import org.junit.Test
+6|
+7|class DemoTests {
+8|    @Test fun normalizationAndMissingValues() {
+9|        val n = PhoneNormalizer()
+10|        assertNull(n.packet(0, 0))
+11|        n.update(SensorKind.ACCEL, 0, floatArrayOf(0f, 0f, 9.81f))
+12|        var p = n.packet(0, 123)!!
+13|        assertNull(p.gyroXDps)
+14|        assertEquals("UNKNOWN", p.phoneMotionState)
+15|        assertEquals(0, p.phonePlacementConfidence)
+16|        assertEquals(123L, p.wallClockTimestampMs)
+17|        n.update(SensorKind.GYRO, 0, floatArrayOf(Math.PI.toFloat(), 0f, 0f))
+18|        n.update(SensorKind.PRESSURE, 0, floatArrayOf(1013.25f))
+19|        p = n.packet(0, 0)!!
+20|        assertEquals(180f, p.gyroXDps!!, 0.001f)
+21|        assertEquals(101325f, p.pressurePa!!, 0.1f)
+22|        assertNull(p.stepCount)
+23|        assertNull(p.altitudeDeltaM)
+24|        n.update(SensorKind.ACCEL, 600_000_000, floatArrayOf(0f, 0f, 9.81f))
+25|        assertNull(n.packet(600_000_000, 0)!!.pressurePa)
+26|        assertNull(n.packet(1_200_000_000, 0))
+27|    }
+28|    @Test fun invalidAndFutureSamplesNeverBecomeMeasurements() {
+29|        val n = PhoneNormalizer()
+30|        n.update(SensorKind.ACCEL, 10, floatArrayOf(Float.NaN, 0f, 0f))
+31|        assertNull(n.packet(10, 0))
+32|        n.update(SensorKind.ACCEL, 20, floatArrayOf(0f, 0f, 9.81f))
+33|        assertNull(n.packet(19, 0))
+34|        n.update(SensorKind.GYRO, 20, floatArrayOf(Float.POSITIVE_INFINITY, 0f, 0f))
+35|        assertNull(n.packet(20, 0)!!.gyroXDps)
+36|        n.update(SensorKind.ACCEL, 21, floatArrayOf(1f))
+37|        assertNull(n.packet(21, 0))
+38|    }
+39|    @Test fun detectorNeedsContinuousTimedEvidence() {
+40|        val d = DemoDetector()
+41|        assertFalse(d.accept(sample(0, 30f)))
+42|        assertFalse(d.accept(sample(100, 9.81f)))
+43|        assertFalse(d.accept(sample(2000, 9.81f))) // gap cannot prove quiet
+44|        assertFalse(d.accept(sample(2100, 9.81f)))
+45|        d.reset()
+46|        assertFalse(d.accept(sample(0, 30f)))
+47|        assertFalse(d.accept(sample(100, 9.81f)))
+48|        assertFalse(d.accept(sample(100, 9.81f))) // duplicate resets
+49|        assertFalse(d.accept(sample(200, 9.81f)))
+50|        d.reset()
+51|        repeat(30) { assertFalse(d.accept(sample(it * 100L, 9.81f))) }
+52|        assertFalse(d.accept(sample(4000, Float.NaN)))
+53|    }
+54|    @Test fun replayUsesSamePipelineAndDeadline() {
+55|        var now = 0L
+56|        val sink = LocalDemoSink()
+57|        val session = DemoSession(MonotonicClock { now }, sink)
+58|        val replay = DemoReplay(0)
+59|        assertTrue(replay.due(0).isNotEmpty())
+60|        // Fresh replay: consume each sample exactly once at its scheduled time.
+61|        val r = DemoReplay(0)
+62|        for (t in 0L..1600L step 100) {
+63|            now = t
+64|            r.due(t).forEach { session.accept(it) }
+65|        }
+66|        assertTrue(r.finished)
+67|        assertTrue(r.due(5000).isEmpty())
+68|        assertEquals(State.VERIFYING, session.snapshot().state)
+69|        val remaining = session.snapshot().remainingMs!!
+70|        now += remaining - 1
+71|        session.tick()
+72|        assertEquals(Status.COUNTDOWN, session.snapshot().status)
+73|        now++
+74|        session.tick()
+75|        assertEquals(Response.NO_RESPONSE, session.snapshot().response)
+76|        assertEquals(Status.SENT, session.snapshot().status)
+77|        assertEquals(1, sink.alerts().size)
+78|        session.tick()
+79|        assertEquals(1, sink.alerts().size)
+80|    }
+81|    @Test fun safeFailureCompleteAndBoundedHistory() {
+82|        var now = 0L
+83|        val sink = LocalDemoSink()
+84|        val s = DemoSession(MonotonicClock { now }, sink)
+85|        DemoReplay(0).due(1600).forEach { s.accept(it) }
+86|        s.safe()
+87|        now = 20000
+88|        s.tick()
+89|        assertTrue(sink.alerts().isEmpty())
+90|        sink.fail = true
+91|        s.needHelp()
+92|        assertEquals(Status.FAILED, s.snapshot().status)
+93|        s.complete()
+94|        sink.fail = false
+95|        repeat(40) { s.needHelp(); s.complete() }
+96|        assertEquals(32, sink.alerts().size)
+97|        assertTrue(s.events().size <= 32)
+98|        assertEquals(Status.ACKNOWLEDGED, s.snapshot().status)
+99|    }
+100|    @Test fun sosRequiresTwoSecondsAndCancels() {
+101|        val h = SosHold()
+102|        h.start(100)
+103|        assertFalse(h.ready(2099))
+104|        assertTrue(h.ready(2100))
+105|        assertFalse(h.ready(2200))
+106|        h.start(3000)
+107|        h.cancel()
+108|        assertFalse(h.ready(6000))
+109|    }
+110|    @Test fun optionalNormalizationAndFreshnessBoundary() {
+111|        val n = PhoneNormalizer()
+112|        n.update(SensorKind.ACCEL, 0, floatArrayOf(1f, 2f, 3f))
+113|        n.update(SensorKind.LINEAR, 0, floatArrayOf(4f, 5f, 6f))
+114|        n.update(SensorKind.ORIENTATION, 0, floatArrayOf(10f, 20f, 30f))
+115|        val p = n.packet(500_000_000, 0)!!
+116|        assertEquals(6f, p.linearAccelZMs2!!, 0f)
+117|        assertEquals(10f, p.pitchDeg!!, 0f)
+118|        assertEquals(30f, p.yawDeg!!, 0f)
+119|        assertNull(n.packet(500_000_001, 0))
+120|        n.clear()
+121|        assertNull(n.packet(0, 0))
+122|    }
+123|    @Test fun motionAndExpiredWindowCannotConfirm() {
+124|        val d = DemoDetector()
+125|        assertFalse(d.accept(sample(0, 30f)))
+126|        for (t in 100L..4000L step 100) {
+127|            assertFalse(d.accept(sample(t, if (t < 3000) 15f else 9.81f)))
+128|        }
+129|        d.reset()
+130|        assertFalse(d.accept(sample(0, 30f)))
+131|        for (t in 100L..1000L step 100) assertFalse(d.accept(sample(t, 9.81f)))
+132|        assertFalse(d.accept(sample(1050, Float.NaN)))
+133|        for (t in 1100L..2200L step 100) assertFalse(d.accept(sample(t, 9.81f)))
+134|    }
+135|    @Test fun helpDuringCountdownAndSafeAtDeadline() {
+136|        var now = 0L
+137|        val s = DemoSession(MonotonicClock { now })
+138|        DemoReplay(0).due(1600).forEach(s::accept)
+139|        s.needHelp()
+140|        assertEquals(Response.NEED_HELP, s.snapshot().response)
+141|        assertEquals(1, s.sink.alerts().size)
+142|        s.complete()
+143|        DemoReplay(2000).due(3600).forEach(s::accept)
+144|        now = 10000
+145|        s.safe()
+146|        assertEquals(Response.NO_RESPONSE, s.snapshot().response)
+147|        assertEquals(Status.SENT, s.snapshot().status)
+148|        assertEquals(2, s.sink.alerts().size)
+149|    }
+150|    private class PipelineFixture {
+151|        var now = 0L
+152|        var phoneOnly = true
+153|        var displayed: PhoneSensorPacket? = null
+154|        val session = DemoSession(MonotonicClock { now })
+155|        val adapter = DemoInputAdapter(session, { phoneOnly }, { displayed = it })
+156|        val pipeline = PhoneInputPipeline(adapter::acceptPhone)
+157|        fun sample(ms: Long, z: Float, kind: SensorKind = SensorKind.ACCEL) {
+158|            now = ms
+159|            pipeline.update(kind, ms * 1_000_000, floatArrayOf(0f, 0f, z), ms * 1_000_000, ms)
+160|        }
+161|        fun pause() { pipeline.clear(); adapter.paused() }
+162|        fun quiet() { for (t in 100L..1000L step 100) sample(t, 9.81f) }
+163|    }
+164|    @Test fun replayImpactSurvivesActivityPauseAndSendsAtDeadline() {
+165|        val f = PipelineFixture()
+166|        f.phoneOnly = false
+167|        val replay = DemoReplay(0)
+168|        for (t in 0L..1600L step 100) {
+169|            f.now = t
+170|            replay.due(t).forEach(f.adapter::acceptReplay)
+171|            if (t == 500L) f.pause()
+172|        }
+173|        assertTrue(replay.finished)
+174|        assertEquals(State.VERIFYING, f.session.snapshot().state)
+175|        val remaining = f.session.snapshot().remainingMs!!
+176|        f.pause()
+177|        assertEquals(remaining, f.session.snapshot().remainingMs)
+178|        f.now += remaining
+179|        f.session.tick()
+180|        assertEquals(Status.SENT, f.session.snapshot().status)
+181|        assertEquals(1, f.session.sink.alerts().size)
+182|    }
+183|    @Test fun invalidAccelThroughNormalizerBreaksQuietWindow() {
+184|        val f = PipelineFixture()
+185|        f.sample(0, 30f)
+186|        f.quiet()
+187|        f.sample(1050, Float.NaN)
+188|        assertNull(f.pipeline.latest(1_050_000_000, 1050))
+189|        for (t in 1100L..2200L step 100) f.sample(t, 9.81f)
+190|        assertEquals(State.MONITORING, f.session.snapshot().state)
+191|        assertNull(f.session.snapshot().remainingMs)
+192|        assertTrue(f.session.sink.alerts().isEmpty())
+193|        // Recovery still accepts a fresh, complete sequence.
+194|        f.sample(2300, 30f)
+195|        for (t in 2400L..3400L step 100) f.sample(t, 9.81f)
+196|        assertEquals(State.VERIFYING, f.session.snapshot().state)
+197|    }
+198|    @Test fun invalidOptionalSensorsDoNotBreakAccelEvidence() {
+199|        for (kind in SensorKind.values().filter { it != SensorKind.ACCEL }) {
+200|            val f = PipelineFixture()
+201|            f.sample(0, 30f)
+202|            f.quiet()
+203|            f.sample(1050, Float.NaN, kind)
+204|            assertNotNull(f.pipeline.latest(1_050_000_000, 1050))
+205|            f.sample(1100, 9.81f)
+206|            assertEquals(kind.toString(), State.VERIFYING, f.session.snapshot().state)
+207|        }
+208|    }
+209|    @Test fun phonePauseClearsEvidenceAndDisplayButPreservesDeadline() {
+210|        val f = PipelineFixture()
+211|        f.sample(0, 30f)
+212|        f.quiet()
+213|        f.pause()
+214|        assertNull(f.displayed)
+215|        assertNull(f.pipeline.latest(1_000_000_000, 1000))
+216|        f.sample(1100, 9.81f)
+217|        assertEquals(State.MONITORING, f.session.snapshot().state)
+218|        f.sample(1200, 30f)
+219|        for (t in 1300L..2300L step 100) f.sample(t, 9.81f)
+220|        val remaining = f.session.snapshot().remainingMs!!
+221|        f.pause()
+222|        assertEquals(remaining, f.session.snapshot().remainingMs)
+223|        f.now += remaining
+224|        f.session.tick()
+225|        assertEquals(Status.SENT, f.session.snapshot().status)
+226|    }
+227|    private fun sample(ms: Long, z: Float) = PhoneSensorPacket(
+228|        timestampNs = ms * 1_000_000, wallClockTimestampMs = 0,
+229|        accelXMs2 = 0f, accelYMs2 = 0f, accelZMs2 = z
+230|    )
+231|}
+
+FILE android/core/src/Core.kt
+1|package core
+2|
+3|/** Nondecreasing elapsed milliseconds, never civil/wall time. */
+4|fun interface MonotonicClock { fun nowMs(): Long }
+5|
+6|/** Synchronous acceptance: return means SENT; throw Exception means FAILED. */
+7|fun interface AlertSink { fun send(alert: Alert) }
+8|
+9|enum class State { MONITORING, SUSPECTED, VERIFYING, ALERTING, AWAITING_HELP }
+10|enum class Response { UNKNOWN, SAFE, NEED_HELP, NO_RESPONSE }
+11|enum class Status { NOT_REQUIRED, COUNTDOWN, SENDING, SENT, FAILED, ACKNOWLEDGED }
+12|data class Alert(
+13|    val eventId: Long,
+14|    val response: Response,
+15|    val locationMessage: String = "chưa xác định được vị trí"
+16|)
+17|data class Snapshot(
+18|    val state: State,
+19|    val eventId: Long,
+20|    val response: Response,
+21|    val status: Status,
+22|    val remainingMs: Long?
+23|)
+24|data class RecordedEvent(val eventId: Long, val state: State, val status: Status)
+25|
+26|/**
+27| * Confined to the creating thread, including reads and sink callbacks.
+28| * Host must call tick at the deadline; this core does not schedule background work.
+29| * Calls reentering from the synchronous sink cannot finish or resend the active event.
+30| */
+31|class AlertCore(
+32|    private val clock: MonotonicClock,
+33|    private val sink: AlertSink,
+34|    private val timeoutMs: Long = 10_000,
+35|    private val logCapacity: Int = 32
+36|) {
+37|    init {
+38|        require(timeoutMs > 0) { "timeoutMs must be positive" }
+39|        require(logCapacity > 0) { "logCapacity must be positive" }
+40|    }
+41|
+42|    private val owner = Thread.currentThread()
+43|    private var state = State.MONITORING
+44|    private var eventId = 0L
+45|    private var response = Response.UNKNOWN
+46|    private var status = Status.NOT_REQUIRED
+47|    private var started = 0L
+48|    private var sending = false
+49|    private val log = ArrayDeque<RecordedEvent>()
+50|
+51|    private fun owned() {
+52|        check(Thread.currentThread() === owner) { "Call on owner thread" }
+53|    }
+54|
+55|    /** Display-only read; never sends an alert. */
+56|    fun snapshot(): Snapshot {
+57|        owned()
+58|        val remaining = if (state == State.VERIFYING)
+59|            (timeoutMs - (clock.nowMs() - started)).coerceAtLeast(0) else null
+60|        return Snapshot(state, eventId, response, status, remaining)
+61|    }
+62|
+63|    fun events(): List<RecordedEvent> {
+64|        owned()
+65|        return log.toList()
+66|    }
+67|
+68|    private fun record() {
+69|        log.addLast(RecordedEvent(eventId, state, status))
+70|        while (log.size > logCapacity) log.removeFirst()
+71|    }
+72|
+73|    fun suspected() {
+74|        owned()
+75|        if (state == State.MONITORING) {
+76|            eventId++
+77|            response = Response.UNKNOWN
+78|            status = Status.NOT_REQUIRED
+79|            state = State.SUSPECTED
+80|            record()
+81|        }
+82|    }
+83|
+84|    fun evidenceConfirmed() {
+85|        owned()
+86|        if (state == State.SUSPECTED) {
+87|            started = clock.nowMs()
+88|            state = State.VERIFYING
+89|            status = Status.COUNTDOWN
+90|            record()
+91|        }
+92|    }
+93|
+94|    fun riskCleared() {
+95|        owned()
+96|        if (state == State.SUSPECTED) {
+97|            state = State.MONITORING
+98|            record()
+99|        }
+100|    }
+101|
+102|    private fun dispatch(reason: Response) {
+103|        if (state == State.ALERTING || state == State.AWAITING_HELP) return
+104|        if (state == State.MONITORING) eventId++
+105|        response = reason
+106|        state = State.ALERTING
+107|        status = Status.SENDING
+108|        record()
+109|        // Set both state and guard before invoking external code.
+110|        sending = true
+111|        try {
+112|            sink.send(Alert(eventId, reason))
+113|            status = Status.SENT
+114|            state = State.AWAITING_HELP
+115|        } catch (_: Exception) {
+116|            // Never retain transport messages, which may contain private data.
+117|            status = Status.FAILED
+118|        } finally {
+119|            sending = false
+120|        }
+121|        record()
+122|    }
+123|
+124|    fun tick() {
+125|        owned()
+126|        if (state == State.VERIFYING && clock.nowMs() - started >= timeoutMs)
+127|            dispatch(Response.NO_RESPONSE)
+128|    }
+129|
+130|    fun safe() {
+131|        owned()
+132|        tick()
+133|        if (state == State.VERIFYING || state == State.SUSPECTED) {
+134|            response = Response.SAFE
+135|            status = Status.NOT_REQUIRED
+136|            state = State.MONITORING
+137|            record()
+138|        }
+139|    }
+140|
+141|    fun needHelp() {
+142|        owned()
+143|        dispatch(Response.NEED_HELP)
+144|    }
+145|
+146|    fun sos() {
+147|        owned()
+148|        dispatch(Response.NEED_HELP)
+149|    }
+150|
+151|    fun complete() {
+152|        owned()
+153|        if (!sending && (state == State.AWAITING_HELP || state == State.ALERTING)) {
+154|            state = State.MONITORING
+155|            status = Status.ACKNOWLEDGED
+156|            record()
+157|        }
+158|    }
+159|}
+
+FILE android/core/tests/CoreTests.kt
+1|package core
+2|
+3|class FakeClock(var time: Long = 0) : MonotonicClock { override fun nowMs() = time }
+4|fun main() {
+5|    var passed = 0
+6|    fun test(name: String, body: () -> Unit) { body(); println("PASS $name"); passed++ }
+7|    test("suspected, clear, confirmed and duplicate callbacks") {
+8|        val clock = FakeClock(); val c = AlertCore(clock, AlertSink {})
+9|        c.evidenceConfirmed(); check(c.snapshot().state == State.MONITORING)
+10|        c.suspected(); check(c.snapshot().state == State.SUSPECTED)
+11|        c.riskCleared(); check(c.snapshot().state == State.MONITORING)
+12|        c.suspected(); c.evidenceConfirmed(); check(c.snapshot().remainingMs == 10_000L)
+13|        clock.time = 9_999; c.suspected(); c.evidenceConfirmed(); c.riskCleared()
+14|        check(c.snapshot().state == State.VERIFYING); check(c.snapshot().remainingMs == 1L)
+15|    }
+16|    test("deadline 10s, no response, absent location, one send") {
+17|        val clock = FakeClock(500); val sent = mutableListOf<Alert>()
+18|        val c = AlertCore(clock, AlertSink { sent += it }); c.suspected(); c.evidenceConfirmed()
+19|        clock.time = 10_499; c.tick(); check(sent.isEmpty())
+20|        clock.time = 10_500; c.tick(); c.tick(); c.evidenceConfirmed(); c.suspected()
+21|        check(sent.size == 1); check(sent.single().response == Response.NO_RESPONSE)
+22|        check(sent.single().locationMessage == "chưa xác định được vị trí")
+23|        check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
+24|        check(c.events().map { it.state }.contains(State.ALERTING))
+25|    }
+26|    test("SAFE before deadline cancels; at and after deadline preserves alert") {
+27|        for (time in listOf(9_999L, 10_000L, 10_001L)) {
+28|            val clock = FakeClock(); val sent = mutableListOf<Alert>(); val c = AlertCore(clock, AlertSink { sent += it })
+29|            c.suspected(); c.evidenceConfirmed(); clock.time = time; c.safe()
+30|            if (time < 10_000) {
+31|                check(c.snapshot().state == State.MONITORING); check(c.snapshot().response == Response.SAFE)
+32|                clock.time = 20_000; c.tick(); check(sent.isEmpty())
+33|            } else {
+34|                check(sent.size == 1); c.safe(); check(c.snapshot().status == Status.SENT)
+35|                check(c.snapshot().response == Response.NO_RESPONSE)
+36|            }
+37|        }
+38|    }
+39|    test("immediate NEED_HELP and SOS, dedup, completion permits new event") {
+40|        for (action in listOf("help", "sos")) for (initial in 0..2) {
+41|            val sent = mutableListOf<Alert>(); val c = AlertCore(FakeClock(), AlertSink { sent += it })
+42|            if (initial >= 1) c.suspected(); if (initial == 2) c.evidenceConfirmed()
+43|            c.complete(); if (action == "help") c.needHelp() else c.sos()
+44|            check(sent.size == 1); check(sent.single().response == Response.NEED_HELP)
+45|            c.sos(); c.needHelp(); c.safe(); check(sent.size == 1)
+46|            c.complete(); check(c.snapshot().state == State.MONITORING)
+47|            check(c.snapshot().status == Status.ACKNOWLEDGED)
+48|            c.sos(); check(sent.size == 2); check(sent[0].eventId != sent[1].eventId)
+49|        }
+50|    }
+51|    test("sink failure stays FAILED; reentrant calls cannot send or complete") {
+52|        var calls = 0; lateinit var c: AlertCore
+53|        val during = mutableListOf<Snapshot>()
+54|        c = AlertCore(FakeClock(), AlertSink {
+55|            calls++; during += c.snapshot()
+56|            c.complete(); c.sos(); c.needHelp(); c.safe(); c.tick(); c.suspected(); c.evidenceConfirmed()
+57|            throw IllegalStateException("private transport details")
+58|        })
+59|        c.sos(); check(calls == 1); check(c.snapshot().status == Status.FAILED)
+60|        check(during.single().state == State.ALERTING)
+61|        check(during.single().status == Status.SENDING)
+62|        check(c.snapshot().state == State.ALERTING); c.sos(); check(calls == 1)
+63|        check(!c.events().toString().contains("private")); c.complete(); c.sos(); check(calls == 2)
+64|    }
+65|    test("invalid timeout and log capacity rejected") {
+66|        for (timeout in listOf(0L, -1L)) check(runCatching { AlertCore(FakeClock(), AlertSink {}, timeout) }.exceptionOrNull() is IllegalArgumentException)
+67|        for (capacity in listOf(0, -1)) check(runCatching { AlertCore(FakeClock(), AlertSink {}, logCapacity = capacity) }.exceptionOrNull() is IllegalArgumentException)
+68|    }
+69|    test("bounded sink and state history retain latest records; copies isolated") {
+70|        val sink = RecordingSink(2); val c = AlertCore(FakeClock(), sink, logCapacity = 3)
+71|        repeat(20) { c.sos(); c.complete() }
+72|        check(sink.alerts().map { it.eventId } == listOf(19L, 20L))
+73|        check(c.events().size == 3); check(c.events().last().status == Status.ACKNOWLEDGED)
+74|        val copy = c.events().toMutableList(); copy.clear(); check(c.events().size == 3)
+75|        val alerts = sink.alerts().toMutableList(); alerts.clear(); check(sink.alerts().size == 2)
+76|        check(runCatching { RecordingSink(0) }.exceptionOrNull() is IllegalArgumentException)
+77|        check(runCatching { RecordingSink(-1) }.exceptionOrNull() is IllegalArgumentException)
+78|    }
+79|    test("wall time jumps do not advance injected monotonic deadline") {
+80|        val clock = DualClock(); val sink = RecordingSink(); val c = AlertCore(clock, sink)
+81|        c.suspected(); c.evidenceConfirmed()
+82|        clock.wall = Long.MAX_VALUE; c.tick(); check(c.snapshot().remainingMs == 10_000L)
+83|        clock.wall = Long.MIN_VALUE; clock.monotonic = 9_999; c.tick(); check(sink.alerts().isEmpty())
+84|        clock.monotonic = 10_000; c.tick(); check(sink.alerts().size == 1)
+85|    }
+86|    test("all public core and recording sink access is owner-thread only") {
+87|        val sink = RecordingSink(); val c = AlertCore(FakeClock(), sink)
+88|        val actions = listOf<() -> Unit>({ c.suspected() }, { c.evidenceConfirmed() },
+89|            { c.riskCleared() }, { c.tick() }, { c.safe() }, { c.needHelp() }, { c.sos() },
+90|            { c.complete() }, { c.snapshot() }, { c.events() }, { sink.alerts() },
+91|            { sink.send(Alert(1, Response.NEED_HELP)) })
+92|        var failures = 0
+93|        val t = Thread { for (action in actions) if (runCatching(action).exceptionOrNull() is IllegalStateException) failures++ }
+94|        t.start(); t.join(); check(failures == actions.size)
+95|        check(c.snapshot().state == State.MONITORING); check(sink.alerts().isEmpty())
+96|    }
+97|    // CORE-002: regression tests added after implementation, not test-first evidence.
+98|    test("successful reentrant sink preserves sending event and completes after return") {
+99|        val sent = mutableListOf<Alert>(); val during = mutableListOf<Snapshot>()
+100|        lateinit var c: AlertCore
+101|        c = AlertCore(FakeClock(), AlertSink { alert ->
+102|            sent += alert
+103|            during += c.snapshot()
+104|            c.complete(); c.sos(); c.needHelp(); c.safe(); c.tick()
+105|            c.suspected(); c.evidenceConfirmed(); c.riskCleared()
+106|            during += c.snapshot()
+107|        })
+108|        c.sos()
+109|        check(sent.size == 1)
+110|        val first = sent.single()
+111|        check(during == List(2) {
+112|            Snapshot(State.ALERTING, first.eventId, Response.NEED_HELP, Status.SENDING, null)
+113|        })
+114|        check(c.snapshot() == Snapshot(State.AWAITING_HELP, first.eventId, Response.NEED_HELP, Status.SENT, null))
+115|        check(c.events().map { it.status } == listOf(Status.SENDING, Status.SENT))
+116|        c.sos(); c.needHelp(); c.tick(); check(sent.size == 1)
+117|        c.complete()
+118|        check(c.snapshot().state == State.MONITORING); check(c.snapshot().status == Status.ACKNOWLEDGED)
+119|        c.sos(); check(sent.size == 2); check(sent.last().eventId != first.eventId)
+120|        check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
+121|    }
+122|    test("deadline at Long.MAX_VALUE preserves remaining time and SAFE boundary") {
+123|        for (safeBefore in listOf(true, false)) {
+124|            val clock = FakeClock(Long.MAX_VALUE - 10_000); val sink = RecordingSink()
+125|            val c = AlertCore(clock, sink); c.suspected(); c.evidenceConfirmed()
+126|            check(c.snapshot().remainingMs == 10_000L)
+127|            clock.time = Long.MAX_VALUE - 1; c.tick()
+128|            check(c.snapshot().remainingMs == 1L); check(sink.alerts().isEmpty())
+129|            if (safeBefore) c.safe()
+130|            clock.time = Long.MAX_VALUE
+131|            if (safeBefore) {
+132|                c.tick(); check(sink.alerts().isEmpty())
+133|                check(c.snapshot().state == State.MONITORING); check(c.snapshot().response == Response.SAFE)
+134|            } else {
+135|                check(c.snapshot().remainingMs == 0L); check(sink.alerts().isEmpty())
+136|                c.safe(); c.tick(); c.sos()
+137|                check(sink.alerts().single().response == Response.NO_RESPONSE)
+138|                check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
+139|            }
+140|        }
+141|    }
+142|    test("Long.MAX_VALUE timeout uses valid elapsed time without deadline overflow") {
+143|        for (start in listOf(0L, 1L)) {
+144|            val clock = FakeClock(start); val sink = RecordingSink()
+145|            val c = AlertCore(clock, sink, timeoutMs = Long.MAX_VALUE)
+146|            c.suspected(); c.evidenceConfirmed()
+147|            check(c.snapshot().remainingMs == Long.MAX_VALUE)
+148|            clock.time = Long.MAX_VALUE - 1; c.tick()
+149|            check(c.snapshot().remainingMs == start + 1); check(sink.alerts().isEmpty())
+150|            clock.time = Long.MAX_VALUE
+151|            check(c.snapshot().remainingMs == start); check(sink.alerts().isEmpty())
+152|            c.tick(); c.tick()
+153|            if (start == 0L) {
+154|                check(sink.alerts().single().response == Response.NO_RESPONSE)
+155|                check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
+156|            } else {
+157|                // Deadline is outside the valid clock domain; do not wrap the clock.
+158|                check(sink.alerts().isEmpty()); check(c.snapshot().state == State.VERIFYING)
+159|                check(c.snapshot().status == Status.COUNTDOWN); check(c.snapshot().remainingMs == 1L)
+160|            }
+161|        }
+162|    }
+163|    println("PASS $passed tests")
+164|}
+165|
+166|// Test-only independent time domains: core receives only monotonic time.
+167|class DualClock(var monotonic: Long = 0, var wall: Long = 0) : MonotonicClock {
+168|    override fun nowMs() = monotonic
+169|}

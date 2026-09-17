@@ -1,0 +1,8 @@
+**KẾT QUẢ: PASS**
+
+Mã nguồn AND-002A đã xử lý chuẩn xác toàn bộ yêu cầu kỹ thuật và khắc phục triệt để các phát hiện trước, không có concrete blocker:
+
+1. **Bàn giao cảm biến & Đồng bộ UI:** [`SensorOwnership`](file:///vn/nckh27pa/fallsafe/SensorOwnership.kt) điều phối loại trừ tương hỗ chuẩn xác (`foreground && !serviceActive`). Callback `onMonitoringChanged` kích hoạt trực tiếp tại `onCreate`/`onDestroy` (không timer delay), làm mới `sensorSummary` ngay lập tức.
+2. **Xử lý quyền & Fail-closed:** Khi thông báo bị tắt/từ chối, [`MonitoringService`](file:///vn/nckh27pa/fallsafe/MonitoringService.kt) fail-closed có thông báo tường minh, cảm biến [`MainActivity`](file:///vn/nckh27pa/fallsafe/MainActivity.kt) vẫn hoạt động bình thường. Quyền cấp lúc Activity paused được hoãn an toàn qua `backgroundStartPending` đến `onResume`.
+3. **WakeLock & Foreground Notification:** WakeLock bound chặt chẽ tối đa 11s (`coerceIn(0, 10000) + 1000`), có kiểm tra `isHeld` tránh crash; hỗ trợ hiển thị tức thì trên API 31+ (`FOREGROUND_SERVICE_IMMEDIATE`) và FGS type Health trên API 34+.
+4. **Dọn dẹp & Vòng đời:** [`onDestroy`](file:///vn/nckh27pa/fallsafe/MonitoringService.kt#L77-L93) kiểm tra `::collector.isInitialized`, gỡ bỏ `poll`, nhả WakeLock, gọi `resetDetection()` đúng phạm vi bộ phát hiện mà không reset đếm lùi, hoàn tất dọn dẹp trước khi kích hoạt handoff.

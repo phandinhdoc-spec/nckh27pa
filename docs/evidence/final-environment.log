@@ -1,0 +1,12 @@
+2026-09-15T11:14:25+07:00
+No boards found.
+List of devices attached
+emulator-5554          device product:sdk_gphone64_x86_64 model:sdk_gphone64_x86_64 device:emu64xa transport_id:1
+
+?? .gitignore
+?? android/
+?? docs/
+?? esp/
+?? protocol-lab/
+?? setup-nckh27pa-26.04.sh
+exit_code=0

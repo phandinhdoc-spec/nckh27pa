@@ -1,0 +1,458 @@
+OpenAI Codex v0.154.0
+--------
+workdir: /home/pdd/nckh27pa
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: none
+reasoning summaries: none
+session id: 01a0a405-3909-7463-8e88-ab0424537b5e
+--------
+user
+Bạn là primary worker duy nhất cho UX-002A-R1 tại /home/pdd/nckh27pa. AGY Level 1 đã bị headless read_file auto-deny hai lượt; đây là escalation có lý do. Tuân thủ AGENTS.md và docs/tasks/UX-002A-R1.md. Chỉ sửa android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt; không sửa file khác, không agent con, không commit/push, không chạy Gradle trong sandbox.
+
+Áp dụng patch Compose tối thiểu:
+- Trên tab Trang chủ, ngay sau text `BLE: chưa tích hợp • PHONE_ONLY vẫn dùng được`, thêm một Text tiếng Việt nói rõ PHONE_ONLY cần mang điện thoại theo người và để máy xa cơ thể có thể bỏ sót sự kiện.
+- Trong tab Kiểm tra hệ thống, sau dòng áp suất/gia tốc tuyến tính, thêm `Text("Độ cao tương đối m: ${p?.altitudeDeltaM ?: "—"}")`.
+- Trong dòng danh sách chưa tích hợp, bỏ từ `độ cao` nhưng giữ bước chân, vị trí, pin, rung/âm thanh và màn hình khóa.
+
+Giữ mọi hành vi, APIs, semantics, bốn tab và cảnh báo THỬ NGHIỆM. Không tuyên bố độ chính xác. Cuối cùng báo đúng file đã sửa và giới hạn chưa kiểm chứng.
+codex
+STATUS: đang thực hiện • OWNER: Codex (primary worker duy nhất) • FILES: chỉ `MainActivity.kt` • GOAL: áp dụng ba chỉnh sửa văn bản Compose tối thiểu theo UX-002A-R1. Tôi sẽ đọc ticket và đúng file đích, sửa bằng patch, rồi kiểm tra diff tĩnh; không dùng agent con, không chạy Gradle, không commit/push.
+exec
+/bin/bash -lc "sed -n '1,240p' docs/tasks/UX-002A-R1.md && sed -n '1,320p' android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+# UX-002A-R1 — kế nhiệm UI sau blocker AGY
+
+STATUS: IN_PROGRESS
+OWNER: Codex / gpt-5.6-sol; một primary worker, không reviewer. Lý do escalation Level 1→2: AGY headless bị từ chối read_file hai lượt, không sửa mã.
+FILES: Đọc AGENTS.md, docs/tasks/UX-002A.md, android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt. Chỉ sửa MainActivity.kt.
+GOAL: Hoàn thành đúng acceptance UX-002A bằng patch Compose tối thiểu.
+SOURCE: android-plan.md §4.5.5 và AND-002B; không thay requirement/API.
+DEPENDENCIES: UX-002A BLOCKED do tool; AND-002B DONE.
+DELIVERABLE: Thêm giới hạn PHONE_ONLY trên Trang chủ; hiển thị altitudeDeltaM ở Kiểm tra hệ thống; bỏ “độ cao” khỏi danh sách chưa tích hợp.
+ACCEPTANCE: Ba thay đổi text đúng nghĩa; null dùng —; không đổi hành vi/dependency/API. Hermes chạy `testDebugUnitTest lintDebug assembleDebug` PASS.
+VERIFY: Codex chỉ sửa một file, không cần Gradle trong sandbox; Hermes đọc exact region và chạy gate. Một lượt; nếu blocked thì dừng xin quyết định, không Hermes tự sửa.
+RESULT: Pending.
+NEXT_ACTION: Codex sửa một tệp; Hermes kiểm chứng, không reviewer thứ hai.
+package vn.nckh27pa.fallsafe
+
+import android.os.Bundle
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import core.State
+import core.Status
+
+class MainActivity : ComponentActivity() {
+    private lateinit var collector: PhoneSensorCollector
+    private var backgroundStartPending = false
+    private lateinit var ownership: SensorOwnership
+    private val controller get() = (application as DemoApplication).controller
+    private val handler = Handler(Looper.getMainLooper())
+    private var sensorSummary by mutableStateOf("Chưa thu cảm biến")
+    private val poll = object : Runnable {
+        override fun run() {
+            if (!controller.backgroundMonitoring) controller.displayPhone(collector.latest())
+            handler.postDelayed(this, 250)
+        }
+    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        collector = PhoneSensorCollector(this, controller::acceptPhone)
+        ownership = SensorOwnership({ collector.start() }, { collector.stop() })
+        setContent {
+            MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
+                DemoScreen(controller, sensorSummary, ::startBackground, ::stopBackground)
+            }
+        }
+    }
+    override fun onResume() {
+        super.onResume()
+        controller.foreground = true
+        controller.onMonitoringChanged = {
+            ownership.update(controller.foreground, controller.backgroundMonitoring)
+            sensorSummary = collector.activeSensors.joinToString().ifEmpty { "Không có cảm biến khả dụng" }
+        }
+        ownership.update(true, controller.backgroundMonitoring)
+        sensorSummary = if (controller.backgroundMonitoring) controller.backgroundSensors else collector.activeSensors.joinToString().ifEmpty { "Không có cảm biến khả dụng" }
+        controller.resumed()
+        handler.post(poll)
+        if (backgroundStartPending) { backgroundStartPending = false; beginMonitoring() }
+    }
+    private fun startBackground() {
+        if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 27)
+        } else beginMonitoring()
+    }
+    private fun beginMonitoring() {
+        try { startForegroundService(Intent(this, MonitoringService::class.java)) }
+        catch (_: RuntimeException) {
+            controller.backgroundMessage = "Hệ thống từ chối giám sát nền; vẫn thu khi mở app."
+            ownership.update(controller.foreground, controller.backgroundMonitoring)
+        }
+    }
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 27) {
+            if (grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
+                // Resume after the system permission dialog, never start from a paused Activity.
+                if (controller.foreground) beginMonitoring() else backgroundStartPending = true
+            } else {
+                backgroundStartPending = false
+                controller.backgroundMessage = "Chưa bật giám sát nền vì quyền thông báo bị từ chối; cảm biến vẫn dùng khi mở app."
+            }
+        }
+    }
+    private fun stopBackground() {
+        if (controller.snapshot.state != State.MONITORING) return
+        stopService(Intent(this, MonitoringService::class.java))
+    }
+    override fun onPause() {
+        controller.foreground = false
+        controller.onMonitoringChanged = null
+        ownership.update(false, controller.backgroundMonitoring)
+        handler.removeCallbacks(poll)
+        controller.paused()
+        super.onPause()
+    }
+}
+
+@Composable
+private fun DemoScreen(c: DemoController, sensorSummary: String, startBackground: () -> Unit, stopBackground: () -> Unit) {
+    var tab by rememberSaveable { mutableIntStateOf(0) }
+    val tabs = listOf("Trang chủ", "Sự kiện", "Người thân", "Cài đặt")
+    val scrollState = rememberScrollState()
+    LaunchedEffect(tab, c.snapshot.state) { scrollState.scrollTo(0) }
+    Scaffold(bottomBar = {
+        NavigationBar {
+            tabs.forEachIndexed { i, title ->
+                NavigationBarItem(selected = tab == i, onClick = { tab = i },
+                    icon = { Text(listOf("⌂", "≡", "♡", "⚙")[i]) }, label = { Text(title) })
+            }
+        }
+    }) { inset ->
+        Column(Modifier.fillMaxSize().padding(inset).verticalScroll(scrollState)
+            .padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text("THỬ NGHIỆM — không gửi ra ngoài", fontSize = 22.sp,
+                color = MaterialTheme.colorScheme.error)
+            Text(c.source, style = MaterialTheme.typography.titleMedium)
+            // Verification remains accessible from every tab, with no blocking modal.
+            if (c.snapshot.state == State.VERIFYING) {
+                Text("! Bạn có ổn không?", style = MaterialTheme.typography.headlineMedium)
+                Text("Còn ${((c.snapshot.remainingMs ?: 0) + 999) / 1000} giây",
+                    fontSize = 32.sp, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+                Action("TÔI VẪN ỔN", c::safe)
+                Action("CẦN GIÚP ĐỠ", c::help)
+            }
+            when (tab) {
+                0 -> {
+                    Text(stateLabel(c), style = MaterialTheme.typography.headlineSmall)
+                    Text("BLE: chưa tích hợp • PHONE_ONLY vẫn dùng được")
+                    Text(if (c.packet == null) "! Thiếu hoặc cũ dữ liệu; không thể đánh giá nguy cơ."
+                        else "Có mẫu gia tốc • chưa thể kết luận an toàn.")
+                    Text("Mang theo người: UNKNOWN — chưa có thuật toán xác định.")
+                    Text("Vị trí: chưa lấy vị trí; không chờ GPS.")
+                    if (c.foreground) SosButton(c::sos)
+                    Action("Chạy dữ liệu mô phỏng", c::runReplay,
+                        c.snapshot.state == State.MONITORING && !c.replaying)
+                    if (c.replaying) Text("Đang cấp chuỗi va đập rồi yên mô phỏng…")
+                    Action("Dùng cảm biến điện thoại", c::usePhone, c.snapshot.state == State.MONITORING)
+                    if (c.snapshot.state == State.ALERTING || c.snapshot.state == State.AWAITING_HELP) {
+                        Text("Người nhận: Người thân mô phỏng 1 • kênh: bộ nhớ tại máy")
+                        Text(if (c.snapshot.status == Status.SENT) "Đã nhận GIẢ tại sink; không phải người thật xác nhận."
+                            else "Gửi GIẢ thất bại; không tự gửi lại.")
+                        Action("Hoàn tất sự kiện để thử lại", c::complete)
+                    }
+                }
+                1 -> {
+                    Text("Sự kiện thử nghiệm", style = MaterialTheme.typography.headlineSmall)
+                    Text("32 chuyển trạng thái gần nhất trong phiên; ID không lưu qua khởi động lại. Độ tin cậy: chưa đánh giá.")
+                    if (c.events.isEmpty()) Text("Chưa có sự kiện.")
+                    c.events.asReversed().forEach {
+                        Text("#${it.eventId} • ${it.state}\n${statusLabel(it.status)}")
+                    }
+                }
+                2 -> {
+                    Text("Người thân mô phỏng", style = MaterialTheme.typography.headlineSmall)
+                    Text("Ưu tiên 1 • Người thân mô phỏng 1\nKênh nhận: bộ nhớ tại máy; không số điện thoại, không danh bạ thật.")
+                    Text("Sink đã nhận ${c.session.sink.alerts().size} cảnh báo giả (tối đa 32).")
+                    Text("Không SMS, cuộc gọi hoặc liên lạc mạng.")
+                }
+                3 -> {
+                    Text("Kiểm tra hệ thống", style = MaterialTheme.typography.headlineSmall)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("Giả lập lỗi gửi", Modifier.weight(1f), fontSize = 20.sp)
+                        Switch(c.fail, c::setFailure, Modifier.semantics { contentDescription = "Giả lập lỗi gửi" })
+                    }
+                    Text(c.backgroundMessage)
+                    Action("Bật giám sát nền thử", startBackground, !c.backgroundMonitoring)
+                    Action("Dừng giám sát nền thử", stopBackground, c.backgroundMonitoring && c.snapshot.state == State.MONITORING)
+                    Text("Dừng trong app chỉ khi không có sự kiện đang xử lý. Android có thể dừng process; không tự khởi động lại.")
+                    Text("Đã đăng ký: ${if (c.backgroundMonitoring) c.backgroundSensors else sensorSummary}")
+                    val p = c.packet
+                    Text("Gia tốc m/s²: ${p?.let { "${it.accelXMs2}, ${it.accelYMs2}, ${it.accelZMs2}" } ?: "không có / quá 500 ms"}")
+                    Text("Gyro °/s: ${p?.gyroXDps ?: "—"}, ${p?.gyroYDps ?: "—"}, ${p?.gyroZDps ?: "—"}")
+                    Text("Pitch/roll/yaw °: ${p?.pitchDeg ?: "—"}, ${p?.rollDeg ?: "—"}, ${p?.yawDeg ?: "—"}")
+                    Text("Áp suất Pa: ${p?.pressurePa ?: "—"}; gia tốc tuyến tính: ${p?.linearAccelXMs2 ?: "—"}, ${p?.linearAccelYMs2 ?: "—"}, ${p?.linearAccelZMs2 ?: "—"}")
+                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, độ cao, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
+                    Text("Luật DEMO: va đập ≥25 m/s² rồi yên ≥1 giây trong cửa sổ 3 giây; chưa kiểm chứng độ chính xác phát hiện ngã.")
+                    Text("Thu cảm biến khi app mở hoặc khi bạn bật giám sát nền thử. Service có thông báo; giữ CPU tối đa11giây lúc xác minh. Không tự phục hồi khi process chết; pin và điện thoại thật chưa kiểm chứng.")
+                }
+            }
+        }
+    }
+}
+@Composable
+private fun Action(label: String, action: () -> Unit, enabled: Boolean = true) {
+    Button(onClick = action, enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+        Text(label, fontSize = 20.sp)
+    }
+}
+@Composable
+private fun SosButton(onSos: () -> Unit) {
+    val currentAction by rememberUpdatedState(onSos)
+    val hold = remember { SosHold() }
+    val handler = remember { Handler(Looper.getMainLooper()) }
+    var holding by remember { mutableStateOf(false) }
+    var accessibleArmed by remember { mutableStateOf(false) }
+    val fire = remember { Runnable {
+        if (hold.ready(SystemClock.elapsedRealtime())) {
+            holding = false; accessibleArmed = false; currentAction()
+        }
+    } }
+    DisposableEffect(Unit) {
+        onDispose { handler.removeCallbacks(fire); hold.cancel() }
+    }
+    Box(Modifier.fillMaxWidth().heightIn(min = 80.dp)
+        .background(MaterialTheme.colorScheme.errorContainer)
+        .semantics {
+            role = Role.Button
+            contentDescription = "SOS giữ 2 giây. Với TalkBack, kích hoạt để bắt đầu, kích hoạt lần nữa để hủy."
+            onClick {
+                if (accessibleArmed) { hold.cancel(); handler.removeCallbacks(fire); accessibleArmed = false; holding = false }
+                else { accessibleArmed = true; holding = true; hold.start(SystemClock.elapsedRealtime()); handler.postDelayed(fire, 2000) }
+                true
+            }
+        }
+        .pointerInput(Unit) {
+            detectTapGestures(onPress = {
+                holding = true
+                hold.start(SystemClock.elapsedRealtime())
+                handler.postDelayed(fire, 2000)
+                try { tryAwaitRelease() } finally {
+                    handler.removeCallbacks(fire); hold.cancel(); holding = false
+                }
+            })
+        }.padding(20.dp)) {
+        Text(if (holding) "Đang giữ SOS…" else "SOS — GIỮ 2 GIÂY", fontSize = 24.sp,
+            color = MaterialTheme.colorScheme.onErrorContainer)
+    }
+}
+private fun statusLabel(status: Status): String = when (status) {
+    Status.NOT_REQUIRED -> "Chưa yêu cầu gửi"
+    Status.COUNTDOWN -> "Đang đếm ngược"
+    Status.SENDING -> "Đang gửi GIẢ"
+    Status.SENT -> "Đã gửi THỬ NGHIỆM"
+    Status.FAILED -> "Gửi GIẢ thất bại"
+    Status.ACKNOWLEDGED -> "Đã hoàn tất tại máy (không phải biên nhận)"
+}
+private fun stateLabel(c: DemoController): String = when (c.snapshot.state) {
+    State.MONITORING -> if (c.snapshot.status == Status.ACKNOWLEDGED) "✓ Đã hoàn tất sự kiện" else "○ Theo dõi thử nghiệm"
+    State.SUSPECTED -> "! Cần chú ý"
+    State.VERIFYING -> "! Đang xác minh"
+    State.ALERTING, State.AWAITING_HELP -> statusLabel(c.snapshot.status)
+}
+
+exec
+/bin/bash -lc "sed -n '1,240p' docs/tasks/UX-002A.md" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+# UX-002A — trạng thái PHONE_ONLY và độ cao tương đối
+
+STATUS: BLOCKED
+OWNER: AGY / gemini-3.8-flash-low; một primary worker, không reviewer vì thay đổi text/UI chẩn đoán một tệp, không đổi logic cảnh báo.
+FILES: Đọc android/android-plan.md §3 và dòng 341–347; docs/tasks/AND-002B.md; android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt. Chỉ được sửa MainActivity.kt.
+GOAL: Trên Trang chủ hiển thị rõ giới hạn PHONE_ONLY: phải mang điện thoại theo và có thể bỏ sót khi để xa người. Trong Kiểm tra hệ thống hiển thị altitudeDeltaM với đơn vị m và không còn nói “độ cao chưa tích hợp”; null/cũ phải dùng dấu “—”.
+SOURCE: Android plan §4.5.5, §3.2/3.7 và AND-002B đã DONE. Không thay plan hoặc đổi tên field.
+DEPENDENCIES: AND-002B clean24tests/lint/APK PASS.
+DELIVERABLE: Một patch Compose tối thiểu, giữ thông báo THỬ NGHIỆM và bốn tab; không thêm dependency/resource/API.
+ACCEPTANCE: Text giới hạn xuất hiện trên Trang chủ; diagnostic hiển thị `Độ cao tương đối m: <value|—>`; dòng backlog không còn liệt kê độ cao là chưa tích hợp; không tuyên bố độ chính xác/phát hiện ngã; accessibility vẫn đọc được text. `./gradlew testDebugUnitTest lintDebug assembleDebug` phải PASS khi Hermes kiểm tra.
+VERIFY: AGY chỉ sửa tệp; Hermes đối chiếu diff, tìm literal và chạy một Gradle gate. Nếu AGY bị quyền headless hai lần thì dừng/ghi blocker; không bypass. Chưa bắt buộc emulator cho text-only slice.
+RESULT: AGY gemini-3.8-flash-low bị headless auto-deny quyền read_file ở cả hai lượt, kể cả khi nhận exact replacements inline; không output và không sửa MainActivity.kt. Không bypass quyền. Evidence: docs/evidence/UX-002A-agy.log.
+NEXT_ACTION: Dừng worker này theo retry limit. Nhiệm vụ kế nhiệm UX-002A-R1 dùng Codex Level 2 vì Level 1 thất bại do cơ chế công cụ; không cho AGY thử tiếp.
+
+codex
+Đã đối chiếu ticket gốc và ticket kế nhiệm: thay đổi chỉ là text/diagnostic, không đụng logic cảnh báo hay API. Tôi đang áp dụng đúng ba chỉnh sửa vào các vị trí được chỉ định.
+apply patch
+patch: completed
+/home/pdd/nckh27pa/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
+diff --git a/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt b/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
+index e6d472d3923d2a5c6daf49ef5324282f171b6ff9..5f686f34a3d414b6dbbeb80a2c85aade80eb635c
+--- a/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
++++ b/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
+@@ -132,6 +132,7 @@
+                 0 -> {
+                     Text(stateLabel(c), style = MaterialTheme.typography.headlineSmall)
+                     Text("BLE: chưa tích hợp • PHONE_ONLY vẫn dùng được")
++                    Text("PHONE_ONLY: cần mang điện thoại theo người; để máy xa cơ thể có thể bỏ sót sự kiện.")
+                     Text(if (c.packet == null) "! Thiếu hoặc cũ dữ liệu; không thể đánh giá nguy cơ."
+                         else "Có mẫu gia tốc • chưa thể kết luận an toàn.")
+                     Text("Mang theo người: UNKNOWN — chưa có thuật toán xác định.")
+@@ -178,7 +179,8 @@
+                     Text("Gyro °/s: ${p?.gyroXDps ?: "—"}, ${p?.gyroYDps ?: "—"}, ${p?.gyroZDps ?: "—"}")
+                     Text("Pitch/roll/yaw °: ${p?.pitchDeg ?: "—"}, ${p?.rollDeg ?: "—"}, ${p?.yawDeg ?: "—"}")
+                     Text("Áp suất Pa: ${p?.pressurePa ?: "—"}; gia tốc tuyến tính: ${p?.linearAccelXMs2 ?: "—"}, ${p?.linearAccelYMs2 ?: "—"}, ${p?.linearAccelZMs2 ?: "—"}")
+-                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, độ cao, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
++                    Text("Độ cao tương đối m: ${p?.altitudeDeltaM ?: "—"}")
++                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
+                     Text("Luật DEMO: va đập ≥25 m/s² rồi yên ≥1 giây trong cửa sổ 3 giây; chưa kiểm chứng độ chính xác phát hiện ngã.")
+                     Text("Thu cảm biến khi app mở hoặc khi bạn bật giám sát nền thử. Service có thông báo; giữ CPU tối đa11giây lúc xác minh. Không tự phục hồi khi process chết; pin và điện thoại thật chưa kiểm chứng.")
+                 }
+
+diff --git a/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt b/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
+index e6d472d3923d2a5c6daf49ef5324282f171b6ff9..5f686f34a3d414b6dbbeb80a2c85aade80eb635c
+--- a/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
++++ b/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
+@@ -132,6 +132,7 @@
+                 0 -> {
+                     Text(stateLabel(c), style = MaterialTheme.typography.headlineSmall)
+                     Text("BLE: chưa tích hợp • PHONE_ONLY vẫn dùng được")
++                    Text("PHONE_ONLY: cần mang điện thoại theo người; để máy xa cơ thể có thể bỏ sót sự kiện.")
+                     Text(if (c.packet == null) "! Thiếu hoặc cũ dữ liệu; không thể đánh giá nguy cơ."
+                         else "Có mẫu gia tốc • chưa thể kết luận an toàn.")
+                     Text("Mang theo người: UNKNOWN — chưa có thuật toán xác định.")
+@@ -178,7 +179,8 @@
+                     Text("Gyro °/s: ${p?.gyroXDps ?: "—"}, ${p?.gyroYDps ?: "—"}, ${p?.gyroZDps ?: "—"}")
+                     Text("Pitch/roll/yaw °: ${p?.pitchDeg ?: "—"}, ${p?.rollDeg ?: "—"}, ${p?.yawDeg ?: "—"}")
+                     Text("Áp suất Pa: ${p?.pressurePa ?: "—"}; gia tốc tuyến tính: ${p?.linearAccelXMs2 ?: "—"}, ${p?.linearAccelYMs2 ?: "—"}, ${p?.linearAccelZMs2 ?: "—"}")
+-                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, độ cao, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
++                    Text("Độ cao tương đối m: ${p?.altitudeDeltaM ?: "—"}")
++                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
+                     Text("Luật DEMO: va đập ≥25 m/s² rồi yên ≥1 giây trong cửa sổ 3 giây; chưa kiểm chứng độ chính xác phát hiện ngã.")
+                     Text("Thu cảm biến khi app mở hoặc khi bạn bật giám sát nền thử. Service có thông báo; giữ CPU tối đa11giây lúc xác minh. Không tự phục hồi khi process chết; pin và điện thoại thật chưa kiểm chứng.")
+                 }
+
+exec
+/bin/bash -lc "git diff --check -- android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt && git diff -- android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt && rg -n 'BLE: chưa tích hợp|PHONE_ONLY: cần|Áp suất Pa|Độ cao tương đối m|Bước chân, vị trí' android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+134:                    Text("BLE: chưa tích hợp • PHONE_ONLY vẫn dùng được")
+135:                    Text("PHONE_ONLY: cần mang điện thoại theo người; để máy xa cơ thể có thể bỏ sót sự kiện.")
+181:                    Text("Áp suất Pa: ${p?.pressurePa ?: "—"}; gia tốc tuyến tính: ${p?.linearAccelXMs2 ?: "—"}, ${p?.linearAccelYMs2 ?: "—"}, ${p?.linearAccelZMs2 ?: "—"}")
+182:                    Text("Độ cao tương đối m: ${p?.altitudeDeltaM ?: "—"}")
+183:                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
+
+diff --git a/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt b/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
+index e6d472d3923d2a5c6daf49ef5324282f171b6ff9..5f686f34a3d414b6dbbeb80a2c85aade80eb635c
+--- a/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
++++ b/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
+@@ -132,6 +132,7 @@
+                 0 -> {
+                     Text(stateLabel(c), style = MaterialTheme.typography.headlineSmall)
+                     Text("BLE: chưa tích hợp • PHONE_ONLY vẫn dùng được")
++                    Text("PHONE_ONLY: cần mang điện thoại theo người; để máy xa cơ thể có thể bỏ sót sự kiện.")
+                     Text(if (c.packet == null) "! Thiếu hoặc cũ dữ liệu; không thể đánh giá nguy cơ."
+                         else "Có mẫu gia tốc • chưa thể kết luận an toàn.")
+                     Text("Mang theo người: UNKNOWN — chưa có thuật toán xác định.")
+@@ -178,7 +179,8 @@
+                     Text("Gyro °/s: ${p?.gyroXDps ?: "—"}, ${p?.gyroYDps ?: "—"}, ${p?.gyroZDps ?: "—"}")
+                     Text("Pitch/roll/yaw °: ${p?.pitchDeg ?: "—"}, ${p?.rollDeg ?: "—"}, ${p?.yawDeg ?: "—"}")
+                     Text("Áp suất Pa: ${p?.pressurePa ?: "—"}; gia tốc tuyến tính: ${p?.linearAccelXMs2 ?: "—"}, ${p?.linearAccelYMs2 ?: "—"}, ${p?.linearAccelZMs2 ?: "—"}")
+-                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, độ cao, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
++                    Text("Độ cao tương đối m: ${p?.altitudeDeltaM ?: "—"}")
++                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
+                     Text("Luật DEMO: va đập ≥25 m/s² rồi yên ≥1 giây trong cửa sổ 3 giây; chưa kiểm chứng độ chính xác phát hiện ngã.")
+                     Text("Thu cảm biến khi app mở hoặc khi bạn bật giám sát nền thử. Service có thông báo; giữ CPU tối đa11giây lúc xác minh. Không tự phục hồi khi process chết; pin và điện thoại thật chưa kiểm chứng.")
+                 }
+
+codex
+Patch đã nằm đúng vị trí và kiểm tra khoảng trắng không báo lỗi. Tuy nhiên `git diff` không hiển thị thay đổi dù nội dung làm việc đã đổi, nên tôi đang kiểm tra trạng thái index/HEAD để báo cáo chính xác mà không sửa thêm file.
+exec
+/bin/bash -lc "git status --short -- android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt; git ls-files -v -- android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt; git show HEAD:android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt | sed -n '128,188p'" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+?? android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
+fatal: invalid object name 'HEAD'.
+
+diff --git a/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt b/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
+index e6d472d3923d2a5c6daf49ef5324282f171b6ff9..5f686f34a3d414b6dbbeb80a2c85aade80eb635c
+--- a/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
++++ b/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
+@@ -132,6 +132,7 @@
+                 0 -> {
+                     Text(stateLabel(c), style = MaterialTheme.typography.headlineSmall)
+                     Text("BLE: chưa tích hợp • PHONE_ONLY vẫn dùng được")
++                    Text("PHONE_ONLY: cần mang điện thoại theo người; để máy xa cơ thể có thể bỏ sót sự kiện.")
+                     Text(if (c.packet == null) "! Thiếu hoặc cũ dữ liệu; không thể đánh giá nguy cơ."
+                         else "Có mẫu gia tốc • chưa thể kết luận an toàn.")
+                     Text("Mang theo người: UNKNOWN — chưa có thuật toán xác định.")
+@@ -178,7 +179,8 @@
+                     Text("Gyro °/s: ${p?.gyroXDps ?: "—"}, ${p?.gyroYDps ?: "—"}, ${p?.gyroZDps ?: "—"}")
+                     Text("Pitch/roll/yaw °: ${p?.pitchDeg ?: "—"}, ${p?.rollDeg ?: "—"}, ${p?.yawDeg ?: "—"}")
+                     Text("Áp suất Pa: ${p?.pressurePa ?: "—"}; gia tốc tuyến tính: ${p?.linearAccelXMs2 ?: "—"}, ${p?.linearAccelYMs2 ?: "—"}, ${p?.linearAccelZMs2 ?: "—"}")
+-                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, độ cao, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
++                    Text("Độ cao tương đối m: ${p?.altitudeDeltaM ?: "—"}")
++                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
+                     Text("Luật DEMO: va đập ≥25 m/s² rồi yên ≥1 giây trong cửa sổ 3 giây; chưa kiểm chứng độ chính xác phát hiện ngã.")
+                     Text("Thu cảm biến khi app mở hoặc khi bạn bật giám sát nền thử. Service có thông báo; giữ CPU tối đa11giây lúc xác minh. Không tự phục hồi khi process chết; pin và điện thoại thật chưa kiểm chứng.")
+                 }
+
+codex
+Đã sửa đúng một file:
+
+- [MainActivity.kt](/home/pdd/nckh27pa/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt:134)
+
+Thay đổi gồm cảnh báo giới hạn PHONE_ONLY, hiển thị `altitudeDeltaM` với fallback `—`, và bỏ “độ cao” khỏi danh sách chưa tích hợp. Không đổi hành vi, API, bốn tab hay cảnh báo THỬ NGHIỆM.
+
+Giới hạn chưa kiểm chứng: không chạy Gradle, emulator hoặc kiểm thử accessibility theo yêu cầu. `git diff` không khả dụng vì repository chưa có `HEAD` và file đang ở trạng thái untracked; đã kiểm tra trực tiếp các vùng mã và `git diff --check` không báo lỗi.
+diff --git a/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt b/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
+index e6d472d3923d2a5c6daf49ef5324282f171b6ff9..5f686f34a3d414b6dbbeb80a2c85aade80eb635c
+--- a/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
++++ b/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
+@@ -132,6 +132,7 @@
+                 0 -> {
+                     Text(stateLabel(c), style = MaterialTheme.typography.headlineSmall)
+                     Text("BLE: chưa tích hợp • PHONE_ONLY vẫn dùng được")
++                    Text("PHONE_ONLY: cần mang điện thoại theo người; để máy xa cơ thể có thể bỏ sót sự kiện.")
+                     Text(if (c.packet == null) "! Thiếu hoặc cũ dữ liệu; không thể đánh giá nguy cơ."
+                         else "Có mẫu gia tốc • chưa thể kết luận an toàn.")
+                     Text("Mang theo người: UNKNOWN — chưa có thuật toán xác định.")
+@@ -178,7 +179,8 @@
+                     Text("Gyro °/s: ${p?.gyroXDps ?: "—"}, ${p?.gyroYDps ?: "—"}, ${p?.gyroZDps ?: "—"}")
+                     Text("Pitch/roll/yaw °: ${p?.pitchDeg ?: "—"}, ${p?.rollDeg ?: "—"}, ${p?.yawDeg ?: "—"}")
+                     Text("Áp suất Pa: ${p?.pressurePa ?: "—"}; gia tốc tuyến tính: ${p?.linearAccelXMs2 ?: "—"}, ${p?.linearAccelYMs2 ?: "—"}, ${p?.linearAccelZMs2 ?: "—"}")
+-                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, độ cao, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
++                    Text("Độ cao tương đối m: ${p?.altitudeDeltaM ?: "—"}")
++                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
+                     Text("Luật DEMO: va đập ≥25 m/s² rồi yên ≥1 giây trong cửa sổ 3 giây; chưa kiểm chứng độ chính xác phát hiện ngã.")
+                     Text("Thu cảm biến khi app mở hoặc khi bạn bật giám sát nền thử. Service có thông báo; giữ CPU tối đa11giây lúc xác minh. Không tự phục hồi khi process chết; pin và điện thoại thật chưa kiểm chứng.")
+                 }
+
+tokens used
+22,089
+Đã sửa đúng một file:
+
+- [MainActivity.kt](/home/pdd/nckh27pa/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt:134)
+
+Thay đổi gồm cảnh báo giới hạn PHONE_ONLY, hiển thị `altitudeDeltaM` với fallback `—`, và bỏ “độ cao” khỏi danh sách chưa tích hợp. Không đổi hành vi, API, bốn tab hay cảnh báo THỬ NGHIỆM.
+
+Giới hạn chưa kiểm chứng: không chạy Gradle, emulator hoặc kiểm thử accessibility theo yêu cầu. `git diff` không khả dụng vì repository chưa có `HEAD` và file đang ở trạng thái untracked; đã kiểm tra trực tiếp các vùng mã và `git diff --check` không báo lỗi.

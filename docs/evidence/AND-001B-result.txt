@@ -1,0 +1,7 @@
+Đã hoàn thành source AND-001B: UI Compose 4 tab, cảm biến thật, replay, countdown, SOS giữ 2 giây và sink giả.
+
+- **9 test JUnit pure Kotlin PASS offline**, có log RED/GREEN.
+- Chỉ sửa phạm vi cho phép; không sửa core/Gradle, không network hay agent con.
+- Build Compose/APK và emulator bàn giao Hermes chạy host.
+
+Hướng dẫn và bằng chứng: [README](/home/pdd/nckh27pa/android/README.md), [báo cáo AND-001B](/home/pdd/nckh27pa/android/evidence/AND-001B-report.md).

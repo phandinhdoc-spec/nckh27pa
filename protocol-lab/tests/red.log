@@ -1,0 +1,111 @@
+FAIL golden encoder mtu23-v1 cpp-lab
+FAIL golden encoder mtu23-v1 java
+FAIL golden decoder mtu23-v1 cpp-lab
+FAIL golden decoder mtu23-v1 java
+FAIL golden encoder mtu185-utf8 cpp-lab
+FAIL golden encoder mtu185-utf8 java
+FAIL golden decoder mtu185-utf8 cpp-lab
+FAIL golden decoder mtu185-utf8 java
+FAIL golden encoder mtu23-max cpp-lab
+FAIL golden encoder mtu23-max java
+FAIL golden decoder mtu23-max cpp-lab
+FAIL golden decoder mtu23-max java
+FAIL out of order cpp-lab
+FAIL out of order java
+FAIL duplicate identical cpp-lab
+FAIL duplicate identical java
+FAIL conflict bytes cpp-lab
+FAIL conflict bytes java
+FAIL conflict offset cpp-lab
+FAIL conflict offset java
+FAIL conflict length cpp-lab
+FAIL conflict length java
+FAIL conflict count cpp-lab
+FAIL conflict count java
+FAIL conflict total cpp-lab
+FAIL conflict total java
+FAIL invalid short cpp-lab
+FAIL invalid short java
+FAIL invalid magic cpp-lab
+FAIL invalid magic java
+FAIL invalid version cpp-lab
+FAIL invalid version java
+FAIL invalid kind zero cpp-lab
+FAIL invalid kind zero java
+FAIL invalid kind six cpp-lab
+FAIL invalid kind six java
+FAIL invalid characteristic cpp-lab
+FAIL invalid characteristic java
+FAIL invalid id zero cpp-lab
+FAIL invalid id zero java
+FAIL invalid count zero cpp-lab
+FAIL invalid count zero java
+FAIL invalid count 257 cpp-lab
+FAIL invalid count 257 java
+FAIL invalid count > total cpp-lab
+FAIL invalid count > total java
+FAIL invalid index cpp-lab
+FAIL invalid index java
+FAIL invalid total zero cpp-lab
+FAIL invalid total zero java
+FAIL invalid oversize cpp-lab
+FAIL invalid oversize java
+FAIL invalid empty data cpp-lab
+FAIL invalid empty data java
+FAIL invalid offset cpp-lab
+FAIL invalid offset java
+FAIL invalid end cpp-lab
+FAIL invalid end java
+FAIL invalid long frame cpp-lab
+FAIL invalid long frame java
+FAIL invalid preserves active cpp-lab
+FAIL invalid preserves active java
+FAIL overlap cpp-lab
+FAIL overlap java
+FAIL gap cpp-lab
+FAIL gap java
+FAIL noncontiguous index cpp-lab
+FAIL noncontiguous index java
+FAIL timeout boundary cpp-lab
+FAIL timeout boundary java
+FAIL duplicate no extension cpp-lab
+FAIL duplicate no extension java
+FAIL missing expires before invalid cpp-lab
+FAIL missing expires before invalid java
+FAIL clock rollback cpp-lab
+FAIL clock rollback java
+FAIL disconnect stale cpp-lab
+FAIL disconnect stale java
+FAIL capacity retains cpp-lab
+FAIL capacity retains java
+FAIL capacity expires cpp-lab
+FAIL capacity expires java
+FAIL kind key cpp-lab
+FAIL kind key java
+FAIL independent deadlines cpp-lab
+FAIL independent deadlines java
+FAIL no completion cache cpp-lab
+FAIL no completion cache java
+FAIL bytes not JSON validation cpp-lab
+FAIL bytes not JSON validation java
+FAIL encoder invalid cpp-lab
+FAIL encoder invalid java
+FAIL encoder invalid cpp-lab
+FAIL encoder invalid java
+FAIL encoder invalid cpp-lab
+FAIL encoder invalid java
+FAIL encoder invalid cpp-lab
+FAIL encoder invalid java
+FAIL encoder invalid cpp-lab
+FAIL encoder invalid java
+FAIL encoder invalid cpp-lab
+FAIL encoder invalid java
+FAIL encoder invalid cpp-lab
+FAIL encoder invalid java
+Traceback (most recent call last):
+  File "/home/pdd/nckh27pa/protocol-lab/tests/run.py", line 72, in <module>
+    if __name__=='__main__': main()
+                             ~~~~^^
+  File "/home/pdd/nckh27pa/protocol-lab/tests/run.py", line 58, in main
+    raise AssertionError(f"{len(failures)} shared behavior checks failed")
+AssertionError: 104 shared behavior checks failed

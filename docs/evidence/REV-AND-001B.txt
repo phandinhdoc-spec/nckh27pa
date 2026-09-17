@@ -1,0 +1,15 @@
+**FAIL — 2 bug mức Medium/P2 trong tích hợp demo.** Kết luận từ đọc source/test độc lập; không chạy build/test/emulator, không network/agent con, không sửa hoặc ghi file, không dùng log/kết luận tác giả làm bằng chứng.
+
+1. **P2 — Pause Activity làm mất bằng chứng replay đang chạy.**  
+   Vị trí: [MainActivity.kt:59](/home/pdd/nckh27pa/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt:59), [DemoApplication.kt:33](/home/pdd/nckh27pa/android/app/src/main/java/vn/nckh27pa/fallsafe/DemoApplication.kt:33).  
+   **Repro:** chạy mô phỏng; khoảng 0,5 giây sau bấm Home hoặc xoay máy, giữ process sống. `onPause()` reset detector dù nguồn đang MÔ PHỎNG. Replay tiếp tục nhưng mẫu va đập duy nhất ở 200 ms đã tiêu thụ; các mẫu còn lại đều yên. Kết quả: replay kết thúc mà không countdown/tự gửi.  
+   Đây là bug isolation/lifecycle, không phải giới hạn ngủ máy/process chết: README công bố replay tiếp tục độc lập UI.
+
+2. **P2 — Accelerometer invalid không xóa bằng chứng detector trong pipeline thật.**  
+   Vị trí: [PhoneSensorCollector.kt:59–60](/home/pdd/nckh27pa/android/app/src/main/java/vn/nckh27pa/fallsafe/PhoneSensorCollector.kt:59), [DemoLogic.kt:27](/home/pdd/nckh27pa/android/app/src/main/java/vn/nckh27pa/fallsafe/DemoLogic.kt:27).  
+   **Repro:** cấp va đập 30 m/s² tại 0 ms; mẫu yên mỗi 100 ms từ 100–1000 ms; NaN tại 1050 ms; mẫu yên tại 1100 ms. Normalizer xóa accel, `latest()` trả null nên collector không gọi detector và không reset. Tại 1100 ms, detector vẫn giữ bằng chứng cũ và xác nhận, dẫn tới countdown dù chuỗi đã invalid.  
+   Test [DemoTests.kt:132](/home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:132) đưa NaN **trực tiếp** vào detector, nên không bắt được lỗi nối collector–normalizer–detector này.
+
+Qua đọc source, chưa thấy bug chặn khác ở chuyển đổi gyro/pressure, null/freshness của normalizer, SAFE tại deadline, gửi fake thất bại, giới hạn lịch sử hoặc logic giữ SOS thuần. **SOS gesture/cancellation và callback Android chưa được kiểm chứng runtime**; test hiện có không bao phủ controller/lifecycle/Compose.
+
+Foreground-only, callback trễ khi máy ngủ, mất phiên khi process chết, detector không được kiểm chứng y khoa, thiếu GPS/BLE/liên lạc thật và SENDING tức thời đã được công bố; **không tính là bug/blocker của lát demo này**.

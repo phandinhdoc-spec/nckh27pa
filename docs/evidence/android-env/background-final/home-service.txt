@@ -1,0 +1,36 @@
+ACTIVITY MANAGER SERVICES (dumpsys activity services)
+  User 0 active services:
+  * ServiceRecord{c16759d u0 vn.nckh27pa.fallsafe/.MonitoringService c:vn.nckh27pa.fallsafe}
+    intent={cmp=vn.nckh27pa.fallsafe/.MonitoringService}
+    packageName=vn.nckh27pa.fallsafe
+    processName=vn.nckh27pa.fallsafe
+    targetSdkVersion=36
+    baseDir=/data/app/~~kZHV1C5K3speh0IojHGiUg==/vn.nckh27pa.fallsafe-xkj8LjeFWsGulQB5oYzT4w==/base.apk
+    dataDir=/data/user/0/vn.nckh27pa.fallsafe
+    app=ProcessRecord{157554f 10768:vn.nckh27pa.fallsafe/u0a216}
+    useNewWiuLogic_forCapabilities()=true
+    useNewWiuLogic_forStart()=true
+    useNewBfslLogic()=true
+    mAllowWiu_noBinding=PROC_STATE_TOP
+    mAllowWiu_inBindService=DENIED
+    mAllowWiu_byBindings=DENIED
+    getFgsAllowWiu_legacy=PROC_STATE_TOP
+    getFgsAllowWiu_new=PROC_STATE_TOP
+    getFgsAllowWiu_forStart=PROC_STATE_TOP
+    getFgsAllowWiu_forCapabilities=PROC_STATE_TOP
+    allowUiJobScheduling=true
+    recentCallingPackage=vn.nckh27pa.fallsafe
+    recentCallingUid=10216
+    mAllowStart_noBinding=PROC_STATE_TOP
+    mAllowStart_inBindService=DENIED
+    mAllowStart_byBindings=DENIED
+    getFgsAllowStart_legacy=PROC_STATE_TOP
+    getFgsAllowStart_new=PROC_STATE_TOP
+    getFgsAllowStart=PROC_STATE_TOP
+    startForegroundCount=1
+    infoAllowStartForeground=[callingPackage: vn.nckh27pa.fallsafe; callingUid: 10216; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { xflg=0x4 cmp=vn.nckh27pa.fallsafe/.MonitoringService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; allowWiu:12; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+    isForeground=true foregroundId=27 types=0x00000100 foregroundNoti=Notification(channel=monitor shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONGOING_EVENT|NO_CLEAR|FOREGROUND_SERVICE color=0x00000000 vis=PRIVATE)
+    createTime=-4s628ms startingBgTimeout=--
+    lastActivity=-4s623ms restartTime=-4s623ms createdFromFg=true
+    startRequested=true delayedStop=false stopIfKilled=true callStart=true lastStartId=1
+ startCommandResult=2

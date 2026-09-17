@@ -1,0 +1,22 @@
+**PASS trong phạm vi review tĩnh local C++ host** theo REV-ESP-CORE-001. Không phát hiện blocker logic/security trong hợp đồng API đã ghi rõ.
+
+Đã đối chiếu source/test với ESP-CORE-001, ESP §7/§11 và ACK/CANCEL trong interface contract:
+
+- ID giới hạn 1–32 byte, loại NUL, buffer có terminator; state không tăng theo số lệnh.
+- Countdown không kéo dài deadline; kiểm tra overflow trước phép cộng; clock regression bị từ chối trước mọi thay đổi.
+- ACK không hủy/tắt âm; STOP không xóa deadline; timeout bật âm lại.
+- SOS hoạt động trong DEGRADED; disconnect không reset countdown; phục hồi cảm biến không xóa alert.
+- Lệnh sai ID không tác động lên sự kiện khác. Replay ID vừa kết thúc là no-op; lịch sử xa hơn và xác thực thuộc caller theo phạm vi công bố.
+- SAFE/CANCEL tại deadline giữ `last().alerted=true`; hai action Start/Stop đồng thời phù hợp quy tắc snapshot trong README.
+
+**Findings không chặn nghiệm thu — thiếu coverage test:**
+
+1. **P3 — Chưa assert action khi timeout trùng lệnh kết thúc**, tại [local_alert_test.cpp:113](/home/pdd/nckh27pa/esp/core/tests/local_alert_test.cpp:113). Test SAFE chỉ kiểm tra record, chưa kiểm tra mask; CANCEL chưa có ca đúng deadline.  
+   Repro đề xuất, **chưa chạy**: máy mới → `Countdown(0,"e",10)` → `CancelAlert(10,"e")`. Theo [local_alert.cpp:36](/home/pdd/nckh27pa/esp/core/local_alert.cpp:36), kỳ vọng `Applied`, actions `15`, buzzer false, active rỗng, last có `alerted=true,cancelled=true`. Làm tương tự với SAFE, kỳ vọng `safe=true`.
+
+2. **P3 — Chưa kiểm tra lệnh bị từ chối vẫn trả action timeout**, tại [local_alert_test.cpp:61](/home/pdd/nckh27pa/esp/core/tests/local_alert_test.cpp:61). Các ca wrong-ID hiện đều trước deadline.  
+   Repro đề xuất, **chưa chạy**: `Countdown(0,"e",10)` → `CancelAlert(10,"wrong")`. Kỳ vọng `WrongId` **và actions `11`**, active `"e"` vẫn tồn tại, alerted/buzzer true. Caller phải xử lý actions dù status không Applied, đúng [README.md:62](/home/pdd/nckh27pa/esp/core/README.md:62).
+
+Bằng chứng có sẵn: [Hermes host log:14](/home/pdd/nckh27pa/docs/evidence/esp-core-hermes.log:14) ghi 11/11 pass, demo exit 0; [sanitizer log:14](/home/pdd/nckh27pa/docs/evidence/esp-core-sanitizer-hermes.log:14) ghi 11/11 pass, exit 0. Đây là log được đọc, không phải kết quả tôi chạy lại.
+
+TDD có bằng chứng **viết cả nhóm test trước implementation rồi RED/GREEN**, không phải strict TDD từng hành vi. Không build/chạy test, network, agent con hay sửa file; không tạo report `.txt` vì yêu cầu read-only. **Không có xác nhận firmware Arduino, GPIO/BLE thực tế hoặc hardware.**

@@ -1,0 +1,4 @@
+# Quyết định kỹ thuật cuối cho bản thử
+Sau review, chọn fail-closed khi notification denied: KHÔNG bật monitoring FGS nếu chưa có quyền hiển thị notification; Activity vẫn thu sensor. Không đồng nhất quyền bật giám sát với nút xác nhận gửi cảnh báo: một khi đang VERIFYING, no-response vẫn dispatch theo deadline, không bấm gửi.
+FGS health hợp lệ với HIGH_SAMPLING_RATE_SENSORS theo docs Android; không dùng đặc quyền role emergency, không loại bỏ battery optimization. Explicit FOREGROUND_SERVICE_IMMEDIATE trên API31+ để không chờ OS defer notification. Test runtime trước chưa thấy notification ngay nên dừng trước screen-off, không được gọi screen-off PASS.
+Permission grant callback có pending trên onResume; sample ownership dùng callback sau cleanup thay100ms. Bản mới cập nhật sensorSummary khi owner thay đổi. Giới hạn countdown10s và START_NOT_STICKY giữ nguyên.

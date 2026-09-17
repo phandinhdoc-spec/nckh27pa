@@ -1,0 +1,32 @@
+[
+  {
+    "name": "no-response",
+    "passed": true,
+    "elapsedSeconds": 23.91
+  },
+  {
+    "name": "safe",
+    "passed": true,
+    "elapsedSeconds": 27.65
+  },
+  {
+    "name": "sos-short-long",
+    "passed": true,
+    "elapsedSeconds": 13.08
+  },
+  {
+    "name": "sink-failure",
+    "passed": false,
+    "error": "('Gửi GIẢ thất bại', ' \\n \\n \\n \\n \\n \\n \\nĐã gửi THỬ NGHIỆM \\nBLE: chưa tích hợp • PHONE_ONLY vẫn dùng được \\nCó mẫu gia tốc • chưa thể kết luận an toàn. \\nMang theo người: UNKNOWN — chưa có thuật toán xác định. \\nVị trí: chưa lấy vị trí; không chờ GPS. \\n SOS giữ 2 giây. Với TalkBack, kích hoạt để bắt đầu, kích hoạt lần nữa để hủy.\\nSOS — GIỮ 2 GIÂY \\n \\nChạy dữ liệu mô phỏng \\n \\n \\nDùng cảm biến điện thoại \\n \\nNgười nhận: Người thân mô phỏng 1 • kênh: bộ nhớ tại máy \\n \\n \\n \\n \\n \\nTrang chủ \\n \\n \\n \\n \\n \\nSự kiện \\n \\n \\n \\n \\n \\nNgười thân \\n \\n \\n \\n \\n \\nCài đặt \\n \\n \\n ')"
+  },
+  {
+    "name": "replay-survives-pause",
+    "passed": true,
+    "elapsedSeconds": 22.46
+  },
+  {
+    "name": "tabs-and-sensors",
+    "passed": true,
+    "elapsedSeconds": 17.46
+  }
+]

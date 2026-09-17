@@ -1,0 +1,20 @@
+tests/CoreTests.kt:67:20: error: unresolved reference 'RecordingSink'.
+        val sink = RecordingSink(2); val c = AlertCore(FakeClock(), sink, logCapacity = 3)
+                   ^^^^^^^^^^^^^
+tests/CoreTests.kt:69:35: error: unresolved reference 'it'.
+        check(sink.alerts().map { it.eventId } == listOf(19L, 20L))
+                                  ^^
+tests/CoreTests.kt:73:15: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+        check(runCatching { RecordingSink(0) }.exceptionOrNull() is IllegalArgumentException)
+              ^^^^^^^^^^^
+tests/CoreTests.kt:73:29: error: unresolved reference 'RecordingSink'.
+        check(runCatching { RecordingSink(0) }.exceptionOrNull() is IllegalArgumentException)
+                            ^^^^^^^^^^^^^
+tests/CoreTests.kt:74:15: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+        check(runCatching { RecordingSink(-1) }.exceptionOrNull() is IllegalArgumentException)
+              ^^^^^^^^^^^
+tests/CoreTests.kt:74:29: error: unresolved reference 'RecordingSink'.
+        check(runCatching { RecordingSink(-1) }.exceptionOrNull() is IllegalArgumentException)
+                            ^^^^^^^^^^^^^
+
+EXIT 1

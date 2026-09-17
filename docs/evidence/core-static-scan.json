@@ -1,0 +1,5 @@
+{
+  "scope": "new Kotlin src/tests and runner; baseline had no source",
+  "pattern_findings": [],
+  "manual_note": "runner deletes only its mktemp directory on EXIT; hardcoded local tool paths portability limit"
+}

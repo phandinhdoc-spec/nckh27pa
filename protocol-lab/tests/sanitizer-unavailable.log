@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/home/pdd/nckh27pa/protocol-lab/tests/run.py", line 72, in <module>
+    if __name__=='__main__': main()
+                             ~~~~^^
+  File "/home/pdd/nckh27pa/protocol-lab/tests/run.py", line 54, in main
+    got=run(cmd,lines)
+  File "/home/pdd/nckh27pa/protocol-lab/tests/run.py", line 15, in run
+    assert p.returncode == 0, (cmd, p.returncode, p.stderr)
+           ^^^^^^^^^^^^^^^^^
+AssertionError: (['/home/pdd/nckh27pa/protocol-lab/build/cpp-lab'], 1, '==68==LeakSanitizer has encountered a fatal error.\n==68==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1\n==68==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)\n')

@@ -1,0 +1,22 @@
+JUnit version 4.13.2
+.......E....E..
+Time: 0.044
+There were 2 failures:
+1) replayImpactSurvivesActivityPauseAndSendsAtDeadline(vn.nckh27pa.fallsafe.DemoTests)
+java.lang.AssertionError: expected:<VERIFYING> but was:<MONITORING>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at vn.nckh27pa.fallsafe.DemoTests.replayImpactSurvivesActivityPauseAndSendsAtDeadline(DemoTests.kt:174)
+2) invalidAccelThroughNormalizerBreaksQuietWindow(vn.nckh27pa.fallsafe.DemoTests)
+java.lang.AssertionError: expected:<MONITORING> but was:<VERIFYING>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at vn.nckh27pa.fallsafe.DemoTests.invalidAccelThroughNormalizerBreaksQuietWindow(DemoTests.kt:190)
+
+FAILURES!!!
+Tests run: 13,  Failures: 2
+

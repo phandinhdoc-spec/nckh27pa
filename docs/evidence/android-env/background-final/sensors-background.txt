@@ -1,0 +1,698 @@
+Captured at: 11:05:45.239
+Sensor Device:
+Total 12 h/w sensors, 12 running 0 disabled clients:
+0x00000000) active-count = 3; sampling_period(ms) = {66.7, 200.0, 20.0}, selected = 20.00 ms; batching_period(ms) = {100.0, 2000.0, 0.0}, selected = 0.00 ms
+0x00000001) active-count = 1; sampling_period(ms) = {20.0}, selected = 20.00 ms; batching_period(ms) = {0.0}, selected = 0.00 ms
+0x00000002) active-count = 1; sampling_period(ms) = {10.0}, selected = 10.00 ms; batching_period(ms) = {0.0}, selected = 0.00 ms
+0x00000007) active-count = 1; sampling_period(ms) = {20.0}, selected = 20.00 ms; batching_period(ms) = {0.0}, selected = 0.00 ms
+0x0000000a) active-count = 1; sampling_period(ms) = {5.0}, selected = 5.00 ms; batching_period(ms) = {0.0}, selected = 0.00 ms
+Sensor List:
+0000000000) Goldfish 3-axis Accelerometer | The Android Open Source Project | ver: 1 | type: android.sensor.accelerometer(1) | perm: n/a | flags: 0x00000050
+	continuous | minRate=2.00Hz | maxRate=100.00Hz | no batching | non-wakeUp | data-injection, has-additional-info, 
+0x00000001) Goldfish 3-axis Gyroscope | The Android Open Source Project | ver: 1 | type: android.sensor.gyroscope(4) | perm: n/a | flags: 0x00000050
+	continuous | minRate=2.00Hz | maxRate=100.00Hz | no batching | non-wakeUp | data-injection, has-additional-info, 
+0x00000002) Goldfish 3-axis Magnetic field sensor | The Android Open Source Project | ver: 1 | type: android.sensor.magnetic_field(2) | perm: n/a | flags: 0x00000010
+	continuous | minRate=2.00Hz | maxRate=100.00Hz | no batching | non-wakeUp | data-injection, 
+0x00000003) Goldfish Orientation sensor | The Android Open Source Project | ver: 1 | type: android.sensor.orientation(3) | perm: n/a | flags: 0x00000010
+	continuous | minRate=2.00Hz | maxRate=100.00Hz | no batching | non-wakeUp | data-injection, 
+0x00000004) Goldfish Ambient Temperature sensor | The Android Open Source Project | ver: 1 | type: android.sensor.ambient_temperature(13) | perm: n/a | flags: 0x00000012
+	on-change | maxDelay=0us | minDelay=0us | no batching | non-wakeUp | data-injection, 
+0x00000005) Goldfish Proximity sensor | The Android Open Source Project | ver: 1 | type: android.sensor.proximity(8) | perm: n/a | flags: 0x00000013
+	on-change | maxDelay=0us | minDelay=0us | no batching | wakeUp | data-injection, 
+0x00000006) Goldfish Light sensor     | The Android Open Source Project | ver: 1 | type: android.sensor.light(5) | perm: n/a | flags: 0x00000012
+	on-change | maxDelay=0us | minDelay=0us | no batching | non-wakeUp | data-injection, 
+0x00000007) Goldfish Pressure sensor  | The Android Open Source Project | ver: 1 | type: android.sensor.pressure(6) | perm: n/a | flags: 0x00000010
+	continuous | minRate=2.00Hz | maxRate=100.00Hz | no batching | non-wakeUp | data-injection, 
+0x00000008) Goldfish Humidity sensor  | The Android Open Source Project | ver: 1 | type: android.sensor.relative_humidity(12) | perm: n/a | flags: 0x00000012
+	on-change | maxDelay=0us | minDelay=0us | no batching | non-wakeUp | data-injection, 
+0x00000009) Goldfish 3-axis Magnetic field sensor (uncalibrated) | The Android Open Source Project | ver: 1 | type: android.sensor.magnetic_field_uncalibrated(14) | perm: n/a | flags: 0x00000010
+	continuous | minRate=2.00Hz | maxRate=100.00Hz | no batching | non-wakeUp | data-injection, 
+0x0000000a) Goldfish 3-axis Gyroscope (uncalibrated) | The Android Open Source Project | ver: 1 | type: android.sensor.gyroscope_uncalibrated(16) | perm: n/a | flags: 0x00000010
+	continuous | minRate=2.00Hz | maxRate=100.00Hz | no batching | non-wakeUp | data-injection, 
+0x00000011) Goldfish 3-axis Accelerometer Uncalibrated | The Android Open Source Project | ver: 1 | type: android.sensor.accelerometer_uncalibrated(35) | perm: n/a | flags: 0x00000050
+	continuous | minRate=2.00Hz | maxRate=100.00Hz | no batching | non-wakeUp | data-injection, has-additional-info, 
+0x5f636779) Corrected Gyroscope Sensor | AOSP            | ver: 1 | type: android.sensor.gyroscope(4) | perm: n/a | flags: 0x00000000
+	continuous | maxDelay=0us | maxRate=100.00Hz | no batching | non-wakeUp | 
+0x5f676172) Game Rotation Vector Sensor | AOSP            | ver: 3 | type: android.sensor.game_rotation_vector(15) | perm: n/a | flags: 0x00000000
+	continuous | maxDelay=0us | maxRate=100.00Hz | no batching | non-wakeUp | 
+0x5f676273) Gyroscope Bias (debug)    | AOSP            | ver: 1 | type: android.sensor.accelerometer(1) | perm: n/a | flags: 0x00000000
+	continuous | maxDelay=0us | maxRate=100.00Hz | no batching | non-wakeUp | 
+0x5f67656f) GeoMag Rotation Vector Sensor | AOSP            | ver: 3 | type: android.sensor.geomagnetic_rotation_vector(20) | perm: n/a | flags: 0x00000000
+	continuous | maxDelay=0us | maxRate=100.00Hz | no batching | non-wakeUp | 
+0x5f677276) Gravity Sensor            | AOSP            | ver: 3 | type: android.sensor.gravity(9) | perm: n/a | flags: 0x00000000
+	continuous | maxDelay=0us | maxRate=100.00Hz | no batching | non-wakeUp | 
+0x5f6c696e) Linear Acceleration Sensor | AOSP            | ver: 3 | type: android.sensor.linear_acceleration(10) | perm: n/a | flags: 0x00000000
+	continuous | maxDelay=0us | maxRate=100.00Hz | no batching | non-wakeUp | 
+0x5f726f76) Rotation Vector Sensor    | AOSP            | ver: 3 | type: android.sensor.rotation_vector(11) | perm: n/a | flags: 0x00000000
+	continuous | maxDelay=0us | maxRate=100.00Hz | no batching | non-wakeUp | 
+0x5f797072) Orientation Sensor        | AOSP            | ver: 1 | type: android.sensor.orientation(3) | perm: n/a | flags: 0x00000000
+	continuous | maxDelay=0us | maxRate=100.00Hz | no batching | non-wakeUp | 
+Fusion States:
+9-axis fusion enabled (1 clients), gyro-rate= 200.00Hz, q=< 0.000168244, 0.000175319, 0.000260471, 1 > (1), b=< 4.14311e-08, 4.21099e-08, 3.06782e-08 >
+game fusion(no mag) enabled (1 clients), gyro-rate= 200.00Hz, q=< 0.000222921, 0.000115741, -0.412626, 0.910901 > (1), b=< 0, 0, 0 >
+geomag fusion (no gyro) disabled (0 clients), gyro-rate= 200.00Hz, q=< 0, 0, 0, 0 > (0), b=< 0, 0, 0 >
+Recent Sensor events:
+Rotation Vector Sensor: last 10 events
+	 1 (ts=50806.647328798, wall=11:05:45.057) 0.00, 0.00, 0.00, 1.00, 0.00, 
+	 2 (ts=50806.667328798, wall=11:05:45.078) 0.00, 0.00, 0.00, 1.00, 0.00, 
+	 3 (ts=50806.687328798, wall=11:05:45.097) 0.00, 0.00, 0.00, 1.00, 0.00, 
+	 4 (ts=50806.707328798, wall=11:05:45.117) 0.00, 0.00, 0.00, 1.00, 0.00, 
+	 5 (ts=50806.727328798, wall=11:05:45.137) 0.00, 0.00, 0.00, 1.00, 0.00, 
+	 6 (ts=50806.747328798, wall=11:05:45.157) 0.00, 0.00, 0.00, 1.00, 0.00, 
+	 7 (ts=50806.767328798, wall=11:05:45.177) 0.00, 0.00, 0.00, 1.00, 0.00, 
+	 8 (ts=50806.787328798, wall=11:05:45.198) 0.00, 0.00, 0.00, 1.00, 0.00, 
+	 9 (ts=50806.807328798, wall=11:05:45.219) 0.00, 0.00, 0.00, 1.00, 0.00, 
+	10 (ts=50806.827328798, wall=11:05:45.238) 0.00, 0.00, 0.00, 1.00, 0.00, 
+Goldfish 3-axis Gyroscope (uncalibrated): last 10 events
+	 1 (ts=50806.780959757, wall=11:05:45.191) 0.00, 0.00, 0.00, 0.00, -0.00, -0.00, 
+	 2 (ts=50806.785959757, wall=11:05:45.196) 0.00, 0.00, 0.00, 0.00, -0.00, -0.00, 
+	 3 (ts=50806.790959757, wall=11:05:45.204) 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 
+	 4 (ts=50806.795959757, wall=11:05:45.208) 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 
+	 5 (ts=50806.800959757, wall=11:05:45.211) 0.00, 0.00, 0.00, -0.00, 0.00, -0.00, 
+	 6 (ts=50806.805959757, wall=11:05:45.216) 0.00, 0.00, 0.00, -0.00, 0.00, -0.00, 
+	 7 (ts=50806.810959757, wall=11:05:45.221) 0.00, 0.00, 0.00, -0.00, -0.00, -0.00, 
+	 8 (ts=50806.815959757, wall=11:05:45.227) 0.00, 0.00, 0.00, -0.00, -0.00, -0.00, 
+	 9 (ts=50806.820959757, wall=11:05:45.231) 0.00, 0.00, 0.00, -0.00, -0.00, -0.00, 
+	10 (ts=50806.825959757, wall=11:05:45.236) 0.00, 0.00, 0.00, -0.00, -0.00, -0.00, 
+Goldfish Pressure sensor: last 10 events
+	 1 (ts=50806.642931704, wall=11:05:45.053) 1013.25, 0.00, 0.00, 
+	 2 (ts=50806.662931704, wall=11:05:45.073) 1013.25, 0.00, 0.00, 
+	 3 (ts=50806.682931704, wall=11:05:45.093) 1013.25, 0.00, 0.00, 
+	 4 (ts=50806.702931704, wall=11:05:45.113) 1013.25, 0.00, 0.00, 
+	 5 (ts=50806.722931704, wall=11:05:45.135) 1013.25, 0.00, 0.00, 
+	 6 (ts=50806.742931704, wall=11:05:45.153) 1013.25, 0.00, 0.00, 
+	 7 (ts=50806.762931704, wall=11:05:45.174) 1013.25, 0.00, 0.00, 
+	 8 (ts=50806.782931704, wall=11:05:45.193) 1013.25, 0.00, 0.00, 
+	 9 (ts=50806.802931704, wall=11:05:45.214) 1013.25, 0.00, 0.00, 
+	10 (ts=50806.822931704, wall=11:05:45.233) 1013.25, 0.00, 0.00, 
+Linear Acceleration Sensor: last 10 events
+	 1 (ts=50806.647328798, wall=11:05:45.057) 0.00, -0.00, 0.00, 
+	 2 (ts=50806.667328798, wall=11:05:45.078) 0.00, -0.00, 0.00, 
+	 3 (ts=50806.687328798, wall=11:05:45.097) 0.00, -0.00, 0.00, 
+	 4 (ts=50806.707328798, wall=11:05:45.117) 0.00, -0.00, 0.00, 
+	 5 (ts=50806.727328798, wall=11:05:45.137) 0.00, -0.00, 0.00, 
+	 6 (ts=50806.747328798, wall=11:05:45.157) 0.00, -0.00, 0.00, 
+	 7 (ts=50806.767328798, wall=11:05:45.177) 0.00, -0.00, 0.00, 
+	 8 (ts=50806.787328798, wall=11:05:45.198) 0.00, -0.00, 0.00, 
+	 9 (ts=50806.807328798, wall=11:05:45.219) 0.00, -0.00, 0.00, 
+	10 (ts=50806.827328798, wall=11:05:45.238) 0.00, -0.00, 0.00, 
+Goldfish 3-axis Magnetic field sensor: last 10 events
+	 1 (ts=50806.732513146, wall=11:05:45.143) 0.00, 9.88, -47.75, 
+	 2 (ts=50806.742513146, wall=11:05:45.153) 0.00, 9.88, -47.75, 
+	 3 (ts=50806.752513146, wall=11:05:45.164) 0.00, 9.88, -47.75, 
+	 4 (ts=50806.762513146, wall=11:05:45.174) 0.00, 9.88, -47.75, 
+	 5 (ts=50806.772513146, wall=11:05:45.183) 0.00, 9.88, -47.75, 
+	 6 (ts=50806.782513146, wall=11:05:45.193) 0.00, 9.88, -47.75, 
+	 7 (ts=50806.792513146, wall=11:05:45.204) 0.00, 9.88, -47.75, 
+	 8 (ts=50806.802513146, wall=11:05:45.214) 0.00, 9.88, -47.75, 
+	 9 (ts=50806.812513146, wall=11:05:45.223) 0.00, 9.88, -47.75, 
+	10 (ts=50806.822513146, wall=11:05:45.233) 0.00, 9.88, -47.75, 
+Goldfish 3-axis Gyroscope: last 10 events
+	 1 (ts=50806.641931554, wall=11:05:45.052) 0.00, 0.00, 0.00, 
+	 2 (ts=50806.661931554, wall=11:05:45.073) 0.00, 0.00, 0.00, 
+	 3 (ts=50806.681931554, wall=11:05:45.092) 0.00, 0.00, 0.00, 
+	 4 (ts=50806.701931554, wall=11:05:45.112) 0.00, 0.00, 0.00, 
+	 5 (ts=50806.721931554, wall=11:05:45.135) 0.00, 0.00, 0.00, 
+	 6 (ts=50806.741931554, wall=11:05:45.152) 0.00, 0.00, 0.00, 
+	 7 (ts=50806.761931554, wall=11:05:45.174) 0.00, 0.00, 0.00, 
+	 8 (ts=50806.781931554, wall=11:05:45.192) 0.00, 0.00, 0.00, 
+	 9 (ts=50806.801931554, wall=11:05:45.212) 0.00, 0.00, 0.00, 
+	10 (ts=50806.821931554, wall=11:05:45.232) 0.00, 0.00, 0.00, 
+Goldfish 3-axis Accelerometer: last 50 events
+	 1 (ts=50805.847328798, wall=11:05:44.257) 0.00, 0.00, 9.81, 
+	 2 (ts=50805.867328798, wall=11:05:44.277) 0.00, 0.00, 9.81, 
+	 3 (ts=50805.887328798, wall=11:05:44.297) 0.00, 0.00, 9.81, 
+	 4 (ts=50805.907328798, wall=11:05:44.317) 0.00, 0.00, 9.81, 
+	 5 (ts=50805.927328798, wall=11:05:44.337) 0.00, 0.00, 9.81, 
+	 6 (ts=50805.947328798, wall=11:05:44.357) 0.00, 0.00, 9.81, 
+	 7 (ts=50805.967328798, wall=11:05:44.377) 0.00, 0.00, 9.81, 
+	 8 (ts=50805.987328798, wall=11:05:44.398) 0.00, 0.00, 9.81, 
+	 9 (ts=50806.007328798, wall=11:05:44.417) 0.00, 0.00, 9.81, 
+	10 (ts=50806.027328798, wall=11:05:44.437) 0.00, 0.00, 9.81, 
+	11 (ts=50806.047328798, wall=11:05:44.457) 0.00, 0.00, 9.81, 
+	12 (ts=50806.067328798, wall=11:05:44.477) 0.00, 0.00, 9.81, 
+	13 (ts=50806.087328798, wall=11:05:44.497) 0.00, 0.00, 9.81, 
+	14 (ts=50806.107328798, wall=11:05:44.517) 0.00, 0.00, 9.81, 
+	15 (ts=50806.127328798, wall=11:05:44.540) 0.00, 0.00, 9.81, 
+	16 (ts=50806.147328798, wall=11:05:44.561) 0.00, 0.00, 9.81, 
+	17 (ts=50806.167328798, wall=11:05:44.578) 0.00, 0.00, 9.81, 
+	18 (ts=50806.187328798, wall=11:05:44.597) 0.00, 0.00, 9.81, 
+	19 (ts=50806.207328798, wall=11:05:44.627) 0.00, 0.00, 9.81, 
+	20 (ts=50806.227328798, wall=11:05:44.637) 0.00, 0.00, 9.81, 
+	21 (ts=50806.247328798, wall=11:05:44.657) 0.00, 0.00, 9.81, 
+	22 (ts=50806.267328798, wall=11:05:44.677) 0.00, 0.00, 9.81, 
+	23 (ts=50806.287328798, wall=11:05:44.697) 0.00, 0.00, 9.81, 
+	24 (ts=50806.307328798, wall=11:05:44.717) 0.00, 0.00, 9.81, 
+	25 (ts=50806.327328798, wall=11:05:44.737) 0.00, 0.00, 9.81, 
+	26 (ts=50806.347328798, wall=11:05:44.757) 0.00, 0.00, 9.81, 
+	27 (ts=50806.367328798, wall=11:05:44.778) 0.00, 0.00, 9.81, 
+	28 (ts=50806.387328798, wall=11:05:44.797) 0.00, 0.00, 9.81, 
+	29 (ts=50806.407328798, wall=11:05:44.817) 0.00, 0.00, 9.81, 
+	30 (ts=50806.427328798, wall=11:05:44.838) 0.00, 0.00, 9.81, 
+	31 (ts=50806.447328798, wall=11:05:44.857) 0.00, 0.00, 9.81, 
+	32 (ts=50806.467328798, wall=11:05:44.877) 0.00, 0.00, 9.81, 
+	33 (ts=50806.487328798, wall=11:05:44.898) 0.00, 0.00, 9.81, 
+	34 (ts=50806.507328798, wall=11:05:44.918) 0.00, 0.00, 9.81, 
+	35 (ts=50806.527328798, wall=11:05:44.938) 0.00, 0.00, 9.81, 
+	36 (ts=50806.547328798, wall=11:05:44.957) 0.00, 0.00, 9.81, 
+	37 (ts=50806.567328798, wall=11:05:44.978) 0.00, 0.00, 9.81, 
+	38 (ts=50806.587328798, wall=11:05:45.000) 0.00, 0.00, 9.81, 
+	39 (ts=50806.607328798, wall=11:05:45.031) 0.00, 0.00, 9.81, 
+	40 (ts=50806.627328798, wall=11:05:45.038) 0.00, 0.00, 9.81, 
+	41 (ts=50806.647328798, wall=11:05:45.057) 0.00, 0.00, 9.81, 
+	42 (ts=50806.667328798, wall=11:05:45.077) 0.00, 0.00, 9.81, 
+	43 (ts=50806.687328798, wall=11:05:45.097) 0.00, 0.00, 9.81, 
+	44 (ts=50806.707328798, wall=11:05:45.117) 0.00, 0.00, 9.81, 
+	45 (ts=50806.727328798, wall=11:05:45.137) 0.00, 0.00, 9.81, 
+	46 (ts=50806.747328798, wall=11:05:45.157) 0.00, 0.00, 9.81, 
+	47 (ts=50806.767328798, wall=11:05:45.177) 0.00, 0.00, 9.81, 
+	48 (ts=50806.787328798, wall=11:05:45.198) 0.00, 0.00, 9.81, 
+	49 (ts=50806.807328798, wall=11:05:45.219) 0.00, 0.00, 9.81, 
+	50 (ts=50806.827328798, wall=11:05:45.238) 0.00, 0.00, 9.81, 
+Active sensors:
+Goldfish 3-axis Accelerometer (handle=0x00000000, connections=3)
+Goldfish 3-axis Gyroscope (handle=0x00000001, connections=1)
+Goldfish Pressure sensor (handle=0x00000007, connections=1)
+Socket Buffer size = 39 events
+WakeLock Status: not held 
+Mode : NORMAL
+Sensor Privacy: disabled
+3 open event connections
+Connection Number: 0 
+	Operating Mode: NORMAL
+	 com.android.server.wm.WindowOrientationListener$AccelSensorJudge | WakeLockRefCount 0 | uid 1000 | cache size 0 | max cache size 0 | has sensor access: true
+	 Goldfish 3-axis Accelerometer 0x00000000 | first flush pending: false | pending flush events 0 
+Connection Number: 1 
+	Operating Mode: NORMAL
+	 com.android.server.power.FaceDownDetector | WakeLockRefCount 0 | uid 1000 | cache size 0 | max cache size 984 | has sensor access: true
+	 Goldfish 3-axis Accelerometer 0x00000000 | first flush pending: false | pending flush events 0 
+Connection Number: 2 
+	Operating Mode: NORMAL
+	 vn.nckh27pa.fallsafe.PhoneSensorCollector | WakeLockRefCount 0 | uid 10216 | cache size 0 | max cache size 984 | has sensor access: true
+	 Goldfish Pressure sensor 0x00000007 | first flush pending: false | pending flush events 0 
+	 Goldfish 3-axis Gyroscope 0x00000001 | first flush pending: false | pending flush events 0 
+	 Rotation Vector Sensor 0x5f726f76 | first flush pending: false | pending flush events 0 
+	 Linear Acceleration Sensor 0x5f6c696e | first flush pending: false | pending flush events 0 
+	 Goldfish 3-axis Accelerometer 0x00000000 | first flush pending: false | pending flush events 0 
+0 open direct connections
+Previous Registrations:
+11:05:40 + 0x00000007 pid=10768 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:40 + 0x5f726f76 pid=10768 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:40 + 0x00000001 pid=10768 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:40 + 0x5f6c696e pid=10768 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:40 + 0x00000000 pid=10768 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:40 - 0x5f726f76 pid=10768 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:40 - 0x5f6c696e pid=10768 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:40 - 0x00000007 pid=10768 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:40 - 0x00000001 pid=10768 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:40 - 0x00000000 pid=10768 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:40 + 0x00000007 pid=10768 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:40 + 0x5f726f76 pid=10768 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:40 + 0x00000001 pid=10768 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:40 + 0x5f6c696e pid=10768 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:40 + 0x00000000 pid=10768 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:38 - 0x5f726f76 pid=10768 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:38 - 0x5f6c696e pid=10768 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:38 - 0x00000007 pid=10768 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:38 - 0x00000001 pid=10768 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:38 - 0x00000000 pid=10768 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:32 + 0x00000007 pid=10768 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:32 + 0x5f726f76 pid=10768 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:32 + 0x00000001 pid=10768 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:32 + 0x5f6c696e pid=10768 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:05:32 + 0x00000000 pid=10768 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+11:04:52 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+11:04:52 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:59:33 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:59:33 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:54:15 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:54:14 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:48:56 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:48:56 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:43:37 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:43:37 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:38:19 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:38:18 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:33:00 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:33:00 - 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+10:33:00 - 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+10:33:00 + 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+10:33:00 + 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+10:33:00 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:27:41 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:27:41 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:22:23 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:22:22 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:17:04 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:17:04 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:11:45 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:11:45 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:06:27 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:06:26 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:01:08 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+10:01:08 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:55:49 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:55:49 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:50:31 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:50:30 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:45:12 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:45:12 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:39:53 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:39:53 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:34:35 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:34:34 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:29:16 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:29:16 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:23:58 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:23:57 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:18:39 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:18:38 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:13:20 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:13:20 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:08:02 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:08:01 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:02:43 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+09:02:43 - 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+09:02:43 - 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+09:02:43 + 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+09:02:43 + 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+09:02:42 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:57:24 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:57:24 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:52:06 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:52:05 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:46:47 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:46:46 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:41:28 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:41:28 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:36:10 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:36:09 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:30:51 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:30:50 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:25:32 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:25:32 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:20:14 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:20:13 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:18:35 - 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+08:18:35 - 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+08:18:35 + 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+08:18:35 + 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+08:14:55 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:14:54 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:09:36 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:09:36 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:04:18 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+08:04:17 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:58:59 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:58:58 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:53:40 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:53:40 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:48:22 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:48:21 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:43:03 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:43:02 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:37:54 - 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+07:37:54 - 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+07:37:54 + 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+07:37:54 + 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+07:37:44 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:37:44 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:32:26 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:32:25 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:27:07 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:27:06 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:25:19 - 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+07:25:19 - 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+07:25:19 + 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+07:25:19 + 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+07:21:48 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:21:48 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:16:30 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:16:29 - 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+07:16:29 - 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+07:16:29 + 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+07:16:29 + 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+07:16:29 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:11:11 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:11:10 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:05:52 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:05:52 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:00:34 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+07:00:33 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:55:15 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:55:14 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:49:56 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:49:56 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:44:38 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:44:37 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:39:19 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:39:19 - 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+06:39:19 - 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+06:39:18 + 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+06:39:18 + 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+06:39:18 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:34:00 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:34:00 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:28:42 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:28:41 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:23:23 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:23:22 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:22:51 - 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+06:22:51 - 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+06:22:51 + 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+06:22:51 + 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+06:18:04 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:18:04 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:12:46 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:12:45 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:07:27 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:07:26 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:04:12 - 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+06:04:12 - 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+06:04:12 + 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+06:04:12 + 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+06:02:08 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+06:02:08 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:56:50 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:56:49 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:51:31 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:51:30 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:46:12 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:46:12 - 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+05:46:12 - 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+05:46:12 + 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+05:46:12 + 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+05:46:12 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:45:51 - 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+05:45:51 - 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+05:45:51 + 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+05:45:51 + 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+05:40:54 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:40:53 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:35:35 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:35:34 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:30:16 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:30:16 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:24:58 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:24:57 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:19:40 - 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+05:19:40 - 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+05:19:40 + 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+05:19:40 + 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+05:19:39 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:19:38 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:14:20 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:14:20 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:09:02 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:09:01 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:03:43 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+05:03:42 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:58:24 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:58:21 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:58:16 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:58:12 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:58:07 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:58:04 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:58:04 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:58:03 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:53:53 + 0x00000007 pid= 9482 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:53:53 + 0x5f726f76 pid= 9482 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:53:53 + 0x00000001 pid= 9482 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:53:53 + 0x5f6c696e pid= 9482 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:53:53 + 0x00000000 pid= 9482 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:45 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:52:45 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:52:27 + 0x00000007 pid= 9351 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:27 + 0x5f726f76 pid= 9351 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:27 + 0x00000001 pid= 9351 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:27 + 0x5f6c696e pid= 9351 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:27 + 0x00000000 pid= 9351 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:27 - 0x5f726f76 pid= 9351 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:27 - 0x5f6c696e pid= 9351 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:27 - 0x00000007 pid= 9351 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:27 - 0x00000001 pid= 9351 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:27 - 0x00000000 pid= 9351 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:27 + 0x00000007 pid= 9351 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:27 + 0x5f726f76 pid= 9351 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:27 + 0x00000001 pid= 9351 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:27 + 0x5f6c696e pid= 9351 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:27 + 0x00000000 pid= 9351 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:24 - 0x5f726f76 pid= 9351 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:24 - 0x5f6c696e pid= 9351 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:24 - 0x00000007 pid= 9351 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:24 - 0x00000001 pid= 9351 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:24 - 0x00000000 pid= 9351 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:19 + 0x00000007 pid= 9351 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:19 + 0x5f726f76 pid= 9351 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:19 + 0x00000001 pid= 9351 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:19 + 0x5f6c696e pid= 9351 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:52:19 + 0x00000000 pid= 9351 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:51:02 + 0x00000007 pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:51:02 + 0x5f726f76 pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:51:02 + 0x00000001 pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:51:02 + 0x5f6c696e pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:51:02 + 0x00000000 pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:51:02 - 0x5f726f76 pid= 9142 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:51:02 - 0x5f6c696e pid= 9142 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:51:02 - 0x00000007 pid= 9142 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:51:02 - 0x00000001 pid= 9142 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:51:02 - 0x00000000 pid= 9142 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:54 + 0x00000007 pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:54 + 0x5f726f76 pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:54 + 0x00000001 pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:54 + 0x5f6c696e pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:54 + 0x00000000 pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:54 - 0x5f726f76 pid= 9142 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:54 - 0x5f6c696e pid= 9142 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:54 - 0x00000007 pid= 9142 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:54 - 0x00000001 pid= 9142 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:54 - 0x00000000 pid= 9142 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:53 + 0x00000007 pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:53 + 0x5f726f76 pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:53 + 0x00000001 pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:53 + 0x5f6c696e pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:53 + 0x00000000 pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:51 - 0x5f726f76 pid= 9142 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:51 - 0x5f6c696e pid= 9142 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:51 - 0x00000007 pid= 9142 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:51 - 0x00000001 pid= 9142 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:51 - 0x00000000 pid= 9142 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:45 + 0x00000007 pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:45 + 0x5f726f76 pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:45 + 0x00000001 pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:45 + 0x5f6c696e pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:45 + 0x00000000 pid= 9142 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:40 + 0x00000007 pid= 8964 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:40 + 0x5f726f76 pid= 8964 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:40 + 0x00000001 pid= 8964 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:40 + 0x5f6c696e pid= 8964 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:40 + 0x00000000 pid= 8964 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:40 - 0x5f726f76 pid= 8964 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:40 - 0x5f6c696e pid= 8964 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:40 - 0x00000007 pid= 8964 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:40 - 0x00000001 pid= 8964 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:40 - 0x00000000 pid= 8964 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:40 + 0x00000007 pid= 8964 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:40 + 0x5f726f76 pid= 8964 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:40 + 0x00000001 pid= 8964 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:40 + 0x5f6c696e pid= 8964 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:40 + 0x00000000 pid= 8964 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:37 - 0x5f726f76 pid= 8964 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:37 - 0x5f6c696e pid= 8964 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:37 - 0x00000007 pid= 8964 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:37 - 0x00000001 pid= 8964 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:37 - 0x00000000 pid= 8964 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:31 + 0x00000007 pid= 8964 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:31 + 0x5f726f76 pid= 8964 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:31 + 0x00000001 pid= 8964 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:31 + 0x5f6c696e pid= 8964 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:50:31 + 0x00000000 pid= 8964 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:47:27 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:47:26 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:47:14 + 0x00000007 pid= 8760 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:47:14 + 0x5f726f76 pid= 8760 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:47:14 + 0x00000001 pid= 8760 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:47:14 + 0x5f6c696e pid= 8760 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:47:14 + 0x00000000 pid= 8760 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:47:01 - 0x5f726f76 pid= 8760 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:47:01 - 0x5f6c696e pid= 8760 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:47:01 - 0x00000007 pid= 8760 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:47:01 - 0x00000001 pid= 8760 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:47:01 - 0x00000000 pid= 8760 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:46:54 + 0x00000007 pid= 8760 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:46:54 + 0x5f726f76 pid= 8760 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:46:54 + 0x00000001 pid= 8760 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:46:54 + 0x5f6c696e pid= 8760 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:46:54 + 0x00000000 pid= 8760 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+04:42:08 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:42:08 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:36:49 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:36:49 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:31:31 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:31:30 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:26:12 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:26:12 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:20:53 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:20:53 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:15:35 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:15:34 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:10:16 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:10:16 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:04:57 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+04:04:57 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:59:39 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:59:38 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:54:20 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:54:20 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:49:02 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:49:01 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:43:43 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:43:42 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:38:24 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:38:24 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:33:06 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:33:05 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:27:47 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:27:46 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:22:28 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:22:28 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:17:10 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:17:09 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:11:51 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:11:50 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:06:32 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:06:32 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:01:14 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+03:01:13 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:55:55 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:55:54 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:50:36 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:50:36 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:45:18 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:45:17 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:39:59 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:39:59 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:34:40 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:34:40 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:29:22 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:29:21 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:24:03 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:24:03 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:18:44 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:18:44 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:13:26 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:13:25 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:08:07 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:08:07 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:02:49 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+02:02:48 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:57:30 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:57:29 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:52:11 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:52:11 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:46:53 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:46:52 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:41:34 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:41:33 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:36:15 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:36:15 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:30:57 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:30:56 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:28:45 - 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+01:28:45 - 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+01:28:45 + 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+01:28:45 + 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+01:28:45 - 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+01:28:45 - 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+01:28:45 + 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+01:28:45 + 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+01:25:38 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:25:37 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:20:19 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:20:19 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:15:01 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:15:00 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:09:42 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:09:42 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:04:23 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+01:04:23 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:59:05 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:59:04 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:53:46 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:53:46 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:48:27 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:48:27 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:43:09 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:43:08 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:37:50 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:37:50 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:32:31 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:32:31 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:27:13 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:27:12 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:21:54 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:21:54 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:16:36 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:16:35 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:11:17 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:11:16 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:05:58 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:05:58 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:00:40 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+00:00:39 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:55:21 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:55:20 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:50:02 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:50:02 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:44:44 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:44:43 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:39:25 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:39:24 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:34:06 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:34:06 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:28:48 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:28:47 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:23:29 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:23:29 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:18:47 - 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+23:18:47 - 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+23:18:47 + 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+23:18:47 + 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+23:18:10 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:18:10 - 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+23:18:10 - 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+23:18:10 + 0x5f726f76 pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , com.google.ccc.abuse.droidguard.events.b)
+23:18:10 + 0x5f6c696e pid= 2708 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , com.google.ccc.abuse.droidguard.events.b)
+23:18:10 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:12:52 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:12:51 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:07:33 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:07:33 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:02:14 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+23:02:14 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+22:56:56 - 0x00000000 pid= 1722 uid=10142 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+22:56:55 + 0x00000000 pid= 1722 uid=10142 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, com.google.android.location.collectionlib.SensorScanner$SensorEventListenerAdapter)
+22:54:58 + 0x00000007 pid= 7356 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:58 + 0x5f726f76 pid= 7356 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:58 + 0x00000001 pid= 7356 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:58 + 0x5f6c696e pid= 7356 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:58 + 0x00000000 pid= 7356 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:55 + 0x00000007 pid= 7249 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:55 + 0x5f726f76 pid= 7249 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:55 + 0x00000001 pid= 7249 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:55 + 0x5f6c696e pid= 7249 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:55 + 0x00000000 pid= 7249 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:42 - 0x5f726f76 pid= 7249 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:42 - 0x5f6c696e pid= 7249 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:42 - 0x00000007 pid= 7249 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:42 - 0x00000001 pid= 7249 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:42 - 0x00000000 pid= 7249 uid=10216 samplingPeriod=   N/A  us batchingPeriod=   N/A  us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:36 + 0x00000007 pid= 7249 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:36 + 0x5f726f76 pid= 7249 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:36 + 0x00000001 pid= 7249 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:36 + 0x5f6c696e pid= 7249 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:36 + 0x00000000 pid= 7249 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Accelerometer, vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:02 + 0x00000007 pid= 7057 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish Pressure sensor   , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:02 + 0x5f726f76 pid= 7057 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Rotation Vector Sensor     , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:02 + 0x00000001 pid= 7057 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Goldfish 3-axis Gyroscope  , vn.nckh27pa.fallsafe.PhoneSensorCollector)
+22:54:02 + 0x5f6c696e pid= 7057 uid=10216 samplingPeriod=   20000us batchingPeriod=       0us result=OK (sensor, package): (Linear Acceleration Sensor , vn.nckh27pa.fallsafe.PhoneSensorCollector)

@@ -1,0 +1,321 @@
+REV-AGY-002 Android follow-up. CHỈ đọc văn bản này, không tool. Trả tối đa250từ tiếng Việt, mở đầu PASS hoặc FAIL trong phạm vi2bug. Không kể lại source hoặc tự nhận run tests. Kiểm2fix: pause phone không reset replay; invalid ACCEL qua normalizer phát null, reset detector trước sample kế; actual Android wiring phải gọi tested seam. Core remaining deadline không reset. Trước đó prompt quá dài timeout nên giảm scope, không bỏ findings. Mã liên quan:
+
+FILE DemoLogic.kt
+package vn.nckh27pa.fallsafe
+
+import core.*
+import kotlin.math.abs
+import kotlin.math.sqrt
+
+/** Names/types follow plan §4.5.2. Confidence 0 + UNKNOWN means unestimated. */
+data class PhoneSensorPacket(
+    val timestampNs: Long, val wallClockTimestampMs: Long,
+    val accelXMs2: Float, val accelYMs2: Float, val accelZMs2: Float,
+    val linearAccelXMs2: Float? = null, val linearAccelYMs2: Float? = null,
+    val linearAccelZMs2: Float? = null,
+    val gyroXDps: Float? = null, val gyroYDps: Float? = null, val gyroZDps: Float? = null,
+    val pitchDeg: Float? = null, val rollDeg: Float? = null, val yawDeg: Float? = null,
+    val pressurePa: Float? = null, val altitudeDeltaM: Float? = null,
+    val stepCount: Long? = null, val stepDetected: Boolean? = null,
+    val phoneMotionState: String = "UNKNOWN", val phonePlacementConfidence: Int = 0,
+    val sensorQuality: Int = 0
+)
+enum class SensorKind { ACCEL, LINEAR, GYRO, ORIENTATION, PRESSURE }
+class PhoneNormalizer {
+    private data class Reading(val ns: Long, val values: List<Float>)
+    private val readings = mutableMapOf<SensorKind, Reading>()
+    fun clear() = readings.clear()
+    fun update(kind: SensorKind, ns: Long, values: FloatArray) {
+        val count = if (kind == SensorKind.PRESSURE) 1 else 3
+        if (ns < 0 || values.size < count || values.take(count).any { !it.isFinite() } ||
+            (kind == SensorKind.PRESSURE && values[0] <= 0f)) {
+            readings.remove(kind); return
+        }
+        if (ns < (readings[kind]?.ns ?: -1)) return
+        val scale = when (kind) {
+            SensorKind.GYRO -> (180.0 / Math.PI).toFloat()
+            SensorKind.PRESSURE -> 100f
+            else -> 1f
+        }
+        val converted = values.take(count).map { it * scale }
+        if (converted.any { !it.isFinite() }) { readings.remove(kind); return }
+        readings[kind] = Reading(ns, converted)
+    }
+    fun packet(nowNs: Long, wallMs: Long): PhoneSensorPacket? {
+        fun fresh(kind: SensorKind) = readings[kind]?.takeIf {
+            nowNs >= it.ns && nowNs - it.ns <= 500_000_000
+        }
+        val a = fresh(SensorKind.ACCEL) ?: return null
+        val l = fresh(SensorKind.LINEAR)?.values
+        val g = fresh(SensorKind.GYRO)?.values
+        val o = fresh(SensorKind.ORIENTATION)?.values
+        return PhoneSensorPacket(a.ns, wallMs, a.values[0], a.values[1], a.values[2],
+            l?.get(0), l?.get(1), l?.get(2), g?.get(0), g?.get(1), g?.get(2),
+            o?.get(0), o?.get(1), o?.get(2), fresh(SensorKind.PRESSURE)?.values?.get(0))
+    }
+}
+
+/** DEMO only: impact >=25 m/s², then >=1 s quiet at 9.81±1 within 3 s.
+ * At least 6 quiet samples; gaps >250 ms, invalid or reversed times break evidence.
+ * These illustrative thresholds are not a validated fall detector.
+ */
+class DemoDetector {
+    private var last: Long? = null
+    private var impact: Long? = null
+    private var quiet: Long? = null
+    private var count = 0
+    fun reset() { last = null; impact = null; quiet = null; count = 0 }
+    fun accept(p: PhoneSensorPacket): Boolean {
+        val t = p.timestampNs
+        val a = listOf(p.accelXMs2, p.accelYMs2, p.accelZMs2)
+        if (t < 0 || a.any { !it.isFinite() }) { reset(); return false }
+        val previous = last
+        if (previous != null && (t <= previous || t - previous > 250_000_000)) {
+            reset(); last = t; return false
+        }
+        last = t
+        val magnitude = sqrt(a.sumOf { it.toDouble() * it.toDouble() })
+        if (magnitude >= 25) { impact = t; quiet = null; count = 0; return false }
+        val hit = impact ?: return false
+        if (t - hit > 3_000_000_000L) { impact = null; quiet = null; count = 0; return false }
+        if (abs(magnitude - 9.81) > 1) { quiet = null; count = 0; return false }
+        if (quiet == null) quiet = t
+        count++
+        if (count >= 6 && t - quiet!! >= 1_000_000_000) { reset(); return true }
+        return false
+    }
+}
+class DemoReplay(private val startMs: Long) {
+    private var index = 0
+    val finished get() = index > 16
+    fun due(nowMs: Long): List<PhoneSensorPacket> {
+        val result = mutableListOf<PhoneSensorPacket>()
+        while (!finished && nowMs >= startMs && nowMs - startMs >= index * 100L) {
+            result += PhoneSensorPacket((startMs + index * 100L) * 1_000_000, 0,
+                0f, 0f, if (index == 2) 30f else 9.81f)
+            index++
+        }
+        return result
+    }
+}
+class LocalDemoSink : AlertSink {
+    var fail = false
+    private val received = ArrayDeque<Alert>()
+    override fun send(alert: Alert) {
+        if (fail) error("Lỗi mô phỏng")
+        received.addLast(alert)
+        while (received.size > 32) received.removeFirst()
+    }
+    fun alerts() = received.toList()
+}
+class DemoSession(clock: MonotonicClock, val sink: LocalDemoSink = LocalDemoSink()) {
+    private val core = AlertCore(clock, sink)
+    private val detector = DemoDetector()
+    fun resetDetection() = detector.reset()
+    fun accept(packet: PhoneSensorPacket) {
+        if (core.snapshot().state == State.MONITORING && detector.accept(packet)) {
+            core.suspected(); core.evidenceConfirmed()
+        }
+    }
+    fun snapshot() = core.snapshot()
+    fun events() = core.events()
+    fun tick() = core.tick()
+    fun safe() { core.safe(); detector.reset() }
+    fun needHelp() { core.needHelp(); detector.reset() }
+    fun complete() { core.complete(); detector.reset() }
+}
+class SosHold {
+    private var started: Long? = null
+    fun start(nowMs: Long) { started = nowMs }
+    fun cancel() { started = null }
+    fun ready(nowMs: Long): Boolean {
+        val start = started ?: return false
+        if (nowMs >= start && nowMs - start >= 2000) { cancel(); return true }
+        return false
+    }
+}
+
+/** Shared by the Android collector and offline pipeline tests. */
+class PhoneInputPipeline(private val onPacket: (PhoneSensorPacket?) -> Unit) {
+    private val normalizer = PhoneNormalizer()
+    fun clear() = normalizer.clear()
+    fun latest(nowNs: Long, wallMs: Long) = normalizer.packet(nowNs, wallMs)
+    fun update(kind: SensorKind, ns: Long, values: FloatArray, nowNs: Long, wallMs: Long) {
+        normalizer.update(kind, ns, values)
+        if (kind == SensorKind.ACCEL) onPacket(latest(nowNs, wallMs))
+    }
+}
+
+/** Input and pause policy shared with the process-scoped controller. */
+class DemoInputAdapter(
+    private val session: DemoSession,
+    private val phoneOnly: () -> Boolean,
+    private val display: (PhoneSensorPacket?) -> Unit
+) {
+    fun acceptPhone(packet: PhoneSensorPacket?) {
+        if (!phoneOnly()) return
+        display(packet)
+        if (packet != null) session.accept(packet) else session.resetDetection()
+    }
+    fun acceptReplay(packet: PhoneSensorPacket) { display(packet); session.accept(packet) }
+    fun paused() {
+        if (phoneOnly()) { display(null); session.resetDetection() }
+    }
+}
+
+FILE DemoApplication.kt
+package vn.nckh27pa.fallsafe
+
+import android.app.Application
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import core.MonotonicClock
+import core.State
+
+/** Process-scoped session survives Activity recreation. No foreground service. */
+class DemoApplication : Application() {
+    lateinit var controller: DemoController; private set
+    override fun onCreate() { super.onCreate(); controller = DemoController() }
+}
+class DemoController {
+    var foreground by mutableStateOf(false)
+    val session = DemoSession(MonotonicClock { SystemClock.elapsedRealtime() })
+    var snapshot by mutableStateOf(session.snapshot()); private set
+    var events by mutableStateOf(session.events()); private set
+    var source by mutableStateOf("PHONE_ONLY • cảm biến thật"); private set
+    var packet by mutableStateOf<PhoneSensorPacket?>(null); private set
+    var replaying by mutableStateOf(false); private set
+    var fail by mutableStateOf(false); private set
+    private val input = DemoInputAdapter(session, { source.startsWith("PHONE_ONLY") }, { packet = it })
+    private var replay: DemoReplay? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private val tick = object : Runnable {
+        override fun run() {
+            val now = SystemClock.elapsedRealtime()
+            replay?.let { r ->
+                r.due(now).forEach(input::acceptReplay)
+                if (r.finished) { replay = null; replaying = false }
+            }
+            session.tick()
+            refresh()
+            if (replay != null || snapshot.state == State.VERIFYING) handler.postDelayed(this, 50)
+        }
+    }
+    fun refresh() { snapshot = session.snapshot(); events = session.events() }
+    private fun schedule() { handler.removeCallbacks(tick); handler.post(tick) }
+    fun acceptPhone(p: PhoneSensorPacket?) {
+        if (!source.startsWith("PHONE_ONLY")) return
+        input.acceptPhone(p)
+        refresh()
+        if (snapshot.state == State.VERIFYING) schedule()
+    }
+    fun displayPhone(p: PhoneSensorPacket?) {
+        if (source.startsWith("PHONE_ONLY")) packet = p
+    }
+    fun runReplay() {
+        if (snapshot.state != State.MONITORING || replaying) return
+        source = "MÔ PHỎNG • dữ liệu giả"
+        session.resetDetection()
+        packet = null
+        replay = DemoReplay(SystemClock.elapsedRealtime())
+        replaying = true
+        schedule()
+    }
+    fun usePhone() {
+        if (snapshot.state != State.MONITORING) return
+        replay = null; replaying = false; packet = null
+        source = "PHONE_ONLY • cảm biến thật"
+        session.resetDetection()
+    }
+    fun safe() { session.safe(); refresh() }
+    fun sos() { if (foreground) help() }
+    fun help() { session.needHelp(); refresh() }
+    fun complete() { replay = null; replaying = false; session.complete(); refresh() }
+    fun setFailure(value: Boolean) { fail = value; session.sink.fail = value }
+    fun paused() { input.paused(); refresh() }
+    fun resumed() { session.tick(); refresh(); schedule() }
+}
+
+FILE PhoneSensorCollector.kt
+package vn.nckh27pa.fallsafe
+
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
+
+/** Activity starts/stops collection; all callbacks are confined to main looper. */
+class PhoneSensorCollector(context: Context, private val onPacket: (PhoneSensorPacket?) -> Unit) : SensorEventListener {
+    private val manager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    private val pipeline = PhoneInputPipeline(onPacket)
+    private val kinds = mapOf(
+        Sensor.TYPE_ACCELEROMETER to SensorKind.ACCEL,
+        Sensor.TYPE_LINEAR_ACCELERATION to SensorKind.LINEAR,
+        Sensor.TYPE_GYROSCOPE to SensorKind.GYRO,
+        Sensor.TYPE_ROTATION_VECTOR to SensorKind.ORIENTATION,
+        Sensor.TYPE_PRESSURE to SensorKind.PRESSURE
+    )
+    var activeSensors: Set<SensorKind> = emptySet(); private set
+    private var running = false
+    fun start() {
+        stop()
+        running = true
+        activeSensors = kinds.mapNotNull { (type, kind) ->
+            val sensor = manager.getDefaultSensor(type) ?: return@mapNotNull null
+            val registered = try {
+                manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME, Handler(Looper.getMainLooper()))
+            } catch (_: SecurityException) { false }
+            if (registered) kind else null
+        }.toSet()
+    }
+    fun stop() {
+        running = false
+        manager.unregisterListener(this)
+        pipeline.clear()
+        activeSensors = emptySet()
+    }
+    fun latest(): PhoneSensorPacket? = pipeline.latest(SystemClock.elapsedRealtimeNanos(), System.currentTimeMillis())
+    override fun onSensorChanged(event: SensorEvent) {
+        if (!running) return
+        val kind = kinds[event.sensor.type] ?: return
+        if (kind == SensorKind.ORIENTATION) {
+            if (event.values.size < 3 || event.values.any { !it.isFinite() }) {
+                update(kind, event.timestamp, floatArrayOf(Float.NaN)); return
+            }
+            val rotation = FloatArray(9)
+            val orientation = FloatArray(3)
+            SensorManager.getRotationMatrixFromVector(rotation, event.values)
+            SensorManager.getOrientation(rotation, orientation)
+            update(kind, event.timestamp, floatArrayOf(
+                Math.toDegrees(orientation[1].toDouble()).toFloat(),
+                Math.toDegrees(orientation[2].toDouble()).toFloat(),
+                Math.toDegrees(orientation[0].toDouble()).toFloat()
+            ))
+        } else update(kind, event.timestamp, event.values)
+    }
+    private fun update(kind: SensorKind, ns: Long, values: FloatArray) {
+        pipeline.update(kind, ns, values, SystemClock.elapsedRealtimeNanos(), System.currentTimeMillis())
+    }
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+}
+
+MainActivity actual onPause:
+ {
+        controller.foreground = false
+        collector.stop()
+        handler.removeCallbacks(poll)
+        controller.paused()
+        super.onPause()
+    }
+}
+
+
+Hermes actual tests13 GREEN after exact2 assertion failures before fix. Đây là evidence của Hermes không phải bạn đã chạy. Hạn chế demo không foreground service/process recovery vẫn công bố. Give bounded verdict, not entire app certification.

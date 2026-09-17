@@ -1,0 +1,34 @@
+**ĐÁNH GIÁ: FAIL**
+
+Tích hợp vi phạm các yêu cầu cốt lõi về bàn giao quyền thu thập cảm biến (sample ownership), bảo toàn countdown `VERIFYING`, quản lý wakelock và xử lý lỗi vòng đời FGS.
+
+---
+
+### 1. `MainActivity.kt:84`, `DemoApplication.kt:77` — Reset trạng thái khi Activity Pause
+* **Yêu cầu vi phạm:** *noResponse not reset on pause*.
+* **Repro:** Khi chưa bật background monitoring (`backgroundMonitoring = false`), nếu hệ thống phát hiện ngã và chuyển sang `State.VERIFYING` (đang đếm ngược chờ phản hồi), người dùng khóa màn hình hoặc chuyển app:
+  * `MainActivity.onPause()` gọi `controller.paused()`.
+  * `DemoInputAdapter.paused(false)` gọi `session.resetDetection()`.
+  * **Hậu quả:** Sự kiện ngã và bộ đếm `noResponse` bị hủy lập tức thay vì tiếp tục đếm đến khi quá hạn.
+
+---
+
+### 2. `MainActivity.kt:64-69`, `MonitoringService.kt:45-48, 80-84` — Mất quyền thu cảm biến khi FGS Start lỗi & nuốt lỗi
+* **Yêu cầu vi phạm:** *Sample ownership Activity/service*, *Lifecycle start failure*.
+* **Repro:** `MainActivity.beginMonitoring()` dừng `collector.stop()` rồi gọi `startForegroundService()`. Khi `MonitoringService.onCreate()` thất bại tại `startForeground` (ví dụ: thiếu điều kiện API 34+), catch block gọi `stopSelf()`.
+  * Khối try-catch của `MainActivity` không bắt được lỗi bất đồng bộ này, khiến collector của Activity bị tắt vĩnh viễn dù app vẫn ở foreground (không còn bên nào đọc cảm biến).
+  * `MonitoringService.onDestroy()` ngay lập tức ghi đè `backgroundMessage` (dòng 82), xóa mất thông báo lỗi vừa gán ở dòng 46.
+
+---
+
+### 3. `MainActivity.kt:76, 78` — Chặn dừng service và Race Condition khi Stop FGS
+* **Yêu cầu vi phạm:** *Sample ownership*, *Lifecycle stop failure*.
+* **Repro:** 
+  * Dòng 76: `if (controller.snapshot.state != State.MONITORING) return` ngăn người dùng dừng service nếu đang ở `VERIFYING` hoặc `SOS`.
+  * Dòng 78: Sử dụng `postDelayed(..., 100)` để bật lại collector của Activity. Nếu service mất hơn 100ms để hủy, `backgroundMonitoring` vẫn `true`, Activity bỏ qua `collector.start()`. Ngược lại, nếu Activity bật collector trước khi service hủy, `onDestroy()` của service sẽ gọi `session.resetDetection()` và `displayPhone(null)`, làm hỏng phiên mới.
+
+---
+
+### 4. `MonitoringService.kt:63-67` — Wakelock tắt sớm trong lúc VERIFYING
+* **Yêu cầu vi phạm:** *Bounded wakelock VERIFYING only*.
+* **Repro:** `protectVerification()` kiểm tra `protectedEvent != state.eventId` và khóa thời gian acquire ở `coerceIn(0, 10000) + 1000`. Nếu thời gian xác minh > 10 giây (hoặc `remainingMs == null` dẫn đến 1 giây), wakelock hết hạn sau 11s và không được gia hạn lại do `protectedEvent` không đổi. CPU có thể ngủ trước khi `noResponse` kịp kích hoạt.

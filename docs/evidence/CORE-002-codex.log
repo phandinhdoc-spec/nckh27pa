@@ -1,0 +1,1240 @@
+OpenAI Codex v0.154.0
+--------
+workdir: /home/pdd/nckh27pa
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: none
+reasoning summaries: none
+session id: 01a0a022-9ab3-7461-a47f-ecee8827675b
+--------
+user
+Thực hiện docs/tasks/CORE-002.md ngay. Chỉ android/core/tests,evidence,README; giữ source nếu không có bug. Thêm regression tests reentrant sink thành công và Long.MAX_VALUE; ghi rõ tests bổ sung sau triển khai, không giả TDD hoặc tái viết source cho đẹp quy trình. Chạy suite/demo và báo thật. Không agent con, không network, không commit; đọc chỉ core/ và phiếu + review trước. Hermes làm phần Android ngoài core song song.
+codex
+Tôi sẽ đọc phiếu CORE-002, review và nội dung `android/core/` trước; chỉ sửa tests, evidence và README trong core. Tôi sẽ giữ source nếu không phát hiện bug, chạy suite/demo và ghi đúng việc các regression tests được bổ sung sau triển khai.
+
+exec
+/bin/bash -lc "pwd; rg --files -g 'AGENTS.md' -g '*CORE-002*' -g '*review*' -g '*REVIEW*' docs/tasks android/core" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+/home/pdd/nckh27pa
+docs/tasks/CORE-002.md
+
+exec
+/bin/bash -lc 'cat docs/tasks/CORE-002.md
+rg --files android/core' in /home/pdd/nckh27pa
+ succeeded in 0ms:
+# CORE-002 — Đóng khoảng trống kiểm thử trước tích hợp
+Trạng thái: READY, chưa chạy, không tự coi review PASS là hoàn tất CORE-001.
+Mục tiêu: bổ sung regression biên thời gian và successful reentrant sink; xử lý minh bạch thiếu TDD trước chuyển lõi vào ứng dụng.
+Nguồn: CORE-001; REV-CORE-001.json; Android §4.4,7,9.
+Người/nhóm/model: Codex gpt-6-astra đã gọi được; reviewer phiên riêng. Hermes quyết định khi khởi chạy.
+Đầu vào: android/core/src, tests, README, log RED/GREEN, review.
+Phạm vi sửa: android/core/tests, evidence, README; source chỉ nếu test tìm bug và có RED tái hiện. Không đổi API/wire hoặc kế hoạch.
+Phụ thuộc: REV-CORE-001 hoàn thành.
+Bàn giao: permanent regression tests successful reentrant sink, Long.MAX_VALUE clock/timeout; bằng chứng chạy thật. Với hành vi đã tồn tại, gọi đúng là regression bổ sung, không gán RED/GREEN lịch sử giả. Theo chỉ thị tiếp theo của chủ dự án: ghi rõ kiểm thử bổ sung sau triển khai; không gọi là test-first cho mã đã viết. Giữ thiếu sót lịch sử trong báo cáo, không tái viết mã đang chạy chỉ để tạo bằng chứng RED/GREEN hồi tố.
+Nghiệm thu: suite + demo exit0, không phát cảnh báo thật; review không lỗi chặn; không đánh dấu CORE-001 đạt đầy đủ nếu thiếu TDD chưa giải quyết.
+Kiểm chứng: ./android/core/run-tests.sh và demo; mỗi hướng tối đa2 lần không tiến triển. Không Gradle/emulator/network, không xóa source người dùng hoặc nới sandbox.
+android/core/tests/CoreTests.kt
+android/core/run-tests.sh
+android/core/README.md
+android/core/src/RecordingSink.kt
+android/core/src/Demo.kt
+android/core/src/Core.kt
+android/core/evidence/02-green.log
+android/core/evidence/04-green.log
+android/core/evidence/06-red.log
+android/core/evidence/03-red.log
+android/core/evidence/04-red.log
+android/core/evidence/07-red.log
+android/core/evidence/tdd-stages.py
+android/core/evidence/01-red.log
+android/core/evidence/03-green.log
+android/core/evidence/05-green.log
+android/core/evidence/demo.log
+android/core/evidence/compiler.log
+android/core/evidence/08-contract-checks.log
+android/core/evidence/final-tests.log
+android/core/evidence/01-green.log
+android/core/evidence/07-green.log
+android/core/evidence/06-green.log
+android/core/evidence/02-red.log
+android/core/evidence/05-red.log
+android/core/evidence/tdd-final-stages.py
+
+exec
+/bin/bash -lc "rg --files docs -g '*REV-CORE-001*'
+cat android/core/README.md android/core/run-tests.sh android/core/src/Core.kt android/core/src/RecordingSink.kt android/core/src/Demo.kt android/core/tests/CoreTests.kt" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+docs/tasks/REV-CORE-001.md
+docs/evidence/REV-CORE-001.json
+# CORE-001 — lõi Kotlin ngoại tuyến
+
+Lõi thử nghiệm, không Android dependency. Chỉ đọc nguồn Android §4.4, §7, §9 và phiếu CORE-001. Không thuật toán phát hiện ngã: bên tích hợp cung cấp `suspected()` và `evidenceConfirmed()`.
+
+Chạy từ root repo:
+
+```sh
+./android/core/run-tests.sh
+./android/core/run-tests.sh core.DemoKt
+```
+
+Runner dùng Kotlin 2.3.10 tại `/home/pdd/.local/opt/nckh27pa/android-studio/plugins/Kotlin/kotlinc/bin/kotlinc` và `JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64`. Compile jar local, chạy Java thật, dọn thư mục build tạm; không Gradle/network/thư viện tải thêm. Đường dẫn công cụ là điều kiện môi trường, không tự cài nếu thiếu.
+
+## Hợp đồng tích hợp
+
+- Tạo và gọi mọi API core/sink trên cùng một thread, kể cả snapshot. Sai thread ném `IllegalStateException` trước khi sửa state. Host chịu trách nhiệm serialize callback lên thread đó; đây không phải class đa luồng có lock.
+- Clock cung cấp elapsed milliseconds không giảm, không lấy từ civil/wall time. Khoảng elapsed phải nằm trong miền Long không âm. Fake clock được dùng trong test/demo; chưa có adapter clock Android.
+- `evidenceConfirmed()` chỉ bắt đầu countdown từ SUSPECTED, mặc định 10.000 ms. Callback lặp trong sự kiện không khởi động lại hạn. `riskCleared()` chỉ hủy SUSPECTED.
+- Host phải gọi `tick()` tại hạn hoặc ngay khi tiếp tục chạy. Snapshot chỉ phục vụ hiển thị, không phát side effect. Không có scheduler/thread nền: “tự gửi” nghĩa là tick đến hạn gửi mà không cần phản hồi người dùng; không bảo đảm chạy đúng giờ khi host ngủ hoặc process chết.
+- SAFE trước hạn hủy; SAFE tại/sau hạn xử lý timeout trước nên không xóa cảnh báo. NEED_HELP/SOS gửi ngay từ MONITORING/SUSPECTED/VERIFYING. Trong ALERTING/AWAITING_HELP, SOS tiếp theo bị bỏ qua để tránh spam.
+- Sink đồng bộ: return thành công nghĩa là sink chấp nhận (SENT), không chứng minh người nhận thật đã nhận. Exception thành FAILED, giữ ALERTING, không tự retry vì transport có thể đã nhận trước khi ném lỗi. Fatal JVM Error không được xử lý như lỗi transport thông thường.
+- State ALERTING/SENDING và cờ gửi được đặt trước khi gọi sink. Sink gọi ngược SOS/complete không gửi trùng hoặc đóng sự kiện đang gửi. `complete()` sau SENT hoặc FAILED quay MONITORING/ACKNOWLEDGED; SOS mới có ID mới. ID chỉ tăng trong vòng đời instance, không bền qua restart. ACKNOWLEDGED biểu thị host kết thúc sự kiện, không phải biên nhận transport.
+- Core hiện luôn gửi thông báo chưa xác định vị trí, không chờ GPS. Chưa chọn/lấy vị trí thật hoặc dựng payload liên hệ đầy đủ trong §7. Không có raw phone/contact/location trong event log. `RecordedEvent` chỉ chứa ID/state/status; log bỏ bản cũ khi đầy (mặc định 32). `RecordingSink` cũng hữu hạn, trả bản sao danh sách.
+- Snapshot giữ response/status cuối sau complete, lần suspected/SOS mới bắt đầu sự kiện mới. Các callback phải thuộc sự kiện hiện tại; chưa có token lọc callback cũ xuyên qua complete.
+
+## Bằng chứng và bàn giao
+
+`evidence/01..07-{red,green}.log` là output chạy thật theo các nhóm hành vi: chuyển trạng thái/callback, deadline/thiếu vị trí, SAFE boundary, HELP/SOS/complete, lỗi/reentrancy, config, bounded recording sink. RED 07 là compile failure vì RecordingSink chưa có. RED 05 phát hiện đệ quy gửi lại gây StackOverflow trước khi thêm guard. Hai script `tdd-*.py` lưu các bước lịch sử, **không chạy lại trên source cuối**.
+
+`08-contract-checks.log` kiểm tra wall time và owner thread bổ sung, chỉ GREEN: guard thread và clock injection đã có từ scaffold, vì vậy không tuyên bố TDD RED riêng cho mọi điều kiện con. Bounded event log cũng đã có trong scaffold; vòng 07 thêm TDD cho RecordingSink và kiểm tra cả hai bộ nhớ. Đây là giới hạn so với yêu cầu nghiêm ngặt “RED/GREEN từng hành vi”.
+
+`final-tests.log` và `demo.log` là lần chạy bản cuối. Không dùng agent con, không nới sandbox, không commit. Hermes đã chạy lại 9 nhóm test và demo exit0 (docs/evidence/core-tests-hermes.log, core-demo-hermes.log). Reviewer độc lập REV-CORE-001 kết luận PASS trong phạm vi core offline, không phát hiện lỗi chặn (docs/evidence/REV-CORE-001.json). Chưa tích hợp Android; thiếu sót TDD nêu trên vẫn chưa được đóng. Các probe bổ sung reviewer báo đã chạy chưa phải regression test lưu trong repo. Chưa xác minh SUR-001 trong phiên này vì giới hạn chỉ đọc các mục được dẫn.
+
+Không coi CORE này là hoàn thành AND-001/APK. Chưa giải quyết sensor, UI, background, persistence, Android permissions hay real transport.
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")"
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+KOTLINC=/home/pdd/.local/opt/nckh27pa/android-studio/plugins/Kotlin/kotlinc/bin/kotlinc
+build=$(mktemp -d)
+trap 'rm -rf "$build"' EXIT
+"$KOTLINC" src/*.kt tests/*.kt -include-runtime -d "$build/core.jar"
+"$JAVA_HOME/bin/java" -cp "$build/core.jar" "${1:-core.CoreTestsKt}"
+package core
+
+/** Nondecreasing elapsed milliseconds, never civil/wall time. */
+fun interface MonotonicClock { fun nowMs(): Long }
+
+/** Synchronous acceptance: return means SENT; throw Exception means FAILED. */
+fun interface AlertSink { fun send(alert: Alert) }
+
+enum class State { MONITORING, SUSPECTED, VERIFYING, ALERTING, AWAITING_HELP }
+enum class Response { UNKNOWN, SAFE, NEED_HELP, NO_RESPONSE }
+enum class Status { NOT_REQUIRED, COUNTDOWN, SENDING, SENT, FAILED, ACKNOWLEDGED }
+data class Alert(
+    val eventId: Long,
+    val response: Response,
+    val locationMessage: String = "chưa xác định được vị trí"
+)
+data class Snapshot(
+    val state: State,
+    val eventId: Long,
+    val response: Response,
+    val status: Status,
+    val remainingMs: Long?
+)
+data class RecordedEvent(val eventId: Long, val state: State, val status: Status)
+
+/**
+ * Confined to the creating thread, including reads and sink callbacks.
+ * Host must call tick at the deadline; this core does not schedule background work.
+ * Calls reentering from the synchronous sink cannot finish or resend the active event.
+ */
+class AlertCore(
+    private val clock: MonotonicClock,
+    private val sink: AlertSink,
+    private val timeoutMs: Long = 10_000,
+    private val logCapacity: Int = 32
+) {
+    init {
+        require(timeoutMs > 0) { "timeoutMs must be positive" }
+        require(logCapacity > 0) { "logCapacity must be positive" }
+    }
+
+    private val owner = Thread.currentThread()
+    private var state = State.MONITORING
+    private var eventId = 0L
+    private var response = Response.UNKNOWN
+    private var status = Status.NOT_REQUIRED
+    private var started = 0L
+    private var sending = false
+    private val log = ArrayDeque<RecordedEvent>()
+
+    private fun owned() {
+        check(Thread.currentThread() === owner) { "Call on owner thread" }
+    }
+
+    /** Display-only read; never sends an alert. */
+    fun snapshot(): Snapshot {
+        owned()
+        val remaining = if (state == State.VERIFYING)
+            (timeoutMs - (clock.nowMs() - started)).coerceAtLeast(0) else null
+        return Snapshot(state, eventId, response, status, remaining)
+    }
+
+    fun events(): List<RecordedEvent> {
+        owned()
+        return log.toList()
+    }
+
+    private fun record() {
+        log.addLast(RecordedEvent(eventId, state, status))
+        while (log.size > logCapacity) log.removeFirst()
+    }
+
+    fun suspected() {
+        owned()
+        if (state == State.MONITORING) {
+            eventId++
+            response = Response.UNKNOWN
+            status = Status.NOT_REQUIRED
+            state = State.SUSPECTED
+            record()
+        }
+    }
+
+    fun evidenceConfirmed() {
+        owned()
+        if (state == State.SUSPECTED) {
+            started = clock.nowMs()
+            state = State.VERIFYING
+            status = Status.COUNTDOWN
+            record()
+        }
+    }
+
+    fun riskCleared() {
+        owned()
+        if (state == State.SUSPECTED) {
+            state = State.MONITORING
+            record()
+        }
+    }
+
+    private fun dispatch(reason: Response) {
+        if (state == State.ALERTING || state == State.AWAITING_HELP) return
+        if (state == State.MONITORING) eventId++
+        response = reason
+        state = State.ALERTING
+        status = Status.SENDING
+        record()
+        // Set both state and guard before invoking external code.
+        sending = true
+        try {
+            sink.send(Alert(eventId, reason))
+            status = Status.SENT
+            state = State.AWAITING_HELP
+        } catch (_: Exception) {
+            // Never retain transport messages, which may contain private data.
+            status = Status.FAILED
+        } finally {
+            sending = false
+        }
+        record()
+    }
+
+    fun tick() {
+        owned()
+        if (state == State.VERIFYING && clock.nowMs() - started >= timeoutMs)
+            dispatch(Response.NO_RESPONSE)
+    }
+
+    fun safe() {
+        owned()
+        tick()
+        if (state == State.VERIFYING || state == State.SUSPECTED) {
+            response = Response.SAFE
+            status = Status.NOT_REQUIRED
+            state = State.MONITORING
+            record()
+        }
+    }
+
+    fun needHelp() {
+        owned()
+        dispatch(Response.NEED_HELP)
+    }
+
+    fun sos() {
+        owned()
+        dispatch(Response.NEED_HELP)
+    }
+
+    fun complete() {
+        owned()
+        if (!sending && (state == State.AWAITING_HELP || state == State.ALERTING)) {
+            state = State.MONITORING
+            status = Status.ACKNOWLEDGED
+            record()
+        }
+    }
+}
+package core
+
+/** In-memory fake recipient; use only on its creating thread. No contact/location data. */
+class RecordingSink(private val capacity: Int = 32) : AlertSink {
+    init { require(capacity > 0) { "capacity must be positive" } }
+    private val owner = Thread.currentThread()
+    private val recorded = ArrayDeque<Alert>()
+    private fun owned() { check(Thread.currentThread() === owner) { "Call on owner thread" } }
+    override fun send(alert: Alert) {
+        owned(); recorded.addLast(alert)
+        while (recorded.size > capacity) recorded.removeFirst()
+    }
+    fun alerts(): List<Alert> { owned(); return recorded.toList() }
+}
+package core
+
+fun main() {
+    println("CORE ONLY: fake monotonic clock and fake recipient; no sensors/UI/real transport")
+    val clock = object : MonotonicClock {
+        var time = 0L
+        override fun nowMs() = time
+    }
+    lateinit var core: AlertCore
+    core = AlertCore(clock, AlertSink { alert ->
+        println("${core.snapshot().state}: fake recipient accepted event ${alert.eventId}, ${alert.response}; ${alert.locationMessage}")
+    })
+    println(core.snapshot().state)
+    core.suspected(); println(core.snapshot().state)
+    core.evidenceConfirmed(); println("${core.snapshot().state}: ${core.snapshot().remainingMs} ms")
+    clock.time = 10_000; core.tick(); println("${core.snapshot().state}: ${core.snapshot().status}")
+}
+package core
+
+class FakeClock(var time: Long = 0) : MonotonicClock { override fun nowMs() = time }
+fun main() {
+    var passed = 0
+    fun test(name: String, body: () -> Unit) { body(); println("PASS $name"); passed++ }
+    test("suspected, clear, confirmed and duplicate callbacks") {
+        val clock = FakeClock(); val c = AlertCore(clock, AlertSink {})
+        c.evidenceConfirmed(); check(c.snapshot().state == State.MONITORING)
+        c.suspected(); check(c.snapshot().state == State.SUSPECTED)
+        c.riskCleared(); check(c.snapshot().state == State.MONITORING)
+        c.suspected(); c.evidenceConfirmed(); check(c.snapshot().remainingMs == 10_000L)
+        clock.time = 9_999; c.suspected(); c.evidenceConfirmed(); c.riskCleared()
+        check(c.snapshot().state == State.VERIFYING); check(c.snapshot().remainingMs == 1L)
+    }
+    test("deadline 10s, no response, absent location, one send") {
+        val clock = FakeClock(500); val sent = mutableListOf<Alert>()
+        val c = AlertCore(clock, AlertSink { sent += it }); c.suspected(); c.evidenceConfirmed()
+        clock.time = 10_499; c.tick(); check(sent.isEmpty())
+        clock.time = 10_500; c.tick(); c.tick(); c.evidenceConfirmed(); c.suspected()
+        check(sent.size == 1); check(sent.single().response == Response.NO_RESPONSE)
+        check(sent.single().locationMessage == "chưa xác định được vị trí")
+        check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
+        check(c.events().map { it.state }.contains(State.ALERTING))
+    }
+    test("SAFE before deadline cancels; at and after deadline preserves alert") {
+        for (time in listOf(9_999L, 10_000L, 10_001L)) {
+            val clock = FakeClock(); val sent = mutableListOf<Alert>(); val c = AlertCore(clock, AlertSink { sent += it })
+            c.suspected(); c.evidenceConfirmed(); clock.time = time; c.safe()
+            if (time < 10_000) {
+                check(c.snapshot().state == State.MONITORING); check(c.snapshot().response == Response.SAFE)
+                clock.time = 20_000; c.tick(); check(sent.isEmpty())
+            } else {
+                check(sent.size == 1); c.safe(); check(c.snapshot().status == Status.SENT)
+                check(c.snapshot().response == Response.NO_RESPONSE)
+            }
+        }
+    }
+    test("immediate NEED_HELP and SOS, dedup, completion permits new event") {
+        for (action in listOf("help", "sos")) for (initial in 0..2) {
+            val sent = mutableListOf<Alert>(); val c = AlertCore(FakeClock(), AlertSink { sent += it })
+            if (initial >= 1) c.suspected(); if (initial == 2) c.evidenceConfirmed()
+            c.complete(); if (action == "help") c.needHelp() else c.sos()
+            check(sent.size == 1); check(sent.single().response == Response.NEED_HELP)
+            c.sos(); c.needHelp(); c.safe(); check(sent.size == 1)
+            c.complete(); check(c.snapshot().state == State.MONITORING)
+            check(c.snapshot().status == Status.ACKNOWLEDGED)
+            c.sos(); check(sent.size == 2); check(sent[0].eventId != sent[1].eventId)
+        }
+    }
+    test("sink failure stays FAILED; reentrant calls cannot send or complete") {
+        var calls = 0; lateinit var c: AlertCore
+        c = AlertCore(FakeClock(), AlertSink {
+            calls++; check(c.snapshot().state == State.ALERTING); check(c.snapshot().status == Status.SENDING)
+            c.complete(); c.sos(); c.needHelp(); c.safe(); c.tick(); c.suspected(); c.evidenceConfirmed()
+            throw IllegalStateException("private transport details")
+        })
+        c.sos(); check(calls == 1); check(c.snapshot().status == Status.FAILED)
+        check(c.snapshot().state == State.ALERTING); c.sos(); check(calls == 1)
+        check(!c.events().toString().contains("private")); c.complete(); c.sos(); check(calls == 2)
+    }
+    test("invalid timeout and log capacity rejected") {
+        for (timeout in listOf(0L, -1L)) check(runCatching { AlertCore(FakeClock(), AlertSink {}, timeout) }.exceptionOrNull() is IllegalArgumentException)
+        for (capacity in listOf(0, -1)) check(runCatching { AlertCore(FakeClock(), AlertSink {}, logCapacity = capacity) }.exceptionOrNull() is IllegalArgumentException)
+    }
+    test("bounded sink and state history retain latest records; copies isolated") {
+        val sink = RecordingSink(2); val c = AlertCore(FakeClock(), sink, logCapacity = 3)
+        repeat(20) { c.sos(); c.complete() }
+        check(sink.alerts().map { it.eventId } == listOf(19L, 20L))
+        check(c.events().size == 3); check(c.events().last().status == Status.ACKNOWLEDGED)
+        val copy = c.events().toMutableList(); copy.clear(); check(c.events().size == 3)
+        val alerts = sink.alerts().toMutableList(); alerts.clear(); check(sink.alerts().size == 2)
+        check(runCatching { RecordingSink(0) }.exceptionOrNull() is IllegalArgumentException)
+        check(runCatching { RecordingSink(-1) }.exceptionOrNull() is IllegalArgumentException)
+    }
+    test("wall time jumps do not advance injected monotonic deadline") {
+        val clock = DualClock(); val sink = RecordingSink(); val c = AlertCore(clock, sink)
+        c.suspected(); c.evidenceConfirmed()
+        clock.wall = Long.MAX_VALUE; c.tick(); check(c.snapshot().remainingMs == 10_000L)
+        clock.wall = Long.MIN_VALUE; clock.monotonic = 9_999; c.tick(); check(sink.alerts().isEmpty())
+        clock.monotonic = 10_000; c.tick(); check(sink.alerts().size == 1)
+    }
+    test("all public core and recording sink access is owner-thread only") {
+        val sink = RecordingSink(); val c = AlertCore(FakeClock(), sink)
+        val actions = listOf<() -> Unit>({ c.suspected() }, { c.evidenceConfirmed() },
+            { c.riskCleared() }, { c.tick() }, { c.safe() }, { c.needHelp() }, { c.sos() },
+            { c.complete() }, { c.snapshot() }, { c.events() }, { sink.alerts() },
+            { sink.send(Alert(1, Response.NEED_HELP)) })
+        var failures = 0
+        val t = Thread { for (action in actions) if (runCatching(action).exceptionOrNull() is IllegalStateException) failures++ }
+        t.start(); t.join(); check(failures == actions.size)
+        check(c.snapshot().state == State.MONITORING); check(sink.alerts().isEmpty())
+    }
+    // NEXT
+    println("PASS $passed tests")
+}
+
+// Test-only independent time domains: core receives only monotonic time.
+class DualClock(var monotonic: Long = 0, var wall: Long = 0) : MonotonicClock {
+    override fun nowMs() = monotonic
+}
+
+exec
+/bin/bash -lc 'cat docs/tasks/REV-CORE-001.md docs/evidence/REV-CORE-001.json
+cat android/core/evidence/final-tests.log android/core/evidence/08-contract-checks.log' in /home/pdd/nckh27pa
+ succeeded in 0ms:
+# REV-CORE-001 — Phản biện lõi cảnh báo
+Mục tiêu: tìm lỗi logic/an toàn độc lập triển khai CORE-001, không tự sửa.
+Nguồn: Android §4.4,7,9; docs/tasks/CORE-001.md.
+Người: reviewer Hermes qua delegate_task (tool có sẵn, ngữ cảnh độc lập, kế thừa model phiên); không gọi vai trò này là Codex/AGY. Không dùng lại hội thoại người triển khai. UX review không phải code review.
+Đầu vào: android/core/src, tests, run-tests.sh, README, log kiểm chứng Hermes; chỉ vùng này và phiếu. Phạm vi sửa: không; Hermes lưu kết quả reviewer tại docs/evidence/REV-CORE-001.json.
+Phụ thuộc: CORE-001 kết thúc, Hermes chạy lại suite.
+Bàn giao: verdict PASS/FAIL, findings file:line + repro; phân biệt blocker và việc chưa nằm trong core. Kiểm no-response deadline, SAFE boundary, SOS/reentrant sink, duplicate, failure, completion, monotonic/overflow, bounded storage, ownership.
+Nghiệm thu: không còn lỗi chặn trong phạm vi; reviewer không coi deadline chỉ tick khi được gọi là tự chạy nền. Việc tích hợp Android còn chặn là giới hạn, không che đi.
+Cách kiểm: đọc diff/source, có thể chạy test read-only nếu output tạm không sửa tracked/source, không network/Gradle/emulator. Giới hạn2 lượt sửa-review, sau đó dừng và báo. Hermes quyết định tích hợp; không commit/push.
+{
+  "task": "REV-CORE-001",
+  "passed": true,
+  "security_concerns": [],
+  "logic_errors": [],
+  "scope": "Kotlin core offline only; not Android/APK acceptance",
+  "reviewer_model": "Runtime returned Model: ?; exact model not verified",
+  "suggestions": [
+    {
+      "file": "android/core/tests/CoreTests.kt:51-60",
+      "action": "Add permanent regression coverage for successful reentrant sink."
+    },
+    {
+      "file": "android/core/tests/CoreTests.kt:16-38",
+      "action": "Add permanent regression coverage near Long.MAX_VALUE and maximum timeout with valid elapsed time."
+    },
+    {
+      "file": "android/core/README.md:30-32",
+      "action": "Update independent verification status; retain TDD limitations."
+    }
+  ],
+  "self_report": "Reviewer ran 9 test groups, demo and three extra probe groups successfully. Probe files were temporary and removed; do not represent them as committed regression tests.",
+  "parent_evidence": [
+    "docs/evidence/core-tests-hermes.log",
+    "docs/evidence/core-demo-hermes.log"
+  ],
+  "transcript": "/home/pdd/.hermes/cache/delegation/live/deleg_2f71dc80/task-0.log",
+  "integration_gate": "Code review passed. Full CORE-001 strict TDD acceptance still unmet; no Android integration."
+}
+PASS suspected, clear, confirmed and duplicate callbacks
+PASS deadline 10s, no response, absent location, one send
+PASS SAFE before deadline cancels; at and after deadline preserves alert
+PASS immediate NEED_HELP and SOS, dedup, completion permits new event
+PASS sink failure stays FAILED; reentrant calls cannot send or complete
+PASS invalid timeout and log capacity rejected
+PASS bounded sink and state history retain latest records; copies isolated
+PASS wall time jumps do not advance injected monotonic deadline
+PASS all public core and recording sink access is owner-thread only
+PASS 9 tests
+EXIT 0
+PASS suspected, clear, confirmed and duplicate callbacks
+PASS deadline 10s, no response, absent location, one send
+PASS SAFE before deadline cancels; at and after deadline preserves alert
+PASS immediate NEED_HELP and SOS, dedup, completion permits new event
+PASS sink failure stays FAILED; reentrant calls cannot send or complete
+PASS invalid timeout and log capacity rejected
+PASS bounded sink and state history retain latest records; copies isolated
+PASS wall time jumps do not advance injected monotonic deadline
+PASS all public core and recording sink access is owner-thread only
+PASS 9 tests
+
+EXIT 0
+
+codex
+Review REV-CORE-001 đã PASS phần core offline nhưng yêu cầu lưu regression cho sink reentrant thành công và biên `Long.MAX_VALUE`. Tôi sẽ kiểm tra trạng thái trong callback, chống gửi trùng/complete sớm, cùng deadline và timeout cực đại; các test này được bổ sung sau triển khai, không phải bằng chứng TDD hồi tố.
+
+apply patch
+patch: completed
+/home/pdd/nckh27pa/android/core/tests/CoreTests.kt
+diff --git a/android/core/tests/CoreTests.kt b/android/core/tests/CoreTests.kt
+index 1e006714759bebc666842bb34288e76d85daed5f..acf033fe3731e8a20c8e114ecbd64013ee0f600d
+--- a/android/core/tests/CoreTests.kt
++++ b/android/core/tests/CoreTests.kt
+@@ -91,7 +91,72 @@
+         t.start(); t.join(); check(failures == actions.size)
+         check(c.snapshot().state == State.MONITORING); check(sink.alerts().isEmpty())
+     }
+-    // NEXT
++    // CORE-002: regression tests added after implementation, not test-first evidence.
++    test("successful reentrant sink preserves sending event and completes after return") {
++        val sent = mutableListOf<Alert>(); val during = mutableListOf<Snapshot>()
++        lateinit var c: AlertCore
++        c = AlertCore(FakeClock(), AlertSink { alert ->
++            sent += alert
++            during += c.snapshot()
++            c.complete(); c.sos(); c.needHelp(); c.safe(); c.tick()
++            c.suspected(); c.evidenceConfirmed(); c.riskCleared()
++            during += c.snapshot()
++        })
++        c.sos()
++        check(sent.size == 1)
++        val first = sent.single()
++        check(during == List(2) {
++            Snapshot(State.ALERTING, first.eventId, Response.NEED_HELP, Status.SENDING, null)
++        })
++        check(c.snapshot() == Snapshot(State.AWAITING_HELP, first.eventId, Response.NEED_HELP, Status.SENT, null))
++        check(c.events().map { it.status } == listOf(Status.SENDING, Status.SENT))
++        c.sos(); c.needHelp(); c.tick(); check(sent.size == 1)
++        c.complete()
++        check(c.snapshot().state == State.MONITORING); check(c.snapshot().status == Status.ACKNOWLEDGED)
++        c.sos(); check(sent.size == 2); check(sent.last().eventId != first.eventId)
++        check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++    }
++    test("deadline at Long.MAX_VALUE preserves remaining time and SAFE boundary") {
++        for (safeBefore in listOf(true, false)) {
++            val clock = FakeClock(Long.MAX_VALUE - 10_000); val sink = RecordingSink()
++            val c = AlertCore(clock, sink); c.suspected(); c.evidenceConfirmed()
++            check(c.snapshot().remainingMs == 10_000L)
++            clock.time = Long.MAX_VALUE - 1; c.tick()
++            check(c.snapshot().remainingMs == 1L); check(sink.alerts().isEmpty())
++            if (safeBefore) c.safe()
++            clock.time = Long.MAX_VALUE
++            if (safeBefore) {
++                c.tick(); check(sink.alerts().isEmpty())
++                check(c.snapshot().state == State.MONITORING); check(c.snapshot().response == Response.SAFE)
++            } else {
++                check(c.snapshot().remainingMs == 0L); check(sink.alerts().isEmpty())
++                c.safe(); c.tick(); c.sos()
++                check(sink.alerts().single().response == Response.NO_RESPONSE)
++                check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++            }
++        }
++    }
++    test("Long.MAX_VALUE timeout uses valid elapsed time without deadline overflow") {
++        for (start in listOf(0L, 1L)) {
++            val clock = FakeClock(start); val sink = RecordingSink()
++            val c = AlertCore(clock, sink, timeoutMs = Long.MAX_VALUE)
++            c.suspected(); c.evidenceConfirmed()
++            check(c.snapshot().remainingMs == Long.MAX_VALUE)
++            clock.time = Long.MAX_VALUE - 1; c.tick()
++            check(c.snapshot().remainingMs == start + 1); check(sink.alerts().isEmpty())
++            clock.time = Long.MAX_VALUE
++            check(c.snapshot().remainingMs == start); check(sink.alerts().isEmpty())
++            c.tick(); c.tick()
++            if (start == 0L) {
++                check(sink.alerts().single().response == Response.NO_RESPONSE)
++                check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++            } else {
++                // Deadline is outside the valid clock domain; do not wrap the clock.
++                check(sink.alerts().isEmpty()); check(c.snapshot().state == State.VERIFYING)
++                check(c.snapshot().status == Status.COUNTDOWN); check(c.snapshot().remainingMs == 1L)
++            }
++        }
++    }
+     println("PASS $passed tests")
+ }
+ 
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+import subprocess
+from pathlib import Path
+for name, command in [('core-002-tests.log', ['./android/core/run-tests.sh']), ('core-002-demo.log', ['./android/core/run-tests.sh', 'core.DemoKt'])]:
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    output = '"'$ '"' + ' '.join(command) + '\\n' + result.stdout + f'\\nEXIT {result.returncode}\\n'
+    Path('android/core/evidence', name).write_text(output)
+    print(output, end='')
+PY" in /home/pdd/nckh27pa
+diff --git a/android/core/tests/CoreTests.kt b/android/core/tests/CoreTests.kt
+index 1e006714759bebc666842bb34288e76d85daed5f..acf033fe3731e8a20c8e114ecbd64013ee0f600d
+--- a/android/core/tests/CoreTests.kt
++++ b/android/core/tests/CoreTests.kt
+@@ -91,7 +91,72 @@
+         t.start(); t.join(); check(failures == actions.size)
+         check(c.snapshot().state == State.MONITORING); check(sink.alerts().isEmpty())
+     }
+-    // NEXT
++    // CORE-002: regression tests added after implementation, not test-first evidence.
++    test("successful reentrant sink preserves sending event and completes after return") {
++        val sent = mutableListOf<Alert>(); val during = mutableListOf<Snapshot>()
++        lateinit var c: AlertCore
++        c = AlertCore(FakeClock(), AlertSink { alert ->
++            sent += alert
++            during += c.snapshot()
++            c.complete(); c.sos(); c.needHelp(); c.safe(); c.tick()
++            c.suspected(); c.evidenceConfirmed(); c.riskCleared()
++            during += c.snapshot()
++        })
++        c.sos()
++        check(sent.size == 1)
++        val first = sent.single()
++        check(during == List(2) {
++            Snapshot(State.ALERTING, first.eventId, Response.NEED_HELP, Status.SENDING, null)
++        })
++        check(c.snapshot() == Snapshot(State.AWAITING_HELP, first.eventId, Response.NEED_HELP, Status.SENT, null))
++        check(c.events().map { it.status } == listOf(Status.SENDING, Status.SENT))
++        c.sos(); c.needHelp(); c.tick(); check(sent.size == 1)
++        c.complete()
++        check(c.snapshot().state == State.MONITORING); check(c.snapshot().status == Status.ACKNOWLEDGED)
++        c.sos(); check(sent.size == 2); check(sent.last().eventId != first.eventId)
++        check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++    }
++    test("deadline at Long.MAX_VALUE preserves remaining time and SAFE boundary") {
++        for (safeBefore in listOf(true, false)) {
++            val clock = FakeClock(Long.MAX_VALUE - 10_000); val sink = RecordingSink()
++            val c = AlertCore(clock, sink); c.suspected(); c.evidenceConfirmed()
++            check(c.snapshot().remainingMs == 10_000L)
++            clock.time = Long.MAX_VALUE - 1; c.tick()
++            check(c.snapshot().remainingMs == 1L); check(sink.alerts().isEmpty())
++            if (safeBefore) c.safe()
++            clock.time = Long.MAX_VALUE
++            if (safeBefore) {
++                c.tick(); check(sink.alerts().isEmpty())
++                check(c.snapshot().state == State.MONITORING); check(c.snapshot().response == Response.SAFE)
++            } else {
++                check(c.snapshot().remainingMs == 0L); check(sink.alerts().isEmpty())
++                c.safe(); c.tick(); c.sos()
++                check(sink.alerts().single().response == Response.NO_RESPONSE)
++                check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++            }
++        }
++    }
++    test("Long.MAX_VALUE timeout uses valid elapsed time without deadline overflow") {
++        for (start in listOf(0L, 1L)) {
++            val clock = FakeClock(start); val sink = RecordingSink()
++            val c = AlertCore(clock, sink, timeoutMs = Long.MAX_VALUE)
++            c.suspected(); c.evidenceConfirmed()
++            check(c.snapshot().remainingMs == Long.MAX_VALUE)
++            clock.time = Long.MAX_VALUE - 1; c.tick()
++            check(c.snapshot().remainingMs == start + 1); check(sink.alerts().isEmpty())
++            clock.time = Long.MAX_VALUE
++            check(c.snapshot().remainingMs == start); check(sink.alerts().isEmpty())
++            c.tick(); c.tick()
++            if (start == 0L) {
++                check(sink.alerts().single().response == Response.NO_RESPONSE)
++                check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++            } else {
++                // Deadline is outside the valid clock domain; do not wrap the clock.
++                check(sink.alerts().isEmpty()); check(c.snapshot().state == State.VERIFYING)
++                check(c.snapshot().status == Status.COUNTDOWN); check(c.snapshot().remainingMs == 1L)
++            }
++        }
++    }
+     println("PASS $passed tests")
+ }
+ 
+
+diff --git a/android/core/tests/CoreTests.kt b/android/core/tests/CoreTests.kt
+index 1e006714759bebc666842bb34288e76d85daed5f..acf033fe3731e8a20c8e114ecbd64013ee0f600d
+--- a/android/core/tests/CoreTests.kt
++++ b/android/core/tests/CoreTests.kt
+@@ -91,7 +91,72 @@
+         t.start(); t.join(); check(failures == actions.size)
+         check(c.snapshot().state == State.MONITORING); check(sink.alerts().isEmpty())
+     }
+-    // NEXT
++    // CORE-002: regression tests added after implementation, not test-first evidence.
++    test("successful reentrant sink preserves sending event and completes after return") {
++        val sent = mutableListOf<Alert>(); val during = mutableListOf<Snapshot>()
++        lateinit var c: AlertCore
++        c = AlertCore(FakeClock(), AlertSink { alert ->
++            sent += alert
++            during += c.snapshot()
++            c.complete(); c.sos(); c.needHelp(); c.safe(); c.tick()
++            c.suspected(); c.evidenceConfirmed(); c.riskCleared()
++            during += c.snapshot()
++        })
++        c.sos()
++        check(sent.size == 1)
++        val first = sent.single()
++        check(during == List(2) {
++            Snapshot(State.ALERTING, first.eventId, Response.NEED_HELP, Status.SENDING, null)
++        })
++        check(c.snapshot() == Snapshot(State.AWAITING_HELP, first.eventId, Response.NEED_HELP, Status.SENT, null))
++        check(c.events().map { it.status } == listOf(Status.SENDING, Status.SENT))
++        c.sos(); c.needHelp(); c.tick(); check(sent.size == 1)
++        c.complete()
++        check(c.snapshot().state == State.MONITORING); check(c.snapshot().status == Status.ACKNOWLEDGED)
++        c.sos(); check(sent.size == 2); check(sent.last().eventId != first.eventId)
++        check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++    }
++    test("deadline at Long.MAX_VALUE preserves remaining time and SAFE boundary") {
++        for (safeBefore in listOf(true, false)) {
++            val clock = FakeClock(Long.MAX_VALUE - 10_000); val sink = RecordingSink()
++            val c = AlertCore(clock, sink); c.suspected(); c.evidenceConfirmed()
++            check(c.snapshot().remainingMs == 10_000L)
++            clock.time = Long.MAX_VALUE - 1; c.tick()
++            check(c.snapshot().remainingMs == 1L); check(sink.alerts().isEmpty())
++            if (safeBefore) c.safe()
++            clock.time = Long.MAX_VALUE
++            if (safeBefore) {
++                c.tick(); check(sink.alerts().isEmpty())
++                check(c.snapshot().state == State.MONITORING); check(c.snapshot().response == Response.SAFE)
++            } else {
++                check(c.snapshot().remainingMs == 0L); check(sink.alerts().isEmpty())
++                c.safe(); c.tick(); c.sos()
++                check(sink.alerts().single().response == Response.NO_RESPONSE)
++                check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++            }
++        }
++    }
++    test("Long.MAX_VALUE timeout uses valid elapsed time without deadline overflow") {
++        for (start in listOf(0L, 1L)) {
++            val clock = FakeClock(start); val sink = RecordingSink()
++            val c = AlertCore(clock, sink, timeoutMs = Long.MAX_VALUE)
++            c.suspected(); c.evidenceConfirmed()
++            check(c.snapshot().remainingMs == Long.MAX_VALUE)
++            clock.time = Long.MAX_VALUE - 1; c.tick()
++            check(c.snapshot().remainingMs == start + 1); check(sink.alerts().isEmpty())
++            clock.time = Long.MAX_VALUE
++            check(c.snapshot().remainingMs == start); check(sink.alerts().isEmpty())
++            c.tick(); c.tick()
++            if (start == 0L) {
++                check(sink.alerts().single().response == Response.NO_RESPONSE)
++                check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++            } else {
++                // Deadline is outside the valid clock domain; do not wrap the clock.
++                check(sink.alerts().isEmpty()); check(c.snapshot().state == State.VERIFYING)
++                check(c.snapshot().status == Status.COUNTDOWN); check(c.snapshot().remainingMs == 1L)
++            }
++        }
++    }
+     println("PASS $passed tests")
+ }
+ 
+
+ succeeded in 13230ms:
+$ ./android/core/run-tests.sh
+PASS suspected, clear, confirmed and duplicate callbacks
+PASS deadline 10s, no response, absent location, one send
+PASS SAFE before deadline cancels; at and after deadline preserves alert
+PASS immediate NEED_HELP and SOS, dedup, completion permits new event
+PASS sink failure stays FAILED; reentrant calls cannot send or complete
+PASS invalid timeout and log capacity rejected
+PASS bounded sink and state history retain latest records; copies isolated
+PASS wall time jumps do not advance injected monotonic deadline
+PASS all public core and recording sink access is owner-thread only
+PASS successful reentrant sink preserves sending event and completes after return
+PASS deadline at Long.MAX_VALUE preserves remaining time and SAFE boundary
+PASS Long.MAX_VALUE timeout uses valid elapsed time without deadline overflow
+PASS 12 tests
+
+EXIT 0
+$ ./android/core/run-tests.sh core.DemoKt
+CORE ONLY: fake monotonic clock and fake recipient; no sensors/UI/real transport
+MONITORING
+SUSPECTED
+VERIFYING: 10000 ms
+ALERTING: fake recipient accepted event 1, NO_RESPONSE; chưa xác định được vị trí
+AWAITING_HELP: SENT
+
+EXIT 0
+
+diff --git a/android/core/tests/CoreTests.kt b/android/core/tests/CoreTests.kt
+index 1e006714759bebc666842bb34288e76d85daed5f..acf033fe3731e8a20c8e114ecbd64013ee0f600d
+--- a/android/core/tests/CoreTests.kt
++++ b/android/core/tests/CoreTests.kt
+@@ -91,7 +91,72 @@
+         t.start(); t.join(); check(failures == actions.size)
+         check(c.snapshot().state == State.MONITORING); check(sink.alerts().isEmpty())
+     }
+-    // NEXT
++    // CORE-002: regression tests added after implementation, not test-first evidence.
++    test("successful reentrant sink preserves sending event and completes after return") {
++        val sent = mutableListOf<Alert>(); val during = mutableListOf<Snapshot>()
++        lateinit var c: AlertCore
++        c = AlertCore(FakeClock(), AlertSink { alert ->
++            sent += alert
++            during += c.snapshot()
++            c.complete(); c.sos(); c.needHelp(); c.safe(); c.tick()
++            c.suspected(); c.evidenceConfirmed(); c.riskCleared()
++            during += c.snapshot()
++        })
++        c.sos()
++        check(sent.size == 1)
++        val first = sent.single()
++        check(during == List(2) {
++            Snapshot(State.ALERTING, first.eventId, Response.NEED_HELP, Status.SENDING, null)
++        })
++        check(c.snapshot() == Snapshot(State.AWAITING_HELP, first.eventId, Response.NEED_HELP, Status.SENT, null))
++        check(c.events().map { it.status } == listOf(Status.SENDING, Status.SENT))
++        c.sos(); c.needHelp(); c.tick(); check(sent.size == 1)
++        c.complete()
++        check(c.snapshot().state == State.MONITORING); check(c.snapshot().status == Status.ACKNOWLEDGED)
++        c.sos(); check(sent.size == 2); check(sent.last().eventId != first.eventId)
++        check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++    }
++    test("deadline at Long.MAX_VALUE preserves remaining time and SAFE boundary") {
++        for (safeBefore in listOf(true, false)) {
++            val clock = FakeClock(Long.MAX_VALUE - 10_000); val sink = RecordingSink()
++            val c = AlertCore(clock, sink); c.suspected(); c.evidenceConfirmed()
++            check(c.snapshot().remainingMs == 10_000L)
++            clock.time = Long.MAX_VALUE - 1; c.tick()
++            check(c.snapshot().remainingMs == 1L); check(sink.alerts().isEmpty())
++            if (safeBefore) c.safe()
++            clock.time = Long.MAX_VALUE
++            if (safeBefore) {
++                c.tick(); check(sink.alerts().isEmpty())
++                check(c.snapshot().state == State.MONITORING); check(c.snapshot().response == Response.SAFE)
++            } else {
++                check(c.snapshot().remainingMs == 0L); check(sink.alerts().isEmpty())
++                c.safe(); c.tick(); c.sos()
++                check(sink.alerts().single().response == Response.NO_RESPONSE)
++                check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++            }
++        }
++    }
++    test("Long.MAX_VALUE timeout uses valid elapsed time without deadline overflow") {
++        for (start in listOf(0L, 1L)) {
++            val clock = FakeClock(start); val sink = RecordingSink()
++            val c = AlertCore(clock, sink, timeoutMs = Long.MAX_VALUE)
++            c.suspected(); c.evidenceConfirmed()
++            check(c.snapshot().remainingMs == Long.MAX_VALUE)
++            clock.time = Long.MAX_VALUE - 1; c.tick()
++            check(c.snapshot().remainingMs == start + 1); check(sink.alerts().isEmpty())
++            clock.time = Long.MAX_VALUE
++            check(c.snapshot().remainingMs == start); check(sink.alerts().isEmpty())
++            c.tick(); c.tick()
++            if (start == 0L) {
++                check(sink.alerts().single().response == Response.NO_RESPONSE)
++                check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++            } else {
++                // Deadline is outside the valid clock domain; do not wrap the clock.
++                check(sink.alerts().isEmpty()); check(c.snapshot().state == State.VERIFYING)
++                check(c.snapshot().status == Status.COUNTDOWN); check(c.snapshot().remainingMs == 1L)
++            }
++        }
++    }
+     println("PASS $passed tests")
+ }
+ 
+
+apply patch
+patch: completed
+/home/pdd/nckh27pa/android/core/README.md
+/home/pdd/nckh27pa/android/core/evidence/core-002-report.md
+diff --git a/android/core/README.md b/android/core/README.md
+index 5fb455555aacd1235038695c0b5ee3ad3e6d22ff..a88e29e5064374befbbf6eb8d15148e658176c3d
+--- a/android/core/README.md
++++ b/android/core/README.md
+@@ -32,3 +32,13 @@
+ `final-tests.log` và `demo.log` là lần chạy bản cuối. Không dùng agent con, không nới sandbox, không commit. Hermes đã chạy lại 9 nhóm test và demo exit0 (docs/evidence/core-tests-hermes.log, core-demo-hermes.log). Reviewer độc lập REV-CORE-001 kết luận PASS trong phạm vi core offline, không phát hiện lỗi chặn (docs/evidence/REV-CORE-001.json). Chưa tích hợp Android; thiếu sót TDD nêu trên vẫn chưa được đóng. Các probe bổ sung reviewer báo đã chạy chưa phải regression test lưu trong repo. Chưa xác minh SUR-001 trong phiên này vì giới hạn chỉ đọc các mục được dẫn.
+ 
+ Không coi CORE này là hoàn thành AND-001/APK. Chưa giải quyết sensor, UI, background, persistence, Android permissions hay real transport.
++
++## CORE-002 — regression bổ sung sau triển khai
++
++Đã lưu thêm 3 nhóm regression trong `tests/CoreTests.kt`: sink reentrant trả về thành công (giữ ALERTING/SENDING trong callback, không gửi trùng hoặc complete sớm, sau return thành AWAITING_HELP/SENT và cho phép sự kiện mới sau complete); deadline tại `Long.MAX_VALUE` với SAFE trước/tại hạn; timeout `Long.MAX_VALUE` với clock bắt đầu ở 0 và 1. Trường hợp bắt đầu ở 1 vẫn còn 1 ms khi clock đạt cực đại, không được gửi sớm do cộng deadline tràn số. Các clock đều không âm, không giảm, không wrap.
++
++Đây là **kiểm thử bổ sung sau triển khai**, chạy PASS ngay trên source hiện có; không phải test-first, không tạo hay tuyên bố RED/GREEN hồi tố. Không phát hiện bug trong các trường hợp này nên giữ nguyên `src/`. Thiếu sót TDD lịch sử của CORE-001 vẫn còn; không đánh dấu CORE-001 đạt đầy đủ.
++
++Kiểm chứng CORE-002 chạy thật: [suite](evidence/core-002-tests.log) PASS 12 nhóm, exit 0; [demo](evidence/core-002-demo.log) exit 0, chỉ fake recipient. Cả hai log gộp stdout/stderr, không có cảnh báo compiler/runtime và không phát cảnh báo qua transport thật. Giữ nguyên log lịch sử. Xem [biên bản](evidence/core-002-report.md).
++
++Review độc lập REV-CORE-001 trước thay đổi đã PASS core offline, không có lỗi chặn. Phiên CORE-002 này tự rà soát các test bổ sung, chưa có review độc lập mới; không dùng kết quả cũ để tuyên bố review độc lập cho thay đổi mới. Không agent con, network, Gradle/emulator hay commit; không sửa Android ngoài core đang do Hermes xử lý.
+diff --git a/android/core/evidence/core-002-report.md b/android/core/evidence/core-002-report.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..137ed3643fd8261d2648b69934fe9d35fd40ad99
+--- /dev/null
++++ b/android/core/evidence/core-002-report.md
+@@ -0,0 +1,23 @@
++# CORE-002 — bằng chứng thực hiện
++
++Phạm vi đọc: phiếu CORE-002, phiếu và kết quả REV-CORE-001, nội dung android/core. Phạm vi ghi: tests/CoreTests.kt, README.md và evidence/core-002-* trong android/core. Không sửa source hoặc runner, không sửa phiếu/trạng thái ngoài core.
++
++## Regression bổ sung sau triển khai
++
++- Successful reentrant sink: lưu snapshot trước/sau callback gọi ngược; kiểm tra bên ngoài sink rằng sự kiện giữ ALERTING/SENDING và ID/response, không complete hoặc gửi trùng. Sink return thành công phải thành AWAITING_HELP/SENT; complete sau return cho phép SOS mới với ID khác.
++- Clock sát Long.MAX_VALUE: còn 1 ms trước hạn, snapshot tại hạn bằng 0 và không tự gửi; SAFE trước hạn hủy, SAFE tại hạn gửi NO_RESPONSE đúng một lần.
++- Timeout Long.MAX_VALUE: bắt đầu 0 gửi đúng tại cực đại; bắt đầu 1 vẫn còn 1 ms tại cực đại, không gửi sớm. Không sử dụng clock âm, giảm hoặc elapsed ngoài miền hợp lệ.
++
++Các test này được viết sau source và PASS lần chạy đầu. Không có RED tái hiện bug; không thay source để dựng quy trình TDD. Các log RED/GREEN trước đây được giữ nguyên. Thiếu TDD lịch sử chưa được giải quyết, CORE-001 chưa đạt đầy đủ yêu cầu TDD nghiêm ngặt.
++
++## Chạy thật
++
++- `./android/core/run-tests.sh`: PASS 12 nhóm, EXIT 0; stdout/stderr trong core-002-tests.log.
++- `./android/core/run-tests.sh core.DemoKt`: EXIT 0, fake recipient, kết thúc AWAITING_HELP: SENT; stdout/stderr trong core-002-demo.log.
++- Mỗi lệnh chạy một lần; không cảnh báo compiler/runtime trong output. Không dùng transport thật, network, Gradle hoặc emulator.
++
++## Rà soát và giới hạn bàn giao
++
++REV-CORE-001.json đã PASS và không báo lỗi chặn cho core trước thay đổi. Tự rà soát bổ sung: assertions reentrancy ở ngoài sink để exception do assertion không bị nhầm thành transport failure; kiểm tra trạng thái thành công sau return, số lần gửi và biên elapsed hợp lệ. Không phát hiện lỗi chặn trong phạm vi kiểm tra này. Chưa có review độc lập mới cho CORE-002; không gọi tự rà soát là review độc lập.
++
++Không agent con, không commit; giữ nguyên source và Android ngoài core. Kết quả không chứng minh Android/APK, scheduler nền hoặc transport thật hoạt động.
+diff --git a/android/core/tests/CoreTests.kt b/android/core/tests/CoreTests.kt
+index 1e006714759bebc666842bb34288e76d85daed5f..acf033fe3731e8a20c8e114ecbd64013ee0f600d
+--- a/android/core/tests/CoreTests.kt
++++ b/android/core/tests/CoreTests.kt
+@@ -91,7 +91,72 @@
+         t.start(); t.join(); check(failures == actions.size)
+         check(c.snapshot().state == State.MONITORING); check(sink.alerts().isEmpty())
+     }
+-    // NEXT
++    // CORE-002: regression tests added after implementation, not test-first evidence.
++    test("successful reentrant sink preserves sending event and completes after return") {
++        val sent = mutableListOf<Alert>(); val during = mutableListOf<Snapshot>()
++        lateinit var c: AlertCore
++        c = AlertCore(FakeClock(), AlertSink { alert ->
++            sent += alert
++            during += c.snapshot()
++            c.complete(); c.sos(); c.needHelp(); c.safe(); c.tick()
++            c.suspected(); c.evidenceConfirmed(); c.riskCleared()
++            during += c.snapshot()
++        })
++        c.sos()
++        check(sent.size == 1)
++        val first = sent.single()
++        check(during == List(2) {
++            Snapshot(State.ALERTING, first.eventId, Response.NEED_HELP, Status.SENDING, null)
++        })
++        check(c.snapshot() == Snapshot(State.AWAITING_HELP, first.eventId, Response.NEED_HELP, Status.SENT, null))
++        check(c.events().map { it.status } == listOf(Status.SENDING, Status.SENT))
++        c.sos(); c.needHelp(); c.tick(); check(sent.size == 1)
++        c.complete()
++        check(c.snapshot().state == State.MONITORING); check(c.snapshot().status == Status.ACKNOWLEDGED)
++        c.sos(); check(sent.size == 2); check(sent.last().eventId != first.eventId)
++        check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++    }
++    test("deadline at Long.MAX_VALUE preserves remaining time and SAFE boundary") {
++        for (safeBefore in listOf(true, false)) {
++            val clock = FakeClock(Long.MAX_VALUE - 10_000); val sink = RecordingSink()
++            val c = AlertCore(clock, sink); c.suspected(); c.evidenceConfirmed()
++            check(c.snapshot().remainingMs == 10_000L)
++            clock.time = Long.MAX_VALUE - 1; c.tick()
++            check(c.snapshot().remainingMs == 1L); check(sink.alerts().isEmpty())
++            if (safeBefore) c.safe()
++            clock.time = Long.MAX_VALUE
++            if (safeBefore) {
++                c.tick(); check(sink.alerts().isEmpty())
++                check(c.snapshot().state == State.MONITORING); check(c.snapshot().response == Response.SAFE)
++            } else {
++                check(c.snapshot().remainingMs == 0L); check(sink.alerts().isEmpty())
++                c.safe(); c.tick(); c.sos()
++                check(sink.alerts().single().response == Response.NO_RESPONSE)
++                check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++            }
++        }
++    }
++    test("Long.MAX_VALUE timeout uses valid elapsed time without deadline overflow") {
++        for (start in listOf(0L, 1L)) {
++            val clock = FakeClock(start); val sink = RecordingSink()
++            val c = AlertCore(clock, sink, timeoutMs = Long.MAX_VALUE)
++            c.suspected(); c.evidenceConfirmed()
++            check(c.snapshot().remainingMs == Long.MAX_VALUE)
++            clock.time = Long.MAX_VALUE - 1; c.tick()
++            check(c.snapshot().remainingMs == start + 1); check(sink.alerts().isEmpty())
++            clock.time = Long.MAX_VALUE
++            check(c.snapshot().remainingMs == start); check(sink.alerts().isEmpty())
++            c.tick(); c.tick()
++            if (start == 0L) {
++                check(sink.alerts().single().response == Response.NO_RESPONSE)
++                check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++            } else {
++                // Deadline is outside the valid clock domain; do not wrap the clock.
++                check(sink.alerts().isEmpty()); check(c.snapshot().state == State.VERIFYING)
++                check(c.snapshot().status == Status.COUNTDOWN); check(c.snapshot().remainingMs == 1L)
++            }
++        }
++    }
+     println("PASS $passed tests")
+ }
+ 
+
+exec
+/bin/bash -lc 'git diff --check -- android/core/tests android/core/README.md android/core/evidence
+ git diff --stat -- android/core
+ git status --short -- android/core' in /home/pdd/nckh27pa
+ succeeded in 0ms:
+?? android/core/
+
+diff --git a/android/core/README.md b/android/core/README.md
+index 5fb455555aacd1235038695c0b5ee3ad3e6d22ff..a88e29e5064374befbbf6eb8d15148e658176c3d
+--- a/android/core/README.md
++++ b/android/core/README.md
+@@ -32,3 +32,13 @@
+ `final-tests.log` và `demo.log` là lần chạy bản cuối. Không dùng agent con, không nới sandbox, không commit. Hermes đã chạy lại 9 nhóm test và demo exit0 (docs/evidence/core-tests-hermes.log, core-demo-hermes.log). Reviewer độc lập REV-CORE-001 kết luận PASS trong phạm vi core offline, không phát hiện lỗi chặn (docs/evidence/REV-CORE-001.json). Chưa tích hợp Android; thiếu sót TDD nêu trên vẫn chưa được đóng. Các probe bổ sung reviewer báo đã chạy chưa phải regression test lưu trong repo. Chưa xác minh SUR-001 trong phiên này vì giới hạn chỉ đọc các mục được dẫn.
+ 
+ Không coi CORE này là hoàn thành AND-001/APK. Chưa giải quyết sensor, UI, background, persistence, Android permissions hay real transport.
++
++## CORE-002 — regression bổ sung sau triển khai
++
++Đã lưu thêm 3 nhóm regression trong `tests/CoreTests.kt`: sink reentrant trả về thành công (giữ ALERTING/SENDING trong callback, không gửi trùng hoặc complete sớm, sau return thành AWAITING_HELP/SENT và cho phép sự kiện mới sau complete); deadline tại `Long.MAX_VALUE` với SAFE trước/tại hạn; timeout `Long.MAX_VALUE` với clock bắt đầu ở 0 và 1. Trường hợp bắt đầu ở 1 vẫn còn 1 ms khi clock đạt cực đại, không được gửi sớm do cộng deadline tràn số. Các clock đều không âm, không giảm, không wrap.
++
++Đây là **kiểm thử bổ sung sau triển khai**, chạy PASS ngay trên source hiện có; không phải test-first, không tạo hay tuyên bố RED/GREEN hồi tố. Không phát hiện bug trong các trường hợp này nên giữ nguyên `src/`. Thiếu sót TDD lịch sử của CORE-001 vẫn còn; không đánh dấu CORE-001 đạt đầy đủ.
++
++Kiểm chứng CORE-002 chạy thật: [suite](evidence/core-002-tests.log) PASS 12 nhóm, exit 0; [demo](evidence/core-002-demo.log) exit 0, chỉ fake recipient. Cả hai log gộp stdout/stderr, không có cảnh báo compiler/runtime và không phát cảnh báo qua transport thật. Giữ nguyên log lịch sử. Xem [biên bản](evidence/core-002-report.md).
++
++Review độc lập REV-CORE-001 trước thay đổi đã PASS core offline, không có lỗi chặn. Phiên CORE-002 này tự rà soát các test bổ sung, chưa có review độc lập mới; không dùng kết quả cũ để tuyên bố review độc lập cho thay đổi mới. Không agent con, network, Gradle/emulator hay commit; không sửa Android ngoài core đang do Hermes xử lý.
+diff --git a/android/core/evidence/core-002-report.md b/android/core/evidence/core-002-report.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..137ed3643fd8261d2648b69934fe9d35fd40ad99
+--- /dev/null
++++ b/android/core/evidence/core-002-report.md
+@@ -0,0 +1,23 @@
++# CORE-002 — bằng chứng thực hiện
++
++Phạm vi đọc: phiếu CORE-002, phiếu và kết quả REV-CORE-001, nội dung android/core. Phạm vi ghi: tests/CoreTests.kt, README.md và evidence/core-002-* trong android/core. Không sửa source hoặc runner, không sửa phiếu/trạng thái ngoài core.
++
++## Regression bổ sung sau triển khai
++
++- Successful reentrant sink: lưu snapshot trước/sau callback gọi ngược; kiểm tra bên ngoài sink rằng sự kiện giữ ALERTING/SENDING và ID/response, không complete hoặc gửi trùng. Sink return thành công phải thành AWAITING_HELP/SENT; complete sau return cho phép SOS mới với ID khác.
++- Clock sát Long.MAX_VALUE: còn 1 ms trước hạn, snapshot tại hạn bằng 0 và không tự gửi; SAFE trước hạn hủy, SAFE tại hạn gửi NO_RESPONSE đúng một lần.
++- Timeout Long.MAX_VALUE: bắt đầu 0 gửi đúng tại cực đại; bắt đầu 1 vẫn còn 1 ms tại cực đại, không gửi sớm. Không sử dụng clock âm, giảm hoặc elapsed ngoài miền hợp lệ.
++
++Các test này được viết sau source và PASS lần chạy đầu. Không có RED tái hiện bug; không thay source để dựng quy trình TDD. Các log RED/GREEN trước đây được giữ nguyên. Thiếu TDD lịch sử chưa được giải quyết, CORE-001 chưa đạt đầy đủ yêu cầu TDD nghiêm ngặt.
++
++## Chạy thật
++
++- `./android/core/run-tests.sh`: PASS 12 nhóm, EXIT 0; stdout/stderr trong core-002-tests.log.
++- `./android/core/run-tests.sh core.DemoKt`: EXIT 0, fake recipient, kết thúc AWAITING_HELP: SENT; stdout/stderr trong core-002-demo.log.
++- Mỗi lệnh chạy một lần; không cảnh báo compiler/runtime trong output. Không dùng transport thật, network, Gradle hoặc emulator.
++
++## Rà soát và giới hạn bàn giao
++
++REV-CORE-001.json đã PASS và không báo lỗi chặn cho core trước thay đổi. Tự rà soát bổ sung: assertions reentrancy ở ngoài sink để exception do assertion không bị nhầm thành transport failure; kiểm tra trạng thái thành công sau return, số lần gửi và biên elapsed hợp lệ. Không phát hiện lỗi chặn trong phạm vi kiểm tra này. Chưa có review độc lập mới cho CORE-002; không gọi tự rà soát là review độc lập.
++
++Không agent con, không commit; giữ nguyên source và Android ngoài core. Kết quả không chứng minh Android/APK, scheduler nền hoặc transport thật hoạt động.
+diff --git a/android/core/tests/CoreTests.kt b/android/core/tests/CoreTests.kt
+index 1e006714759bebc666842bb34288e76d85daed5f..acf033fe3731e8a20c8e114ecbd64013ee0f600d
+--- a/android/core/tests/CoreTests.kt
++++ b/android/core/tests/CoreTests.kt
+@@ -91,7 +91,72 @@
+         t.start(); t.join(); check(failures == actions.size)
+         check(c.snapshot().state == State.MONITORING); check(sink.alerts().isEmpty())
+     }
+-    // NEXT
++    // CORE-002: regression tests added after implementation, not test-first evidence.
++    test("successful reentrant sink preserves sending event and completes after return") {
++        val sent = mutableListOf<Alert>(); val during = mutableListOf<Snapshot>()
++        lateinit var c: AlertCore
++        c = AlertCore(FakeClock(), AlertSink { alert ->
++            sent += alert
++            during += c.snapshot()
++            c.complete(); c.sos(); c.needHelp(); c.safe(); c.tick()
++            c.suspected(); c.evidenceConfirmed(); c.riskCleared()
++            during += c.snapshot()
++        })
++        c.sos()
++        check(sent.size == 1)
++        val first = sent.single()
++        check(during == List(2) {
++            Snapshot(State.ALERTING, first.eventId, Response.NEED_HELP, Status.SENDING, null)
++        })
++        check(c.snapshot() == Snapshot(State.AWAITING_HELP, first.eventId, Response.NEED_HELP, Status.SENT, null))
++        check(c.events().map { it.status } == listOf(Status.SENDING, Status.SENT))
++        c.sos(); c.needHelp(); c.tick(); check(sent.size == 1)
++        c.complete()
++        check(c.snapshot().state == State.MONITORING); check(c.snapshot().status == Status.ACKNOWLEDGED)
++        c.sos(); check(sent.size == 2); check(sent.last().eventId != first.eventId)
++        check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++    }
++    test("deadline at Long.MAX_VALUE preserves remaining time and SAFE boundary") {
++        for (safeBefore in listOf(true, false)) {
++            val clock = FakeClock(Long.MAX_VALUE - 10_000); val sink = RecordingSink()
++            val c = AlertCore(clock, sink); c.suspected(); c.evidenceConfirmed()
++            check(c.snapshot().remainingMs == 10_000L)
++            clock.time = Long.MAX_VALUE - 1; c.tick()
++            check(c.snapshot().remainingMs == 1L); check(sink.alerts().isEmpty())
++            if (safeBefore) c.safe()
++            clock.time = Long.MAX_VALUE
++            if (safeBefore) {
++                c.tick(); check(sink.alerts().isEmpty())
++                check(c.snapshot().state == State.MONITORING); check(c.snapshot().response == Response.SAFE)
++            } else {
++                check(c.snapshot().remainingMs == 0L); check(sink.alerts().isEmpty())
++                c.safe(); c.tick(); c.sos()
++                check(sink.alerts().single().response == Response.NO_RESPONSE)
++                check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++            }
++        }
++    }
++    test("Long.MAX_VALUE timeout uses valid elapsed time without deadline overflow") {
++        for (start in listOf(0L, 1L)) {
++            val clock = FakeClock(start); val sink = RecordingSink()
++            val c = AlertCore(clock, sink, timeoutMs = Long.MAX_VALUE)
++            c.suspected(); c.evidenceConfirmed()
++            check(c.snapshot().remainingMs == Long.MAX_VALUE)
++            clock.time = Long.MAX_VALUE - 1; c.tick()
++            check(c.snapshot().remainingMs == start + 1); check(sink.alerts().isEmpty())
++            clock.time = Long.MAX_VALUE
++            check(c.snapshot().remainingMs == start); check(sink.alerts().isEmpty())
++            c.tick(); c.tick()
++            if (start == 0L) {
++                check(sink.alerts().single().response == Response.NO_RESPONSE)
++                check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++            } else {
++                // Deadline is outside the valid clock domain; do not wrap the clock.
++                check(sink.alerts().isEmpty()); check(c.snapshot().state == State.VERIFYING)
++                check(c.snapshot().status == Status.COUNTDOWN); check(c.snapshot().remainingMs == 1L)
++            }
++        }
++    }
+     println("PASS $passed tests")
+ }
+ 
+
+codex
+Đã thêm 3 nhóm regression: reentrant sink thành công, deadline sát `Long.MAX_VALUE`, timeout `Long.MAX_VALUE`.
+
+- Suite: **12 nhóm PASS, exit 0**.
+- Demo: **exit 0**, chỉ fake recipient; không có cảnh báo compiler/runtime.
+- Giữ nguyên source; chỉ sửa tests, README và evidence trong core.
+- Ghi rõ tests bổ sung **sau triển khai**, không giả TDD; thiếu sót TDD CORE-001 vẫn còn.
+- Review cũ PASS; chưa có review độc lập mới cho CORE-002.
+
+[Bằng chứng và giới hạn bàn giao](/home/pdd/nckh27pa/android/core/evidence/core-002-report.md). Không agent con, network hoặc commit.
+diff --git a/android/core/README.md b/android/core/README.md
+index 5fb455555aacd1235038695c0b5ee3ad3e6d22ff..a88e29e5064374befbbf6eb8d15148e658176c3d
+--- a/android/core/README.md
++++ b/android/core/README.md
+@@ -32,3 +32,13 @@
+ `final-tests.log` và `demo.log` là lần chạy bản cuối. Không dùng agent con, không nới sandbox, không commit. Hermes đã chạy lại 9 nhóm test và demo exit0 (docs/evidence/core-tests-hermes.log, core-demo-hermes.log). Reviewer độc lập REV-CORE-001 kết luận PASS trong phạm vi core offline, không phát hiện lỗi chặn (docs/evidence/REV-CORE-001.json). Chưa tích hợp Android; thiếu sót TDD nêu trên vẫn chưa được đóng. Các probe bổ sung reviewer báo đã chạy chưa phải regression test lưu trong repo. Chưa xác minh SUR-001 trong phiên này vì giới hạn chỉ đọc các mục được dẫn.
+ 
+ Không coi CORE này là hoàn thành AND-001/APK. Chưa giải quyết sensor, UI, background, persistence, Android permissions hay real transport.
++
++## CORE-002 — regression bổ sung sau triển khai
++
++Đã lưu thêm 3 nhóm regression trong `tests/CoreTests.kt`: sink reentrant trả về thành công (giữ ALERTING/SENDING trong callback, không gửi trùng hoặc complete sớm, sau return thành AWAITING_HELP/SENT và cho phép sự kiện mới sau complete); deadline tại `Long.MAX_VALUE` với SAFE trước/tại hạn; timeout `Long.MAX_VALUE` với clock bắt đầu ở 0 và 1. Trường hợp bắt đầu ở 1 vẫn còn 1 ms khi clock đạt cực đại, không được gửi sớm do cộng deadline tràn số. Các clock đều không âm, không giảm, không wrap.
++
++Đây là **kiểm thử bổ sung sau triển khai**, chạy PASS ngay trên source hiện có; không phải test-first, không tạo hay tuyên bố RED/GREEN hồi tố. Không phát hiện bug trong các trường hợp này nên giữ nguyên `src/`. Thiếu sót TDD lịch sử của CORE-001 vẫn còn; không đánh dấu CORE-001 đạt đầy đủ.
++
++Kiểm chứng CORE-002 chạy thật: [suite](evidence/core-002-tests.log) PASS 12 nhóm, exit 0; [demo](evidence/core-002-demo.log) exit 0, chỉ fake recipient. Cả hai log gộp stdout/stderr, không có cảnh báo compiler/runtime và không phát cảnh báo qua transport thật. Giữ nguyên log lịch sử. Xem [biên bản](evidence/core-002-report.md).
++
++Review độc lập REV-CORE-001 trước thay đổi đã PASS core offline, không có lỗi chặn. Phiên CORE-002 này tự rà soát các test bổ sung, chưa có review độc lập mới; không dùng kết quả cũ để tuyên bố review độc lập cho thay đổi mới. Không agent con, network, Gradle/emulator hay commit; không sửa Android ngoài core đang do Hermes xử lý.
+diff --git a/android/core/evidence/core-002-report.md b/android/core/evidence/core-002-report.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..137ed3643fd8261d2648b69934fe9d35fd40ad99
+--- /dev/null
++++ b/android/core/evidence/core-002-report.md
+@@ -0,0 +1,23 @@
++# CORE-002 — bằng chứng thực hiện
++
++Phạm vi đọc: phiếu CORE-002, phiếu và kết quả REV-CORE-001, nội dung android/core. Phạm vi ghi: tests/CoreTests.kt, README.md và evidence/core-002-* trong android/core. Không sửa source hoặc runner, không sửa phiếu/trạng thái ngoài core.
++
++## Regression bổ sung sau triển khai
++
++- Successful reentrant sink: lưu snapshot trước/sau callback gọi ngược; kiểm tra bên ngoài sink rằng sự kiện giữ ALERTING/SENDING và ID/response, không complete hoặc gửi trùng. Sink return thành công phải thành AWAITING_HELP/SENT; complete sau return cho phép SOS mới với ID khác.
++- Clock sát Long.MAX_VALUE: còn 1 ms trước hạn, snapshot tại hạn bằng 0 và không tự gửi; SAFE trước hạn hủy, SAFE tại hạn gửi NO_RESPONSE đúng một lần.
++- Timeout Long.MAX_VALUE: bắt đầu 0 gửi đúng tại cực đại; bắt đầu 1 vẫn còn 1 ms tại cực đại, không gửi sớm. Không sử dụng clock âm, giảm hoặc elapsed ngoài miền hợp lệ.
++
++Các test này được viết sau source và PASS lần chạy đầu. Không có RED tái hiện bug; không thay source để dựng quy trình TDD. Các log RED/GREEN trước đây được giữ nguyên. Thiếu TDD lịch sử chưa được giải quyết, CORE-001 chưa đạt đầy đủ yêu cầu TDD nghiêm ngặt.
++
++## Chạy thật
++
++- `./android/core/run-tests.sh`: PASS 12 nhóm, EXIT 0; stdout/stderr trong core-002-tests.log.
++- `./android/core/run-tests.sh core.DemoKt`: EXIT 0, fake recipient, kết thúc AWAITING_HELP: SENT; stdout/stderr trong core-002-demo.log.
++- Mỗi lệnh chạy một lần; không cảnh báo compiler/runtime trong output. Không dùng transport thật, network, Gradle hoặc emulator.
++
++## Rà soát và giới hạn bàn giao
++
++REV-CORE-001.json đã PASS và không báo lỗi chặn cho core trước thay đổi. Tự rà soát bổ sung: assertions reentrancy ở ngoài sink để exception do assertion không bị nhầm thành transport failure; kiểm tra trạng thái thành công sau return, số lần gửi và biên elapsed hợp lệ. Không phát hiện lỗi chặn trong phạm vi kiểm tra này. Chưa có review độc lập mới cho CORE-002; không gọi tự rà soát là review độc lập.
++
++Không agent con, không commit; giữ nguyên source và Android ngoài core. Kết quả không chứng minh Android/APK, scheduler nền hoặc transport thật hoạt động.
+diff --git a/android/core/tests/CoreTests.kt b/android/core/tests/CoreTests.kt
+index 1e006714759bebc666842bb34288e76d85daed5f..acf033fe3731e8a20c8e114ecbd64013ee0f600d
+--- a/android/core/tests/CoreTests.kt
++++ b/android/core/tests/CoreTests.kt
+@@ -91,7 +91,72 @@
+         t.start(); t.join(); check(failures == actions.size)
+         check(c.snapshot().state == State.MONITORING); check(sink.alerts().isEmpty())
+     }
+-    // NEXT
++    // CORE-002: regression tests added after implementation, not test-first evidence.
++    test("successful reentrant sink preserves sending event and completes after return") {
++        val sent = mutableListOf<Alert>(); val during = mutableListOf<Snapshot>()
++        lateinit var c: AlertCore
++        c = AlertCore(FakeClock(), AlertSink { alert ->
++            sent += alert
++            during += c.snapshot()
++            c.complete(); c.sos(); c.needHelp(); c.safe(); c.tick()
++            c.suspected(); c.evidenceConfirmed(); c.riskCleared()
++            during += c.snapshot()
++        })
++        c.sos()
++        check(sent.size == 1)
++        val first = sent.single()
++        check(during == List(2) {
++            Snapshot(State.ALERTING, first.eventId, Response.NEED_HELP, Status.SENDING, null)
++        })
++        check(c.snapshot() == Snapshot(State.AWAITING_HELP, first.eventId, Response.NEED_HELP, Status.SENT, null))
++        check(c.events().map { it.status } == listOf(Status.SENDING, Status.SENT))
++        c.sos(); c.needHelp(); c.tick(); check(sent.size == 1)
++        c.complete()
++        check(c.snapshot().state == State.MONITORING); check(c.snapshot().status == Status.ACKNOWLEDGED)
++        c.sos(); check(sent.size == 2); check(sent.last().eventId != first.eventId)
++        check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++    }
++    test("deadline at Long.MAX_VALUE preserves remaining time and SAFE boundary") {
++        for (safeBefore in listOf(true, false)) {
++            val clock = FakeClock(Long.MAX_VALUE - 10_000); val sink = RecordingSink()
++            val c = AlertCore(clock, sink); c.suspected(); c.evidenceConfirmed()
++            check(c.snapshot().remainingMs == 10_000L)
++            clock.time = Long.MAX_VALUE - 1; c.tick()
++            check(c.snapshot().remainingMs == 1L); check(sink.alerts().isEmpty())
++            if (safeBefore) c.safe()
++            clock.time = Long.MAX_VALUE
++            if (safeBefore) {
++                c.tick(); check(sink.alerts().isEmpty())
++                check(c.snapshot().state == State.MONITORING); check(c.snapshot().response == Response.SAFE)
++            } else {
++                check(c.snapshot().remainingMs == 0L); check(sink.alerts().isEmpty())
++                c.safe(); c.tick(); c.sos()
++                check(sink.alerts().single().response == Response.NO_RESPONSE)
++                check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++            }
++        }
++    }
++    test("Long.MAX_VALUE timeout uses valid elapsed time without deadline overflow") {
++        for (start in listOf(0L, 1L)) {
++            val clock = FakeClock(start); val sink = RecordingSink()
++            val c = AlertCore(clock, sink, timeoutMs = Long.MAX_VALUE)
++            c.suspected(); c.evidenceConfirmed()
++            check(c.snapshot().remainingMs == Long.MAX_VALUE)
++            clock.time = Long.MAX_VALUE - 1; c.tick()
++            check(c.snapshot().remainingMs == start + 1); check(sink.alerts().isEmpty())
++            clock.time = Long.MAX_VALUE
++            check(c.snapshot().remainingMs == start); check(sink.alerts().isEmpty())
++            c.tick(); c.tick()
++            if (start == 0L) {
++                check(sink.alerts().single().response == Response.NO_RESPONSE)
++                check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
++            } else {
++                // Deadline is outside the valid clock domain; do not wrap the clock.
++                check(sink.alerts().isEmpty()); check(c.snapshot().state == State.VERIFYING)
++                check(c.snapshot().status == Status.COUNTDOWN); check(c.snapshot().remainingMs == 1L)
++            }
++        }
++    }
+     println("PASS $passed tests")
+ }
+ 
+
+tokens used
+24,884
+Đã thêm 3 nhóm regression: reentrant sink thành công, deadline sát `Long.MAX_VALUE`, timeout `Long.MAX_VALUE`.
+
+- Suite: **12 nhóm PASS, exit 0**.
+- Demo: **exit 0**, chỉ fake recipient; không có cảnh báo compiler/runtime.
+- Giữ nguyên source; chỉ sửa tests, README và evidence trong core.
+- Ghi rõ tests bổ sung **sau triển khai**, không giả TDD; thiếu sót TDD CORE-001 vẫn còn.
+- Review cũ PASS; chưa có review độc lập mới cho CORE-002.
+
+[Bằng chứng và giới hạn bàn giao](/home/pdd/nckh27pa/android/core/evidence/core-002-report.md). Không agent con, network hoặc commit.

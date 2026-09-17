@@ -1,0 +1,8 @@
+Đã triển khai trong `android/core/` bằng Kotlin local, không tải Gradle/network, không agent con, không nới sandbox.
+
+- **9 nhóm test PASS, exit 0**; demo chạy thật đủ chuỗi MONITORING → SUSPECTED → VERIFYING → ALERTING → AWAITING_HELP.
+- Có log RED/GREEN cho 7 nhóm triển khai.
+- **Chưa đáp ứng trọn yêu cầu TDD từng hành vi**: wall time, thread ownership và bounded event log được kiểm tra sau scaffold, thiếu RED riêng.
+- Chưa có Hermes/reviewer độc lập; chưa giải quyết APK, background, persistence hoặc transport thật.
+
+Chi tiết và lệnh chạy: [README](/home/pdd/nckh27pa/android/core/README.md). Bằng chứng: [tests](/home/pdd/nckh27pa/android/core/evidence/final-tests.log), [demo](/home/pdd/nckh27pa/android/core/evidence/demo.log).

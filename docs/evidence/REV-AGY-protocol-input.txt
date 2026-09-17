@@ -1,0 +1,429 @@
+Bạn là reviewer độc lập. CHỈ phân tích văn bản inline; KHÔNG gọi tool/read_file/network/write. Không giả đã chạy test. Trả tiếng Việt. Review Kotlin/C++ framing lab versus draft. No payload JSON decoder/ACK/dedupe/live BLE in scope, not approved deployment. Review buffer bounds, duplicate/conflict/overlap/index/coverage, clock reversal/timeout, disconnect generation, encoder MTU, cross-language parity. Return PASS/FAIL with concrete file:line bug/repro, not speculative extras.
+
+FILE docs/interface-framing-draft.md
+1|# IF-002 — Frame phòng thí nghiệm, bản đề xuất 0.1
+2|TRẠNG THÁI: ĐỀ XUẤT KỸ THUẬT của Hermes, chưa phê duyệt giao thức triển khai. Không thay protocolVersion=1 của payload, UUID hoặc tên API. Chỉ được kiểm thử host; chưa bật BLE/HTTP thật. Cần review hai phía trước tích hợp, và quyết định chủ dự án nếu đổi hợp đồng đã duyệt.
+3|Nguồn: Android §6.1,6.9,8; ESP §8.6–8.7. Phạm vi: chia JSON UTF-8 thành frame, không phát hiện ngã/không xác thực. ESP còn cần GATT MTU đo thật.
+4|
+5|## Byte layout
+6|Mỗi frame là một GATT characteristic value; ATT_MTU-3 là giới hạn value. Không vượt MTU, không dùng MTU như độ dài cố định. Không gộp nhiều frame trong một value.
+7|Little-endian unsigned cho số nguyên. Header16byte:
+8||Offset|Bytes|Trường ngoài payload|Quy tắc|
+9||---|---|---|---|
+10||0|2|magic|0x46 0x53 (FS)|
+11||2|1|frameVersion|1 của draft, không phải protocolVersion payload|
+12||3|1|kind|1 sensor,2 event,3 status,4 command,5 commandAck; phải khớp characteristic|
+13||4|4|messageId|1..4294967295, unique trong phiên transport; không phải sequenceNumber/eventId|
+14||8|2|fragmentIndex|0-based|
+15||10|2|fragmentCount|1..256|
+16||12|2|totalLength|1..1024 byte UTF-8|
+17||14|2|fragmentOffset|offset byte trong toàn JSON|
+18||16|N|data|N>=1; offset+N<=totalLength|
+19|Tải MTU tối thiểu23→value20→4byte data. Encoder dùng chunk=MTU-3-16, chia mảnh theo thứ tự index/offset tăng, count=ceil(total/chunk), last chunk có thể ngắn. Decoder không giả mọi message dùng MTU giống nhau; kiểm contiguous coverage khi hoàn tất. Không thay MTU giữa một message; nếu cần gửi lại toàn message.
+20|
+21|## Giới hạn và kết thúc
+22|- Hai message đang ráp tối đa mỗi connection; key=(connection generation,kind,messageId). Nếu đầy, từ chối message mới với lỗi cục bộ CAPACITY, không âm thầm bỏ sự kiện đang ráp. Transport event queue vẫn cần chính sách ưu tiên riêng.
+23|- Mỗi message giữ tối đa1024byte data và metadata256fragment; gói vượt giới hạn bị reject trước cấp phát. Tổng memory bound cần đo theo implementation, không hứa RAM=2048 vì còn metadata.
+24|- index<count<=min(256,totalLength). Mọi frame cùng key phải khớp count/totalLength. Mảnh cùng index chỉ được lặp khi offset/length/data y hệt; mâu thuẫn hủy message. Mảnh khác index không được chồng byte. Completion phải có đủ count, coverage đúng toàn bộ, index0 offset0 và contiguous offsets theo index; UTF-8/JSON được kiểm ở lớp decoder payload sau ráp.
+25|- Hạn ráp2000ms từ mảnh đầu, monotonic; mảnh lặp không gia hạn. Tại now-start>=2000 bỏ message trước nhận mảnh tiếp theo. disconnect xóa phần đang ráp, tăng generation. Metadata completion cache có bound cần lớp trên; frame layer không thay event dedupe.
+26|- Frame đã ráp không chứng minh JSON hợp lệ, chưa ACK_EVENT. Decode v1 thành công, lưu sự kiện bền vững rồi mới ACK_EVENT. checksum=null đến khi thống nhất.
+27|
+28|## Gói và sự kiện
+29|Giữ mẫu sensor/events, types/units theo interface-contract.md. Status/ACK không có sequenceNumber (C02 đề xuất theo schema cụ thể). Không loại gói có số thấp chỉ vì max_seen lớn. Dedupe sự kiện theo (pairedDeviceId,eventId) + payload fingerprint; trùng ID nhưng khác payload là lỗi, không phát lại cảnh báo. Sensor dedupe theo (pairedDeviceId,sequenceNumber) với cửa sổ hữu hạn; sự kiện đến trễ vẫn xử lý riêng. Bền vững reboot/seq reservation chưa được host demo này nghiệm thu.
+30|
+31|## Timeout/retry đề xuất, không đã duyệt
+32|COMMAND_ACK_TIMEOUT_MS=2000, COMMAND_MAX_RETRIES=2 (tối đa3 lần gửi tổng). Giữ commandId/payload khi retry. ACCEPTED không phải COMPLETED; completion deadline riêng5000ms, không reset vì ACCEPTED lặp. REBOOT/đổi cấu hình cần cache result để idempotent, không tự gửi lại với ID mới.
+33|EVENT_ACK_TIMEOUT_MS=2000, EVENT_MAX_RETRIES_PER_CONNECTION=2; hết lượt giữ queue bền vững giới hạn và hiển thị chưa chuyển, chờ reconnect; ACK không tắt local alert.
+34|RECONNECT_BACKOFF_MS thử [1000,2000,4000,8000,16000,30000], reset chỉ sau kết nối ổn định30s; không retry busy loop. Sensor gaps chỉ thống kê sau reorder window500ms, không coi mất sensor sample là mất event đã lưu. Những giá trị này cần đo BLE/pin trước chốt.
+35|
+36|## Ma trận rủi ro đề xuất
+37|SOS_PRESSED → khẩn ngay. IMPACT/FREE_FALL/POSTURE/INSTABILITY/INACTIVITY → detection đa dấu hiệu hoặc xác minh, CRITICAL do luật wearable đã hiệu chỉnh có thể vào đường khẩn; trước hiệu chỉnh chỉ dữ liệu test. LOW_BATTERY/SENSOR_ERROR dù severity CRITICAL là lỗi kỹ thuật, không tự gọi là ngã. SOS_CANCELLED thiếu liên kết, không replay hủy qua disconnect; không tự tắt sự kiện khác. CANCEL_ALERT phải đúng eventId và authenticated caller. Những chính sách cuối phải thống nhất Android/ESP và reviewer trước live transport.
+38|
+39|## Nghiệm thu IF-003 trước tích hợp
+40|Hai encoder/decoder Kotlin/C++ phải dùng chung vectors: MTU23/185, out-of-order, duplicate identical/conflicting, index/count/offset/length sai, phiên bản sai, oversize, overlap/gap, missing timeout, disconnect, capacity. Test roundtrip không đủ: cần golden hex độc lập. ACK/retry/device seq thuộc lượt sau, không tuyên bố done bằng frame test.
+
+FILE protocol-lab/cpp/framing.hpp
+1|#pragma once
+2|#include <algorithm>
+3|#include <array>
+4|#include <cstdint>
+5|#include <optional>
+6|#include <stdexcept>
+7|#include <string>
+8|#include <vector>
+9|#include <limits>
+10|
+11|namespace lab {
+12|using Bytes = std::vector<std::uint8_t>;
+13|inline std::optional<std::vector<Bytes>> encode(int mtu, int kind, std::uint64_t id, const Bytes& payload) {
+14|    if (mtu < 23 || kind < 1 || kind > 5 || id == 0 || id > 0xffffffffULL || payload.empty() || payload.size() > 1024) return {};
+15|    const auto chunk = static_cast<std::size_t>(mtu - 19);
+16|    const auto count = (payload.size() - 1) / chunk + 1;
+17|    std::vector<Bytes> frames;
+18|    frames.reserve(count);
+19|    for (std::size_t i = 0; i < count; ++i) {
+20|        auto offset = i * chunk, length = std::min(chunk, payload.size() - offset);
+21|        Bytes f(16 + length);
+22|        auto put = [&](int pos, std::uint64_t n, int size) { for (int j=0;j<size;++j) f[pos+j] = static_cast<std::uint8_t>(n >> (8*j)); };
+23|        f[0]=0x46; f[1]=0x53; f[2]=1; f[3]=static_cast<std::uint8_t>(kind);
+24|        put(4,id,4); put(8,i,2); put(10,count,2); put(12,payload.size(),2); put(14,offset,2);
+25|        std::copy_n(payload.begin()+offset,length,f.begin()+16);
+26|        frames.push_back(std::move(f));
+27|    }
+28|    return frames;
+29|}
+30|struct Result { std::string status; Bytes payload{}; };
+31|class Reassembler {
+32|    struct Slot {
+33|        bool used = false;
+34|        int kind = 0, count = 0, total = 0, received = 0;
+35|        std::uint64_t id = 0;
+36|        std::int64_t start = 0;
+37|        std::array<std::uint8_t,1024> data{};
+38|        std::array<std::uint16_t,256> offsets{}, lengths{};
+39|        void clear() { used=false; lengths.fill(0); received=0; }
+40|    };
+41|    std::array<Slot,2> slots{};
+42|    std::int64_t lastNow = 0;
+43|    std::uint64_t generation_ = 0;
+44|    bool advance(std::int64_t now) {
+45|        if (now < lastNow) return false;
+46|        lastNow=now;
+47|        for (auto& s:slots) if (s.used && now-s.start >= 2000) s.clear();
+48|        return true;
+49|    }
+50|public:
+51|    int active() const { return static_cast<int>(std::count_if(slots.begin(),slots.end(),[](const Slot& s){return s.used;})); }
+52|    std::uint64_t generation() const { return generation_; }
+53|    Result tick(std::int64_t now) { return {advance(now)?"TICK":"CLOCK"}; }
+54|    Result disconnect() {
+55|        if (generation_ == std::numeric_limits<std::uint64_t>::max()) throw std::overflow_error("generation exhausted");
+56|        for (auto& s:slots) s.clear();
+57|        ++generation_; return {"DISCONNECTED"};
+58|    }
+59|    Result receive(std::int64_t now, std::uint64_t session, int characteristicKind, const Bytes& f) {
+60|        if (!advance(now)) return {"CLOCK"};
+61|        if (session != generation_) return {"STALE"};
+62|        if (f.size()<17 || f.size()>1040) return {"INVALID"};
+63|        auto u = [&](int p,int size) { std::uint64_t n=0; for(int j=0;j<size;++j) n |= std::uint64_t(f[p+j]) << (8*j); return n; };
+64|        int kind=int(u(3,1)), index=int(u(8,2)), count=int(u(10,2)), total=int(u(12,2)), offset=int(u(14,2)), length=int(f.size()-16);
+65|        auto id=u(4,4);
+66|        if (u(0,2)!=0x5346 || u(2,1)!=1 || kind<1 || kind>5 || kind!=characteristicKind || id==0 ||
+67|            total<1 || total>1024 || count<1 || count>std::min(256,total) || index>=count || offset+length>total) return {"INVALID"};
+68|        Slot* s=nullptr;
+69|        for(auto& item:slots) if(item.used && item.kind==kind && item.id==id) { s=&item; break; }
+70|        if (!s) {
+71|            for(auto& item:slots) if(!item.used) { s=&item; break; }
+72|            if(!s) return {"CAPACITY"};
+73|            s->clear(); s->used=true; s->kind=kind; s->id=id; s->start=now; s->count=count; s->total=total;
+74|        }
+75|        auto conflict=[&]() -> Result { s->clear(); return {"CONFLICT"}; };
+76|        if(s->count!=count || s->total!=total) return conflict();
+77|        if(s->lengths[index]) {
+78|            if(s->offsets[index]!=offset || s->lengths[index]!=length || !std::equal(f.begin()+16,f.end(),s->data.begin()+offset)) return conflict();
+79|            return {"DUPLICATE"};
+80|        }
+81|        for(int i=0;i<count;++i) if(s->lengths[i] && offset<s->offsets[i]+s->lengths[i] && s->offsets[i]<offset+length) return conflict();
+82|        std::copy(f.begin()+16,f.end(),s->data.begin()+offset);
+83|        s->offsets[index]=static_cast<std::uint16_t>(offset); s->lengths[index]=static_cast<std::uint16_t>(length); ++s->received;
+84|        if(s->received!=count) return {"PENDING"};
+85|        int end=0;
+86|        for(int i=0;i<count;++i) { if(s->offsets[i]!=end) return conflict(); end+=s->lengths[i]; }
+87|        if(end!=total) return conflict();
+88|        Bytes payload(s->data.begin(),s->data.begin()+total); s->clear();
+89|        return {"COMPLETE",std::move(payload)};
+90|    }
+91|};
+92|}
+
+FILE protocol-lab/kotlin/Framing.kt
+1|package lab
+2|
+3|/** Host proposal only. Payload is opaque bytes; caller supplies monotonic milliseconds. */
+4|object Framing {
+5|    private fun put(b: ByteArray, p: Int, n: Long, size: Int) {
+6|        repeat(size) { b[p + it] = (n ushr (8 * it)).toByte() }
+7|    }
+8|    fun encode(mtu: Int, kind: Int, id: Long, payload: ByteArray): List<ByteArray>? {
+9|        if (mtu < 23 || kind !in 1..5 || id !in 1..0xffffffffL || payload.size !in 1..1024) return null
+10|        val chunk = mtu - 19
+11|        val count = (payload.size - 1) / chunk + 1
+12|        return List(count) { i ->
+13|            val offset = i * chunk
+14|            val length = minOf(chunk, payload.size - offset)
+15|            ByteArray(16 + length).also {
+16|                it[0] = 0x46; it[1] = 0x53; it[2] = 1; it[3] = kind.toByte()
+17|                put(it, 4, id, 4); put(it, 8, i.toLong(), 2); put(it, 10, count.toLong(), 2)
+18|                put(it, 12, payload.size.toLong(), 2); put(it, 14, offset.toLong(), 2)
+19|                payload.copyInto(it, 16, offset, offset + length)
+20|            }
+21|        }
+22|    }
+23|}
+24|
+25|class Reassembler {
+26|    private class Slot {
+27|        var used = false
+28|        var kind = 0
+29|        var id = 0L
+30|        var start = 0L
+31|        var count = 0
+32|        var total = 0
+33|        var received = 0
+34|        val data = ByteArray(1024)
+35|        val offsets = IntArray(256)
+36|        val lengths = IntArray(256) // zero means unseen
+37|        fun clear() { used = false; lengths.fill(0); received = 0 }
+38|    }
+39|    private val slots = Array(2) { Slot() }
+40|    var generation = 0L; private set
+41|    private var lastNow = 0L
+42|    val active: Int get() = slots.count { it.used }
+43|    data class Result(val status: String, val payload: ByteArray? = null)
+44|    private fun advance(now: Long): Boolean {
+45|        if (now < lastNow) return false
+46|        lastNow = now
+47|        slots.forEach { if (it.used && now - it.start >= 2000) it.clear() }
+48|        return true
+49|    }
+50|    fun tick(now: Long) = Result(if (advance(now)) "TICK" else "CLOCK")
+51|    fun disconnect(): Result {
+52|        check(generation < Long.MAX_VALUE) // fail closed instead of generation wrap
+53|        slots.forEach { it.clear() }; generation++
+54|        return Result("DISCONNECTED")
+55|    }
+56|    fun receive(now: Long, session: Long, characteristicKind: Int, frame: ByteArray): Result {
+57|        if (!advance(now)) return Result("CLOCK")
+58|        if (session != generation) return Result("STALE")
+59|        if (frame.size !in 17..1040) return Result("INVALID")
+60|        fun u(p: Int, size: Int): Long {
+61|            var n = 0L
+62|            repeat(size) { n = n or ((frame[p + it].toLong() and 255) shl (8 * it)) }
+63|            return n
+64|        }
+65|        val kind = u(3,1).toInt(); val id = u(4,4)
+66|        val index = u(8,2).toInt(); val count = u(10,2).toInt()
+67|        val total = u(12,2).toInt(); val offset = u(14,2).toInt(); val length = frame.size - 16
+68|        if (u(0,2) != 0x5346L || u(2,1) != 1L || kind !in 1..5 || kind != characteristicKind ||
+69|            id == 0L || total !in 1..1024 || count !in 1..minOf(256,total) || index >= count || offset + length > total)
+70|            return Result("INVALID")
+71|        var s = slots.firstOrNull { it.used && it.kind == kind && it.id == id }
+72|        if (s == null) {
+73|            s = slots.firstOrNull { !it.used } ?: return Result("CAPACITY")
+74|            s.clear(); s.used = true; s.kind = kind; s.id = id; s.start = now; s.count = count; s.total = total
+75|        }
+76|        fun conflict(): Result { s.clear(); return Result("CONFLICT") }
+77|        if (s.count != count || s.total != total) return conflict()
+78|        if (s.lengths[index] != 0) {
+79|            if (s.offsets[index] != offset || s.lengths[index] != length) return conflict()
+80|            repeat(length) { if (s.data[offset + it] != frame[16 + it]) return conflict() }
+81|            return Result("DUPLICATE")
+82|        }
+83|        repeat(count) { i ->
+84|            if (s.lengths[i] != 0 && offset < s.offsets[i] + s.lengths[i] && s.offsets[i] < offset + length) return conflict()
+85|        }
+86|        frame.copyInto(s.data, offset, 16)
+87|        s.offsets[index] = offset; s.lengths[index] = length; s.received++
+88|        if (s.received != count) return Result("PENDING")
+89|        var end = 0
+90|        repeat(count) { if (s.offsets[it] != end) return conflict(); end += s.lengths[it] }
+91|        if (end != total) return conflict()
+92|        val payload = s.data.copyOf(total)
+93|        s.clear()
+94|        return Result("COMPLETE", payload)
+95|    }
+96|}
+
+FILE protocol-lab/tests/run.py
+1|#!/usr/bin/env python3
+2|"""Independent wire oracle + shared transcripts; stdlib only, no network."""
+3|import json, pathlib, struct, subprocess, sys
+4|ROOT = pathlib.Path(__file__).resolve().parents[1]
+5|CMDS = [[str(ROOT/'build/cpp-lab')], [str(ROOT/'build/java'), '-jar', str(ROOT/'build/kotlin-lab.jar')]]
+6|
+7|def wire(kind=1, mid=1, index=0, count=2, total=8, offset=0, data=b'abcd', version=1, magic=b'FS'):
+8|    return (magic + struct.pack('<BBIHHHH', version, kind, mid, index, count, total, offset) + data).hex()
+9|
+10|def recv(h=None, t=0, gen=0, kind=1):
+11|    return f'R {t} {gen} {kind} {h or wire()}'
+12|
+13|def run(cmd, lines):
+14|    p = subprocess.run(cmd, input='\n'.join(lines)+'\n', text=True, capture_output=True)
+15|    assert p.returncode == 0, (cmd, p.returncode, p.stderr)
+16|    return p.stdout.splitlines()
+17|
+18|def main():
+19|    vectors = json.loads((ROOT/'fixtures/golden.json').read_text())
+20|    cases = []
+21|    def case(name, lines, want): cases.append((name, lines, want))
+22|    for v in vectors:
+23|        case('golden encoder '+v['name'], [f"E {v['mtu']} {v['kind']} {v['id']} {v['payload']}"], ['FRAMES '+','.join(v['frames'])])
+24|        lines = [recv(h, kind=v['kind']) for h in v['frames']]
+25|        case('golden decoder '+v['name'], lines, ['PENDING 1 0']*(len(lines)-1)+['COMPLETE '+v['payload']+' 0 0'])
+26|    a, b = wire(), wire(index=1, offset=4, data=b'efgh')
+27|    done = 'COMPLETE 6162636465666768 0 0'
+28|    case('out of order', [recv(b), recv(a)], ['PENDING 1 0', done])
+29|    case('duplicate identical', [recv(a), recv(a, 1999), recv(b,1999)], ['PENDING 1 0','DUPLICATE 1 0',done])
+30|    for label, h in [('bytes',wire(data=b'abce')), ('offset',wire(offset=1)), ('length',wire(data=b'abc')), ('count',wire(count=3)), ('total',wire(total=9))]:
+31|        case('conflict '+label,[recv(a),recv(h)],['PENDING 1 0','CONFLICT 0 0'])
+32|    for label,h in [('short','4653'),('magic',wire(magic=b'XX')),('version',wire(version=2)),('kind zero',wire(kind=0)),('kind six',wire(kind=6)),('characteristic',wire(kind=2)),('id zero',wire(mid=0)),('count zero',wire(count=0)),('count 257',wire(count=257)),('count > total',wire(count=9)),('index',wire(index=2)),('total zero',wire(total=0)),('oversize',wire(total=1025)),('empty data',wire(data=b'')),('offset',wire(offset=65535)),('end',wire(offset=5)),('long frame',wire(data=b'x'*1025,total=1024))]:
+33|        case('invalid '+label,[recv(h)],['INVALID 0 0'])
+34|    case('invalid preserves active', [recv(a),recv(wire(version=2)),recv(b)],['PENDING 1 0','INVALID 1 0',done])
+35|    case('overlap',[recv(a),recv(wire(index=1,offset=3))],['PENDING 1 0','CONFLICT 0 0'])
+36|    case('gap',[recv(wire(data=b'abc')),recv(b)],['PENDING 1 0','CONFLICT 0 0'])
+37|    case('noncontiguous index',[recv(wire(offset=4)),recv(wire(index=1,offset=0,data=b'efgh'))],['PENDING 1 0','CONFLICT 0 0'])
+38|    case('timeout boundary',[recv(a), 'T 1999','T 2000'],['PENDING 1 0','TICK 1 0','TICK 0 0'])
+39|    case('duplicate no extension',[recv(a),recv(a,1999),recv(b,2000),recv(a,2001)],['PENDING 1 0','DUPLICATE 1 0','PENDING 1 0',done])
+40|    case('missing expires before invalid',[recv(a),recv('00',2000)],['PENDING 1 0','INVALID 0 0'])
+41|    case('clock rollback',[recv(a,100),'T 99','T 2100'],['PENDING 1 0','CLOCK 1 0','TICK 0 0'])
+42|    case('disconnect stale',[recv(a),'D',recv(b,gen=0),recv(b,gen=1),recv(a,gen=1)],['PENDING 1 0','DISCONNECTED 0 1','STALE 0 1','PENDING 1 1','COMPLETE 6162636465666768 0 1'])
+43|    case('capacity retains',[recv(a),recv(wire(mid=2)),recv(wire(mid=3)),recv(b)],['PENDING 1 0','PENDING 2 0','CAPACITY 2 0','COMPLETE 6162636465666768 1 0'])
+44|    case('capacity expires',[recv(a),recv(wire(mid=2),1),recv(wire(mid=3),2000)],['PENDING 1 0','PENDING 2 0','PENDING 2 0'])
+45|    case('kind key',[recv(a),recv(wire(kind=2),kind=2),recv(b)],['PENDING 1 0','PENDING 2 0','COMPLETE 6162636465666768 1 0'])
+46|    case('independent deadlines',[recv(a),recv(wire(mid=2),1000),'T 2000'],['PENDING 1 0','PENDING 2 0','TICK 1 0'])
+47|    case('no completion cache',[recv(a),recv(b),recv(a),recv(b)],['PENDING 1 0',done,'PENDING 1 0',done])
+48|    case('bytes not JSON validation',[recv(wire(count=1,total=1,data=b'\xff'))],['COMPLETE ff 0 0'])
+49|    for mtu,kind,mid,payload in [(22,1,1,'00'),(23,0,1,'00'),(23,6,1,'00'),(23,1,0,'00'),(23,1,4294967296,'00'),(23,1,1,'-'),(23,1,1,'aa'*1025)]:
+50|        case('encoder invalid',[f'E {mtu} {kind} {mid} {payload}'],['INVALID'])
+51|    failures = []
+52|    for name,lines,want in cases:
+53|        for cmd in CMDS:
+54|            got=run(cmd,lines)
+55|            if got != want: failures.append((name, pathlib.Path(cmd[0]).name))
+56|    if failures:
+57|        for failure in failures: print("FAIL", *failure)
+58|        raise AssertionError(f"{len(failures)} shared behavior checks failed")
+59|    # Both directions, multiple MTUs/kinds, binary payloads, reversed order.
+60|    for mtu in [23,24,185,517]:
+61|        for length in [1,4,5,166,167,169,1024]:
+62|            payload=bytes((i*37)%256 for i in range(length)).hex()
+63|            for source,target in [(CMDS[0],CMDS[1]),(CMDS[1],CMDS[0])]:
+64|                frames=run(source,[f'E {mtu} 5 4294967295 {payload}'])[0].removeprefix('FRAMES ').split(',')
+65|                assert all(17<=len(bytes.fromhex(h))<=mtu-3 for h in frames)
+66|                expected=[wire(kind=5,mid=4294967295,index=i,count=len(frames),total=length,offset=i*(mtu-19),data=bytes.fromhex(payload)[i*(mtu-19):(i+1)*(mtu-19)]) for i in range(len(frames))]
+67|                assert frames==expected
+68|                got=run(target,[recv(h,kind=5) for h in reversed(frames)])
+69|                assert got==['PENDING 1 0']*(len(frames)-1)+[f'COMPLETE {payload} 0 0']
+70|    print(f'PASS {len(cases)} shared scenarios x 2 languages; 56 cross-language exchanges')
+71|
+72|if __name__=='__main__': main()
+
+FILE protocol-lab/README.md
+1|# IF-003 host framing lab — PROPOSAL, CHƯA APPROVED
+2|
+3|Thực thi `docs/tasks/IF-003.md` và byte layout của
+4|`docs/interface-framing-draft.md` 0.1. Chỉ chạy host Kotlin/C++, không tích hợp
+5|Android/ESP, BLE/HTTP, không sửa payload API v1, UUID hay checksum.
+6|`frameVersion=1` là version lớp ngoài, không phải thay đổi `protocolVersion`.
+7|
+8|## Chạy offline
+9|
+10|```sh
+11|./protocol-lab/run.sh
+12|SANITIZE=1 ./protocol-lab/run.sh
+13|```
+14|
+15|Runner dùng Python 3 stdlib, g++, kotlinc từ Android Studio và JBR local;
+16|không Gradle/download. Có thể đặt `KOTLINC` (đường dẫn executable) và
+17|`JAVA_HOME` nếu Studio nằm nơi khác. Build chỉ ghi vào `protocol-lab/build/`
+18|(được ignore). `SANITIZE=1` bật C++ AddressSanitizer + UndefinedBehaviorSanitizer;
+19|Mặc định `detect_leaks=0` vì LeakSanitizer không chạy được dưới ptrace của
+20|sandbox này (lỗi được giữ ở `tests/sanitizer-unavailable.log`); chưa kiểm leak.
+21|Có thể override `ASAN_OPTIONS` trên host hỗ trợ leak detection.
+22|`-no-pie` tránh va chạm địa chỉ shadow memory trong môi trường host.
+23|
+24|Các file chính:
+25|
+26|- `kotlin/Framing.kt`, `cpp/framing.hpp`: API encoder và reassembler thuần host.
+27|- `kotlin/Main.kt`, `cpp/main.cpp`: harness dòng lệnh, không phải parser network.
+28|- `fixtures/golden.json`: literal payload/frame hex chung, tạo độc lập bằng
+29|  byte layout và `struct.pack('<BBIHHHH', ...)`, không lấy output encoder làm oracle.
+30|  Bao gồm MTU23 với JSON v1, MTU185 với UTF-8, MTU23 với 1024 byte/256 fragment.
+31|- `tests/run.py`: cùng input và expected output cho cả hai runtime, thêm encode
+32|  Kotlin → ráp C++ và encode C++ → ráp Kotlin theo thứ tự đảo ngược.
+33|- `tests/red.log`, `tests/green.log`, `tests/sanitizer.log`: bằng chứng thực thi.
+34|
+35|TDD: toàn bộ 52 scenario được viết và chạy với hai stub trước implementation:
+36|104 behavior checks đỏ (`UNIMPLEMENTED`); sau đó 104 checks xanh và 56 lượt
+37|cross-language. Các nhóm behavior: golden encoder/decoder, validation header,
+38|characteristic, ID unsigned tối đa, giới hạn encoder, reorder, identical/conflicting
+39|index, count/total mismatch, overlap/gap/order coverage, capacity, timeout,
+40|disconnect/generation, clock regression, opaque bytes và không completion cache.
+41|Test cross-language còn so header/data với oracle Python độc lập, không chỉ roundtrip.
+42|
+43|## Semantics và giới hạn
+44|
+45|Mỗi instance dành cho **một connection**, truy cập tuần tự, tối đa hai message.
+46|Caller cấp messageId duy nhất trong phiên; encoder không tự cấp ID và không đổi
+47|MTU giữa các fragment. Decoder nhận mỗi characteristic value riêng, không yêu
+48|cầu các mảnh bằng độ dài chunk encoder. Adapter tương lai phải kiểm value không
+49|vượt negotiated ATT_MTU−3; host decoder chỉ kiểm bound frame 17..1040 byte.
+50|
+51|`receive(now, generation, characteristicKind, bytes)` kiểm clock, expire slot,
+52|kiểm generation, rồi toàn bộ giới hạn header trước khi nhận slot/copy data.
+53|Frame malformed trả `INVALID`, giữ message còn hiệu lực; frame hợp lệ nhưng
+54|metadata/duplicate/overlap mâu thuẫn trả `CONFLICT` và hủy đúng message đó.
+55|Đầy hai slot trả `CAPACITY`, không loại message khác. `COMPLETE` trả bản sao
+56|payload và giải phóng slot sau khi kiểm đủ fragment, index0 offset0 và coverage
+57|liên tục theo index tới totalLength. Không kiểm UTF-8/JSON ở lớp này.
+58|
+59|Clock là millisecond monotonic không âm, không phải wall clock; adapter nên dùng
+60|elapsed time từ một mốc ổn định. Hạn cố định 2000ms từ mảnh đầu, không reset do
+61|mảnh mới hay duplicate. `tick(now)` cho phép expire khi không có traffic; caller
+62|phải schedule tick nếu cần giải phóng đúng hạn lúc im lặng. Mọi receive cũng expire
+63|trước xử lý frame. Clock đi lùi trả `CLOCK` và không thay state. Sau timeout,
+64|mảnh cùng ID có thể bắt đầu ráp mới: draft chưa có tombstone/quarantine.
+65|
+66|`disconnect()` xóa cả hai slot và tăng generation, không reset clock.
+67|Callback phải mang generation đã capture lúc đăng ký phiên; không được gắn
+68|callback cũ vào generation hiện hành. Generation cũ trả `STALE`.
+69|Không cache completion: replay trọn message có thể trả COMPLETE lần nữa.
+70|Generation exhaustion fail closed, không wrap; host CLI chỉ dùng giá trị nhỏ
+71|trong phần miền số chung Kotlin/C++. Key thực tế là instance/generation/kind/ID.
+72|
+73|### Memory và thời gian xử lý
+74|
+75|C++ giữ hai slot inline, mỗi slot chứa data[1024], offsets[256] và lengths[256]
+76|uint16, cùng scalar. `sizeof(lab::Reassembler)` đo trên g++ 15.2.0 x86_64 là
+77|**4192 byte**, bao gồm padding; chạy `printf 'M\n' | protocol-lab/build/cpp-lab`
+78|để đo lại ABI khác. Không heap allocation cho slot hay fragment metadata khi
+79|receive. Result COMPLETE có vector tối đa1024byte; string/result và input thuộc
+80|chi phí API, không nằm trong sizeof state.
+81|
+82|Kotlin cấp phát cố định hai Slot ngay lúc tạo instance: mỗi slot một ByteArray
+83|1024, hai IntArray 256, tổng **6144 byte phần tử mảng** cho hai slot. Không tạo
+84|mảng theo count/total từ frame; malformed frame không cấp phát message storage.
+85|Chi phí header object/array, reference, scalar và alignment JVM **chưa đo tổng
+86|retained heap**, do đó 6144 không phải tổng RAM. Result/iterator/lambda tạm và
+87|bản sao COMPLETE tối đa1024byte còn tạo allocation JVM. Đây là giới hạn state
+88|ráp, không hứa bound toàn JVM, caller queue hoặc input buffers.
+89|
+90|Encoder giữ tối đa256 frame, tổng header+data tối đa5120 byte chưa kể container.
+91|Receive quét tối đa2 slot và256 metadata, copy/compare tối đa1024 byte;
+92|không có loop retry hoặc state tăng theo số frame nhận. Harness đọc trusted hex
+93|bằng stdin và giữ transcript để test; không phải ingress có memory bound cho
+94|chuỗi input tùy ý. Khi tích hợp cần giới hạn input trước tạo ByteArray/vector.
+95|
+96|## Còn thiếu trước approval/tích hợp
+97|
+98|- Review độc lập bằng input do reviewer tự chọn; chưa thực hiện trong lượt này.
+99|  Passing suite không đồng nghĩa transport production approved.
+100|- Đo tổng retained heap Kotlin và peak allocations; RAM ESP, GATT MTU thực,
+101|  scheduling, throughput, pin và disconnect callback trên thiết bị chưa nghiệm thu.
+102|- Payload decoder v1/UTF-8/JSON và validation schema; frame COMPLETE không phải
+103|  bằng chứng payload hợp lệ, không phát ACK_EVENT. Payload phải decode thành công,
+104|  event phải lưu bền vững rồi mới ACK_EVENT; checksum giữ nguyên/null theo hợp đồng.
+105|- Completion cache có bound, event dedupe `(pairedDeviceId,eventId)+fingerprint`,
+106|  sensor dedupe/reorder window500ms, late events, durable queue, reboot và seq
+107|  reservation chưa có. Không dùng max_seen để tự loại event đến trễ.
+108|- COMMAND_ACK 2000ms/2 retries, ACCEPTED khác COMPLETED và deadline5000ms không
+109|  reset; EVENT_ACK 2000ms/2 retries/connection; reconnect backoff
+110|  [1000,2000,4000,8000,16000,30000] reset sau ổn định30s đều thuộc lượt sau.
+111|- Idempotent result cache, authenticated cancellation, liên kết SOS_CANCELLED,
+112|  policy ưu tiên queue và ma trận rủi ro/detection trong draft chưa triển khai.
+113|  Cần review hai phía và quyết định chủ dự án trước bật transport.
+114|
+115|Các điểm draft cần chốt: cách báo expiry cho lớp trên, chống late fragment ghép
+116|sau timeout, bound/retention completion cache, adapter kiểm MTU, chính sách lỗi
+117|malformed so với conflict, và measurement budget JVM/ESP. Lab ghi rõ lựa chọn
+118|ở trên để review; không tự nâng proposal thành hợp đồng đã duyệt.

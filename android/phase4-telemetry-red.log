@@ -1,0 +1,67 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:processDebugJavaRes UP-TO-DATE
+
+> Task :app:compileDebugUnitTestKotlin FAILED
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:10:25 Unresolved reference 'PhoneTelemetry'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:11:23 Unresolved reference 'BatteryReading'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:14:35 Unresolved reference 'accelZMs2'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:15:37 Unresolved reference 'pressurePa'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:16:26 Unresolved reference 'gyroXDps'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:16:54 Unresolved reference 'gyroYDps'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:16:82 Unresolved reference 'gyroZDps'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:17:26 Unresolved reference 'location'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:18:32 Unresolved reference 'batteryPercent'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:23:32 Unresolved reference 'gyroXDps'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:24:25 Unresolved reference 'sequenceNumber'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:24:48 Unresolved reference 'sequenceNumber'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:30:17 Unresolved reference 'PhoneTelemetry'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:32:33 Unresolved reference 'BatteryReading'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:33:20 Unresolved reference 'PhoneTelemetry'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:33:72 Unresolved reference 'BatteryReading'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:34:25 Unresolved reference 'sequenceNumber'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:34:48 Unresolved reference 'sequenceNumber'.
+e: file:///home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/api/TelemetryTests.kt:35:60 Unresolved reference 'BatteryReading'.
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugUnitTestKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 12s
+24 actionable tasks: 1 executed, 23 up-to-date

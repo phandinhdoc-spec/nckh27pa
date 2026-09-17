@@ -1,0 +1,24 @@
+### ĐÁNH GIÁ: **FAIL**
+
+Bản cập nhật đã giải quyết triệt để lỗi mất collector khi FGS khởi động bất đồng bộ thất bại và race condition 100ms lúc dừng. Tuy nhiên, code vẫn dính lỗi cụ thể ở luồng phân quyền và xử lý kết quả cấp quyền.
+
+---
+
+### 1. Lỗi cụ thể (Concrete Bugs)
+
+* **Bỏ qua kiểm tra kết quả cấp quyền (`onRequestPermissionsResult` trong `MainActivity.kt`)**:
+  * **Hiện tượng**: Điều kiện `if (requestCode == 27 && controller.foreground) beginMonitoring()` hoàn toàn không kiểm tra `grantResults`.
+  * **Hậu quả**: Khi người dùng nhấn **Từ chối (Deny)** quyền `POST_NOTIFICATIONS`, ứng dụng vẫn tự động gọi `beginMonitoring()` thay vì hủy bỏ thao tác.
+  * **Vi phạm yêu cầu**: Thiếu thông báo từ chối quyền tường minh (*"denied notification must explicit"*). Cần kiểm tra `grantResults.getOrNull(0) == PackageManager.PERMISSION_GRANTED`; nếu bị từ chối, phải gán `controller.backgroundMessage` thông báo rõ người dùng đã từ chối quyền thông báo và cập nhật lại ownership.
+* **Lỗi cập nhật hiển thị UI (`sensorSummary`)**:
+  * `sensorSummary` chỉ được gán trong `onResume()`. Khi bật/tắt nền thành công ngay lúc Activity đang hiển thị, chuỗi cảm biến không tự cập nhật lại theo `backgroundSensors`.
+
+---
+
+### 2. Phân tích các thành phần đã đạt (Verified)
+
+* **Sensor Ownership & Lifecycle Handoff**: Rất tốt. Callback `onMonitoringChanged` chỉ kích hoạt sau khi `startForeground` thành công và sau khi `onDestroy` hoàn tất dọn dẹp (`collector.stop()`, giải phóng `wake`).
+* **Bảo toàn thông báo lỗi `onCreate`**: Khi `startForeground` bắt ngoại lệ và gọi `stopSelf()`, biến `collector` chưa được khởi tạo (`::collector.isInitialized` trả về `false`), giúp `onDestroy()` không ghi đè mất chuỗi thông báo lỗi.
+* **WakeLock & Scope 10s**: WakeLock clamp trần 11s (`coerceIn(0, 10000) + 1000`) hoàn toàn ăn khớp với countdown cố định 10s của `DemoSession`.
+* **Quyền FGS Health**: Thiết bị điện thoại không có `BODY_SENSORS`; việc dùng FGS Health kết hợp khai báo `HIGH_SAMPLING_RATE_SENSORS` và `FOREGROUND_SERVICE_HEALTH` trong Manifest là đúng chuẩn Android 14.
+* **Chặn STOP khi Active**: Đúng theo đặc tả ticket, hệ thống vẫn dừng được qua Task Manager.

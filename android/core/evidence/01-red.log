@@ -1,0 +1,5 @@
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at core.CoreTestsKt.main$lambda$0(CoreTests.kt:10)
+	at core.CoreTestsKt.main$test(CoreTests.kt:6)
+	at core.CoreTestsKt.main(CoreTests.kt:7)
+	at core.CoreTestsKt.main(CoreTests.kt)

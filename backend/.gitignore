@@ -1,0 +1,4 @@
+/data/
+/test/persist-*/
+/test/recovery-*/
+/test/runtime-*/

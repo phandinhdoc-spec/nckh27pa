@@ -1,0 +1,6 @@
+PASS no-response
+PASS safe
+PASS sos-short-long
+PASS sink-failure
+PASS replay-survives-pause
+PASS tabs-and-sensors

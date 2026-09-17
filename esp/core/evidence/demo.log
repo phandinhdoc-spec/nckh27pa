@@ -1,0 +1,12 @@
++ g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. local_alert.cpp demo.cpp -o .build/demo
++ .build/demo
+ms=0 state=MONITORING buzzer=0 actions=0
+ms=0 state=SUSPECTED buzzer=0 actions=9
+ms=0 state=VERIFYING buzzer=1 actions=2
+ms=1000 state=VERIFYING buzzer=1 actions=8
+ms=2000 state=VERIFYING buzzer=1 actions=0
+ms=3000 state=VERIFYING buzzer=0 actions=4
+ms=10000 state=LOCAL_ALERTING buzzer=1 actions=11
+ms=11000 state=MONITORING buzzer=0 actions=13
+retained=demo-1 alerted=1 safe=1
+exit=0

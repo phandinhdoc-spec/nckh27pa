@@ -1,0 +1,19 @@
+Tiếp tục UX-002A với cùng worker/model. Không gọi read_file, không đọc dự án, không agent con. Chỉ dùng công cụ sửa tệp để áp dụng đúng ba thay đổi dưới đây vào /home/pdd/nckh27pa/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt; không sửa tệp khác.
+
+1. Thay đúng dòng:
+                    Text("BLE: chưa tích hợp • PHONE_ONLY vẫn dùng được")
+bằng hai dòng:
+                    Text("BLE: chưa tích hợp • PHONE_ONLY vẫn dùng được")
+                    Text("PHONE_ONLY cần mang điện thoại theo người; để máy xa cơ thể có thể bỏ sót sự kiện.")
+
+2. Sau đúng dòng:
+                    Text("Áp suất Pa: ${p?.pressurePa ?: "—"}; gia tốc tuyến tính: ${p?.linearAccelXMs2 ?: "—"}, ${p?.linearAccelYMs2 ?: "—"}, ${p?.linearAccelZMs2 ?: "—"}")
+thêm dòng:
+                    Text("Độ cao tương đối m: ${p?.altitudeDeltaM ?: "—"}")
+
+3. Thay đúng dòng:
+                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, độ cao, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
+bằng:
+                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
+
+Không chạy Gradle. Nếu công cụ sửa bị từ chối, trả BLOCKED và dừng, không bypass. Nếu thành công, báo DONE và đúng một tệp đã sửa.

@@ -1,0 +1,8 @@
+PASS (trong phạm vi 2 fix).
+
+1. **Pause phone không reset replay**: Lớp `DemoInputAdapter.paused()` đã kiểm tra `phoneOnly()`. Khi ứng dụng đang ở chế độ replay (dữ liệu giả), thao tác pause Activity bị bỏ qua, đảm bảo tiến trình mô phỏng không bị reset sai cách.
+2. **Invalid ACCEL reset detector**: Khi cảm biến lỗi (giá trị `!isFinite` hoặc thiếu data), `PhoneNormalizer` sẽ loại bỏ reading. `PhoneInputPipeline` phát `null` ra ngoài. Wiring thực tế kết nối chính xác khi `DemoController` truyền `null` vào `DemoInputAdapter.acceptPhone()`, từ đó gọi `session.resetDetection()` để reset detector ngay lập tức trước sample kế tiếp, đúng theo thiết kế tested seam.
+
+**Ghi nhận Findings**:
+- Xác nhận lỗi `Core remaining deadline không reset` vẫn còn tồn tại như bạn đã báo cáo từ phiên giảm scope trước.
+- **Giới hạn đánh giá (Bounded Verdict)**: Kết luận này chỉ xác nhận 2 điểm logic nêu trên. Do Demo app không triển khai foreground service và không có cơ chế process recovery, đây không phải là chứng nhận toàn diện (entire app certification) cho độ tin cậy của ứng dụng trên môi trường Android thực tế.

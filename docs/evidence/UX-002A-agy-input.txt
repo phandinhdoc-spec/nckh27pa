@@ -1,0 +1,8 @@
+Bạn là primary worker duy nhất cho UX-002A tại /home/pdd/nckh27pa. Tuân thủ AGENTS.md và docs/tasks/UX-002A.md. Chỉ sửa android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt; không sửa file khác, không agent con, không commit/push.
+
+Thay đổi tối thiểu:
+1) Trong tab Trang chủ, gần dòng `BLE: chưa tích hợp • PHONE_ONLY vẫn dùng được`, thêm text tiếng Việt rõ rằng khi PHONE_ONLY người dùng phải mang điện thoại theo; điện thoại để xa cơ thể có thể bỏ sót sự kiện. Không quảng bá độ chính xác.
+2) Trong tab Kiểm tra hệ thống, hiển thị `altitudeDeltaM` riêng với nhãn `Độ cao tương đối m`, dùng `—` khi null/cũ.
+3) Dòng hiện tại liệt kê `Bước chân, độ cao, vị trí... chưa tích hợp` phải bỏ `độ cao`, nhưng giữ các mục thật sự chưa làm.
+
+Giữ toàn bộ hành vi, field/API, bốn tab, semantics hiện có. Không thêm dependency/resource/test giả. Không chạy Gradle nếu sandbox chặn; Hermes sẽ chạy gate. Cuối cùng báo đúng file đổi và giới hạn chưa kiểm chứng. Nếu không đọc/sửa được do quyền, dừng và báo blocker, không bypass.

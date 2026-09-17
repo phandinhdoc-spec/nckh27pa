@@ -1,0 +1,10 @@
+{
+  "original_files_unchanged": {
+    "setup-nckh27pa-26.04.sh": true,
+    "android/android-plan.md": true,
+    "esp/esp32-plan.md": true
+  },
+  "uuids_equal_across_plans_and_contract": true,
+  "uuid_count": 6,
+  "fixture_count": 8
+}

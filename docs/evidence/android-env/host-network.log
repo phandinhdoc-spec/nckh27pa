@@ -1,0 +1,132 @@
+2026-09-14T20:36:57+07:00
+104.16.72.101   STREAM downloads.gradle.org
+104.16.72.101   DGRAM  
+104.16.72.101   RAW    
+104.16.73.101   STREAM 
+104.16.73.101   DGRAM  
+104.16.73.101   RAW    
+2606:4700::6810:4965 STREAM 
+2606:4700::6810:4965 DGRAM  
+2606:4700::6810:4965 RAW    
+2606:4700::6810:4865 STREAM 
+2606:4700::6810:4865 DGRAM  
+2606:4700::6810:4865 RAW    
+64.233.188.136  STREAM dl.google.com
+64.233.188.136  DGRAM  
+64.233.188.136  RAW    
+64.233.188.190  STREAM 
+64.233.188.190  DGRAM  
+64.233.188.190  RAW    
+64.233.188.93   STREAM 
+64.233.188.93   DGRAM  
+64.233.188.93   RAW    
+64.233.188.91   STREAM 
+64.233.188.91   DGRAM  
+64.233.188.91   RAW    
+2404:6800:4008:c06::be STREAM 
+2404:6800:4008:c06::be DGRAM  
+2404:6800:4008:c06::be RAW    
+2404:6800:4008:c06::5b STREAM 
+2404:6800:4008:c06::5b DGRAM  
+2404:6800:4008:c06::5b RAW    
+2404:6800:4008:c06::88 STREAM 
+2404:6800:4008:c06::88 DGRAM  
+2404:6800:4008:c06::88 RAW    
+2404:6800:4008:c06::5d STREAM 
+2404:6800:4008:c06::5d DGRAM  
+2404:6800:4008:c06::5d RAW    
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+  0      0   0      0   0      0      0      0                              0  0    169   0      0   0      0      0      0                              0  0    169   0      0   0      0      0      0                              0
+  0      0   0      0   0      0      0      0                              0HTTP/1.1 307 Temporary Redirect
+Date: Mon, 14 Sep 2026 13:36:58 GMT
+Content-Type: text/html; charset=UTF-8
+Content-Length: 169
+Connection: keep-alive
+Location: https://github.com/gradle/gradle-distributions/releases/download/v8.13.0/gradle-8.13-bin.zip
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Server: cloudflare
+CF-RAY: a3afc8a04fbcfe86-SIN
+
+HTTP/2 302 
+date: Mon, 14 Sep 2026 13:35:23 GMT
+content-type: text/html; charset=utf-8
+location: https://release-assets.githubusercontent.com/github-production-release-asset/696192900/ae74b100-f6f6-4fa3-a880-fb419e6074cb?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-09-14T14%3A13%3A42Z&rscd=attachment%3B+filename%3Dgradle-8.13-bin.zip&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-09-14T13%3A13%3A33Z&ske=2026-09-14T14%3A13%3A42Z&sks=b&skv=2018-11-09&sig=IzZEGIEj3v4JVScsA42idmZFC9vhUIQySUX9%2Bnphz64%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc4OTM5NjUyMywibmJmIjoxNzg5MzkyOTIzLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.E-Q_NwLS-t4vuIlpKwHWHiVReQhcPAeNShiLTpfZBto&response-content-disposition=attachment%3B%20filename%3Dgradle-8.13-bin.zip&response-content-type=application%2Foctet-stream
+vary: X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With
+cache-control: no-cache
+strict-transport-security: max-age=31536000; includeSubdomains; preload
+x-frame-options: deny
+x-content-type-options: nosniff
+x-xss-protection: 0
+referrer-policy: no-referrer-when-downgrade
+content-security-policy: default-src 'none'; base-uri 'self'; child-src github.githubassets.com github.com/assets-cdn/worker/ github.com/assets/ gist.github.com/assets-cdn/worker/; connect-src 'self' uploads.github.com www.githubstatus.com collector.github.com raw.githubusercontent.com api.github.com github-cloud.s3.amazonaws.com github-production-repository-file-5c1aeb.s3.amazonaws.com github-production-upload-manifest-file-7fdce7.s3.amazonaws.com github-production-user-asset-6210df.s3.amazonaws.com *.rel.tunnels.api.visualstudio.com wss://*.rel.tunnels.api.visualstudio.com github.githubassets.com objects-origin.githubusercontent.com copilot-proxy.githubusercontent.com proxy.individual.githubcopilot.com proxy.business.githubcopilot.com proxy.enterprise.githubcopilot.com *.actions.githubusercontent.com wss://*.actions.githubusercontent.com productionresultssa0.blob.core.windows.net productionresultssa1.blob.core.windows.net productionresultssa2.blob.core.windows.net productionresultssa3.blob.core.windows.net productionresultssa4.blob.core.windows.net productionresultssa5.blob.core.windows.net productionresultssa6.blob.core.windows.net productionresultssa7.blob.core.windows.net productionresultssa8.blob.core.windows.net productionresultssa9.blob.core.windows.net productionresultssa10.blob.core.windows.net productionresultssa11.blob.core.windows.net productionresultssa12.blob.core.windows.net productionresultssa13.blob.core.windows.net productionresultssa14.blob.core.windows.net productionresultssa15.blob.core.windows.net productionresultssa16.blob.core.windows.net productionresultssa17.blob.core.windows.net productionresultssa18.blob.core.windows.net productionresultssa19.blob.core.windows.net github-production-repository-image-32fea6.s3.amazonaws.com github-production-release-asset-2e65be.s3.amazonaws.com insights.github.com wss://alive.github.com wss://alive-staging.github.com api.githubcopilot.com api.individual.githubcopilot.com api.business.githubcopilot.com api.enterprise.githubcopilot.com wss://production-copilot-host.webpubsub.azure.com; font-src github.githubassets.com; form-action 'self' github.com gist.github.com copilot-workspace.githubnext.com objects-origin.githubusercontent.com; frame-ancestors 'none'; frame-src viewscreen.githubusercontent.com notebooks.gith  0      0   0      0   0      0      0      0                              0  0      0   0      0   0      0      0      0                              0
+  0      0   0      0   0      0      0      0                              0  0 130.6M   0      0   0      0      0      0                              0  0 130.6M   0      0   0      0      0      0                              0  0 130.6M   0      0   0      0      0      0                              0
+ubusercontent.com; img-src 'self' data: blob: github.githubassets.com media.githubusercontent.com camo.githubusercontent.com identicons.github.com avatars.githubusercontent.com private-avatars.githubusercontent.com github-cloud.s3.amazonaws.com objects.githubusercontent.com release-assets.githubusercontent.com secured-user-images.githubusercontent.com user-images.githubusercontent.com private-user-images.githubusercontent.com opengraph.githubassets.com repository-images.githubusercontent.com marketplace-screenshots.githubusercontent.com copilotprodattachments.blob.core.windows.net/github-production-copilot-attachments/ github-production-user-asset-6210df.s3.amazonaws.com customer-stories-feed.github.com spotlights-feed.github.com explore-feed.github.com objects-origin.githubusercontent.com *.githubusercontent.com; manifest-src 'self'; media-src github.com user-images.githubusercontent.com secured-user-images.githubusercontent.com private-user-images.githubusercontent.com github-production-user-asset-6210df.s3.amazonaws.com gist.github.com github.githubassets.com; script-src github.githubassets.com; style-src 'unsafe-inline' github.githubassets.com; upgrade-insecure-requests; worker-src github.githubassets.com github.com/assets-cdn/worker/ github.com/assets/ gist.github.com/assets-cdn/worker/
+server: github.com
+content-length: 0
+x-github-request-id: 2712:15BFEB:15A7A8:17678B:6AA7F87B
+x-github-edge-region: southeastasia
+
+HTTP/2 200 
+last-modified: Tue, 25 Feb 2025 09:33:51 GMT
+etag: "0x8DD557F83E3F218"
+server: Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+x-ms-request-id: 589436df-e01e-0040-4be5-f0e66d000000
+x-ms-version: 2018-11-09
+x-ms-creation-time: Tue, 25 Feb 2025 09:33:51 GMT
+x-ms-lease-status: unlocked
+x-ms-lease-state: available
+x-ms-blob-type: BlockBlob
+x-ms-server-encrypted: true
+via: 1.1 varnish, 1.1 varnish
+accept-ranges: bytes
+date: Mon, 14 Sep 2026 13:36:59 GMT
+age: 1925
+x-served-by: cache-iad-kcgs7200105-IAD, cache-sin-wsap440067-SIN
+x-cache: HIT, HIT
+x-cache-hits: 281091, 1
+x-timer: S1789393019.340250,VS0,VE10
+content-disposition: attachment; filename=gradle-8.13-bin.zip
+content-type: application/octet-stream
+content-length: 136983045
+
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+  0      0   0      0   0      0      0      0                              0  0  11773   0      0   0      0      0      0                              0  0  11773   0      0   0      0      0      0                              0  0  11773   0      0   0      0      0      0                              0
+HTTP/2 200 
+accept-ranges: bytes
+content-disposition: attachment
+content-length: 11773
+content-security-policy: default-src 'none'
+server: downloads
+x-content-type-options: nosniff
+x-frame-options: SAMEORIGIN
+x-identity-content-length: 11773
+x-xss-protection: 0
+date: Mon, 14 Sep 2026 13:36:59 GMT
+cache-control: no-transform,public,max-age=86400
+last-modified: Tue, 02 Sep 2025 16:53:34 GMT
+etag: "4c4b3ba"
+content-type: application/octet-stream
+vary: Accept-Encoding,Origin
+age: 0
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+  0      0   0      0   0      0      0      0                              0  0  13055   0      0   0      0      0      0                              0  0  13055   0      0   0      0      0      0                              0  0  13055   0      0   0      0      0      0                              0
+HTTP/2 200 
+date: Mon, 14 Sep 2026 13:37:00 GMT
+content-type: text/xml
+content-length: 13055
+cf-ray: a3afc8a96dbae2f3-HKG
+cf-cache-status: HIT
+accept-ranges: bytes
+age: 1130761
+etag: "c74eda1db838c35398ce9659dc9ff88f"
+last-modified: Wed, 13 Aug 2025 18:10:30 GMT
+x-checksum-md5: c74eda1db838c35398ce9659dc9ff88f
+x-checksum-sha1: b7f13cfcd49cdf8ad62d055aca4db62202da0994
+server: cloudflare
+alt-svc: h3=":443"; ma=86400
+

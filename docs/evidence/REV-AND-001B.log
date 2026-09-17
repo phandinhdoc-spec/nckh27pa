@@ -1,0 +1,2138 @@
+OpenAI Codex v0.154.0
+--------
+workdir: /home/pdd/nckh27pa
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: none
+reasoning summaries: none
+session id: 01a0a034-c1b5-7653-9e39-108185f25db1
+--------
+user
+Review độc lập theo docs/tasks/REV-AND-001B.md. Không sửa, không tool build/network/agent con. Read-only source và test; tìm bug trong demo/lifecycle/sensor/timer/SOS. Báo PASS/FAIL, severity và file:line với repro, phân biệt hạn chế demo công bố với bugs. Không dựa output tác giả.
+codex
+Tôi sẽ đọc yêu cầu review và tự kiểm tra source/test theo các luồng demo, lifecycle, sensor, timer và SOS; không sửa file, chạy build, dùng network hay agent con.
+
+exec
+/bin/bash -lc "pwd; rg --files -g 'AGENTS.md' -g 'REV-AND-001B.md' -g '*'" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+/home/pdd/nckh27pa
+.tools/gradle-8.13/NOTICE
+.tools/gradle-8.13/README
+.tools/gradle-8.13/bin/gradle.bat
+.tools/gradle-8.13/bin/gradle
+.tools/gradle-8.13/LICENSE
+android/settings.gradle.kts
+protocol-lab/kotlin/Main.kt
+protocol-lab/cpp/main.cpp
+android/core/tests/CoreTests.kt
+setup-nckh27pa-26.04.sh
+.gitignore
+android/core/run-tests.sh
+android/core/README.md
+android/gradlew
+android/android-plan.md
+protocol-lab/fixtures/golden.json
+protocol-lab/run.sh
+protocol-lab/tests/red.log
+protocol-lab/tests/run.py
+.tools/gradle-8.13-bin.zip.sha256
+protocol-lab/build/kotlin-lab.jar
+protocol-lab/build/cpp-lab
+.tools/bootstrap/settings.gradle.kts
+android/core/evidence/02-green.log
+android/core/evidence/04-green.log
+android/core/evidence/06-red.log
+android/core/evidence/03-red.log
+android/core/evidence/04-red.log
+android/core/evidence/core-002-demo.log
+android/core/evidence/07-red.log
+android/core/evidence/tdd-stages.py
+android/core/evidence/01-red.log
+android/core/evidence/03-green.log
+android/core/evidence/05-green.log
+android/core/evidence/demo.log
+android/core/evidence/compiler.log
+android/core/evidence/08-contract-checks.log
+android/core/evidence/core-002-report.md
+android/core/evidence/core-002-tests.log
+android/core/evidence/final-tests.log
+android/core/evidence/01-green.log
+android/core/evidence/07-green.log
+android/core/evidence/06-green.log
+android/core/evidence/02-red.log
+android/core/evidence/05-red.log
+android/core/evidence/tdd-final-stages.py
+.tools/gradle-8.13/lib/gradle-daemon-server-8.13.jar
+.tools/gradle-8.13/lib/native-platform-linux-aarch64-ncurses5-0.22-milestone-28.jar
+.tools/gradle-8.13/lib/gradle-messaging-8.13.jar
+.tools/gradle-8.13/lib/kotlin-scripting-jvm-host-2.0.21.jar
+.tools/gradle-8.13/lib/gradle-kotlin-dsl-extensions-8.13.jar
+.tools/gradle-8.13/lib/ant-launcher-1.10.15.jar
+.tools/gradle-8.13/lib/groovy-ant-3.0.22.jar
+.tools/gradle-8.13/lib/gradle-build-configuration-8.13.jar
+.tools/gradle-8.13/lib/gradle-internal-instrumentation-api-8.13.jar
+android/app/build.gradle.kts
+android/core/src/RecordingSink.kt
+.tools/bootstrap/.gradle/vcs-1/gc.properties
+android/core/src/Demo.kt
+android/core/src/Core.kt
+android/build.gradle.kts
+.tools/gradle-8.13/init.d/readme.txt
+.tools/gradle-8.13-bin.zip
+.tools/bootstrap/.gradle/8.13/executionHistory/executionHistory.bin
+.tools/bootstrap/.gradle/8.13/executionHistory/executionHistory.lock
+esp/core/demo.cpp
+android/.gradle/vcs-1/gc.properties
+.tools/bootstrap/.gradle/8.13/checksums/checksums.lock
+esp/core/.build/demo
+esp/core/.build/tests
+esp/core/local_alert.cpp
+.tools/bootstrap/.gradle/buildOutputCleanup/cache.properties
+.tools/bootstrap/.gradle/buildOutputCleanup/outputFiles.bin
+.tools/bootstrap/.gradle/buildOutputCleanup/buildOutputCleanup.lock
+.tools/bootstrap/.gradle/file-system.probe
+.tools/bootstrap/.gradle/8.13/fileChanges/last-build.bin
+esp/core/tests/local_alert_test.cpp
+esp/core/run-tests.sh
+esp/core/.gitignore
+esp/core/run-demo.sh
+esp/core/README.md
+android/app/build/kotlin/compileDebugKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin
+.tools/bootstrap/.gradle/8.13/fileHashes/fileHashes.bin
+.tools/bootstrap/.gradle/8.13/fileHashes/fileHashes.lock
+.tools/bootstrap/.gradle/8.13/gc.properties
+esp/core/evidence/tdd-green.log
+esp/core/evidence/demo.log
+esp/core/evidence/sanitizer.log
+esp/core/evidence/tdd-red.log
+esp/core/evidence/sanitizer-retry.log
+esp/core/local_alert.h
+esp/esp32-plan.md
+.tools/bootstrap/gradlew.bat
+.tools/bootstrap/gradlew
+.tools/bootstrap/gradle/wrapper/gradle-wrapper.jar
+.tools/bootstrap/gradle/wrapper/gradle-wrapper.properties
+android/.gradle/8.13/executionHistory/executionHistory.bin
+android/.gradle/8.13/executionHistory/executionHistory.lock
+.tools/gradle-8.13/lib/groovy-templates-3.0.22.jar
+.tools/gradle-8.13/lib/asm-commons-9.7.1.jar
+.tools/gradle-8.13/lib/kotlin-compiler-embeddable-2.0.21.jar
+.tools/gradle-8.13/lib/gradle-input-tracking-8.13.jar
+.tools/gradle-8.13/lib/javaparser-core-3.17.0.jar
+.tools/gradle-8.13/lib/guava-32.1.2-jre.jar
+.tools/gradle-8.13/lib/groovy-astbuilder-3.0.22.jar
+.tools/gradle-8.13/lib/gradle-configuration-problems-base-8.13.jar
+.tools/gradle-8.13/lib/jcifs-1.3.17.jar
+.tools/gradle-8.13/lib/gradle-build-operations-8.13.jar
+.tools/gradle-8.13/lib/gradle-instrumentation-agent-services-8.13.jar
+.tools/gradle-8.13/lib/gradle-file-temp-8.13.jar
+.tools/gradle-8.13/lib/gradle-execution-8.13.jar
+.tools/gradle-8.13/lib/jackson-annotations-2.16.1.jar
+android/.gradle/8.13/checksums/md5-checksums.bin
+.tools/gradle-8.13/lib/gradle-functional-8.13.jar
+android/.gradle/8.13/checksums/sha1-checksums.bin
+.tools/gradle-8.13/lib/native-platform-windows-i386-min-0.22-milestone-28.jar
+android/.gradle/8.13/checksums/checksums.lock
+.tools/gradle-8.13/lib/native-platform-0.22-milestone-28.jar
+.tools/gradle-8.13/lib/gradle-declarative-dsl-core-8.13.jar
+.tools/gradle-8.13/lib/kotlinx-metadata-jvm-0.5.0.jar
+.tools/gradle-8.13/lib/gradle-client-services-8.13.jar
+.tools/gradle-8.13/lib/gradle-build-process-services-8.13.jar
+.tools/gradle-8.13/lib/jcl-over-slf4j-1.7.36.jar
+.tools/gradle-8.13/lib/gradle-daemon-services-8.13.jar
+.tools/gradle-8.13/lib/native-platform-freebsd-amd64-libcpp-0.22-milestone-28.jar
+.tools/gradle-8.13/lib/gradle-tooling-api-8.13.jar
+.tools/gradle-8.13/lib/annotations-24.0.1.jar
+.tools/gradle-8.13/lib/kryo-2.24.0.jar
+.tools/gradle-8.13/lib/slf4j-api-1.7.36.jar
+.tools/gradle-8.13/lib/gradle-core-kotlin-extensions-8.13.jar
+.tools/gradle-8.13/lib/qdox-1.12.1.jar
+.tools/gradle-8.13/lib/gradle-declarative-dsl-tooling-models-8.13.jar
+.tools/gradle-8.13/lib/groovy-dateutil-3.0.22.jar
+.tools/gradle-8.13/lib/gradle-build-state-8.13.jar
+.tools/gradle-8.13/lib/gradle-api-metadata-8.13.jar
+.tools/gradle-8.13/lib/jackson-datatype-jsr310-2.16.1.jar
+android/evidence/AND-001B-red.log
+.tools/gradle-8.13/lib/gradle-build-cache-local-8.13.jar
+android/evidence/gradle-download-attempt-2.log
+android/evidence/AND-001B-test.sh
+android/evidence/AND-001B-final-tests.log
+android/evidence/AND-001B-static-checks.log
+android/evidence/test-build-blocked.log
+android/evidence/AND-001B-report.md
+android/evidence/AND-001-blocked.md
+android/evidence/AND-001B-green.log
+android/gradle.properties
+android/.gradle/8.13/fileChanges/last-build.bin
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.values.at
+.tools/gradle-8.13/lib/agents/gradle-instrumentation-agent-8.13.jar
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i.len
+.tools/gradle-8.13/lib/failureaccess-1.0.1.jar
+.tools/gradle-8.13/lib/jackson-core-2.16.1.jar
+.tools/gradle-8.13/lib/httpclient-4.5.14.jar
+.tools/gradle-8.13/lib/gradle-kotlin-dsl-shared-runtime-8.13.jar
+.tools/gradle-8.13/lib/junit-4.13.2.jar
+.tools/gradle-8.13/lib/gradle-declarative-dsl-internal-utils-8.13.jar
+.tools/gradle-8.13/lib/native-platform-linux-amd64-0.22-milestone-28.jar
+.tools/gradle-8.13/lib/gradle-resources-http-8.13.jar
+.tools/gradle-8.13/lib/gradle-process-memory-services-8.13.jar
+.tools/gradle-8.13/lib/gradle-gradle-cli-main-8.13.jar
+.tools/gradle-8.13/lib/gradle-build-cache-base-8.13.jar
+.tools/gradle-8.13/lib/commons-lang3-3.14.0.jar
+.tools/gradle-8.13/lib/gson-2.10.jar
+.tools/gradle-8.13/lib/gradle-daemon-main-8.13.jar
+.tools/gradle-8.13/lib/httpcore-4.4.14.jar
+.tools/gradle-8.13/lib/native-platform-linux-amd64-ncurses5-0.22-milestone-28.jar
+.tools/gradle-8.13/lib/gradle-files-8.13.jar
+.tools/gradle-8.13/lib/kotlin-scripting-compiler-embeddable-2.0.21.jar
+.tools/gradle-8.13/lib/native-platform-linux-amd64-ncurses6-0.22-milestone-28.jar
+.tools/gradle-8.13/lib/gradle-native-8.13.jar
+.tools/gradle-8.13/lib/groovy-3.0.22.jar
+.tools/gradle-8.13/lib/gradle-build-cache-spi-8.13.jar
+.tools/gradle-8.13/lib/groovy-test-3.0.22.jar
+.tools/gradle-8.13/lib/gradle-io-8.13.jar
+.tools/gradle-8.13/lib/gradle-installation-beacon-8.13.jar
+.tools/gradle-8.13/lib/kotlin-reflect-2.0.21.jar
+.tools/gradle-8.13/lib/kotlin-daemon-embeddable-2.0.21.jar
+.tools/gradle-8.13/lib/kotlin-stdlib-2.0.21.jar
+.tools/gradle-8.13/lib/gradle-build-events-8.13.jar
+.tools/gradle-8.13/lib/groovy-docgenerator-3.0.22.jar
+.tools/gradle-8.13/lib/gradle-problems-8.13.jar
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream.len
+android/.gradle/8.13/fileHashes/fileHashes.bin
+android/.gradle/8.13/fileHashes/resourceHashesCache.bin
+android/.gradle/8.13/fileHashes/fileHashes.lock
+android/.gradle/8.13/gc.properties
+.tools/gradle-8.13/lib/gradle-enterprise-workers-8.13.jar
+.tools/gradle-8.13/lib/jsr305-3.0.2.jar
+.tools/gradle-8.13/lib/gradle-snapshots-8.13.jar
+.tools/gradle-8.13/lib/gradle-versioned-cache-8.13.jar
+.tools/gradle-8.13/lib/asm-9.7.1.jar
+.tools/gradle-8.13/lib/gradle-logging-api-8.13.jar
+.tools/gradle-8.13/lib/tomlj-1.0.0.jar
+.tools/gradle-8.13/lib/native-platform-osx-aarch64-0.22-milestone-28.jar
+.tools/gradle-8.13/lib/gradle-persistent-cache-8.13.jar
+.tools/gradle-8.13/lib/kotlin-scripting-jvm-2.0.21.jar
+.tools/gradle-8.13/lib/antlr4-runtime-4.7.2.jar
+.tools/gradle-8.13/lib/gradle-service-lookup-8.13.jar
+.tools/gradle-8.13/lib/fastutil-8.5.2-min.jar
+.tools/gradle-8.13/lib/gradle-time-8.13.jar
+.tools/gradle-8.13/lib/groovy-json-3.0.22.jar
+.tools/gradle-8.13/lib/gradle-stdlib-kotlin-extensions-8.13.jar
+.tools/gradle-8.13/lib/gradle-launcher-8.13.jar
+.tools/gradle-8.13/lib/jansi-1.18.jar
+.tools/gradle-8.13/lib/gradle-build-option-8.13.jar
+.tools/gradle-8.13/lib/gradle-jvm-services-8.13.jar
+.tools/gradle-8.13/lib/commons-compress-1.26.1.jar
+.tools/gradle-8.13/lib/jsoup-1.15.3.jar
+.tools/gradle-8.13/lib/gradle-build-init-specs-api-8.13.jar
+.tools/gradle-8.13/lib/gradle-worker-main-8.13.jar
+.tools/gradle-8.13/lib/gradle-normalization-java-8.13.jar
+.tools/gradle-8.13/lib/gradle-build-operations-trace-8.13.jar
+.tools/gradle-8.13/lib/gradle-cli-8.13.jar
+.tools/gradle-8.13/lib/native-platform-windows-i386-0.22-milestone-28.jar
+.tools/gradle-8.13/lib/minlog-1.2.jar
+.tools/gradle-8.13/lib/gradle-declarative-dsl-evaluator-8.13.jar
+.tools/gradle-8.13/lib/error_prone_annotations-2.36.0.jar
+.tools/gradle-8.13/lib/kotlinx-coroutines-core-jvm-1.6.4.jar
+.tools/gradle-8.13/lib/hamcrest-core-1.3.jar
+.tools/gradle-8.13/lib/gradle-file-operations-8.13.jar
+.tools/gradle-8.13/lib/ant-junit-1.10.15.jar
+.tools/gradle-8.13/lib/gradle-gradle-cli-8.13.jar
+.tools/gradle-8.13/lib/gradle-instrumentation-reporting-8.13.jar
+.tools/gradle-8.13/lib/kotlinx-serialization-json-jvm-1.6.2.jar
+.tools/gradle-8.13/lib/native-platform-osx-amd64-0.22-milestone-28.jar
+.tools/gradle-8.13/lib/gradle-report-rendering-8.13.jar
+.tools/gradle-8.13/lib/gradle-fileevents-0.2.7.jar
+.tools/gradle-8.13/lib/gradle-problems-api-8.13.jar
+.tools/gradle-8.13/lib/gradle-runtime-api-info-8.13.jar
+.tools/gradle-8.13/lib/ant-antlr-1.10.14.jar
+.tools/gradle-8.13/lib/objenesis-2.6.jar
+.tools/gradle-8.13/lib/gradle-declarative-dsl-provider-8.13.jar
+.tools/gradle-8.13/lib/gradle-declarative-dsl-api-8.13.jar
+.tools/gradle-8.13/lib/groovy-swing-3.0.22.jar
+.tools/gradle-8.13/lib/log4j-over-slf4j-1.7.36.jar
+.tools/gradle-8.13/lib/gradle-model-groovy-8.13.jar
+.tools/gradle-8.13/lib/jul-to-slf4j-1.7.36.jar
+.tools/gradle-8.13/lib/kotlin-assignment-compiler-plugin-embeddable-2.0.21.jar
+.tools/gradle-8.13/lib/gradle-hashing-8.13.jar
+.tools/gradle-8.13/lib/gradle-problems-rendering-8.13.jar
+.tools/gradle-8.13/lib/jackson-datatype-jdk8-2.16.1.jar
+.tools/gradle-8.13/lib/commons-codec-1.16.1.jar
+.tools/gradle-8.13/lib/gradle-kotlin-dsl-8.13.jar
+.tools/gradle-8.13/lib/asm-tree-9.7.1.jar
+.tools/gradle-8.13/lib/trove4j-1.0.20200330.jar
+.tools/gradle-8.13/lib/javax.inject-1.jar
+android/.gradle/buildOutputCleanup/cache.properties
+android/.gradle/buildOutputCleanup/outputFiles.bin
+android/.gradle/buildOutputCleanup/buildOutputCleanup.lock
+android/.gradle/file-system.probe
+android/local.properties
+.tools/gradle-8.13/lib/gradle-file-collections-8.13.jar
+.tools/gradle-8.13/lib/native-platform-linux-aarch64-ncurses6-0.22-milestone-28.jar
+.tools/gradle-8.13/lib/commons-lang-2.6.jar
+.tools/gradle-8.13/lib/xml-apis-1.4.01.jar
+.tools/gradle-8.13/lib/native-platform-linux-aarch64-0.22-milestone-28.jar
+.tools/gradle-8.13/lib/gradle-java-api-extractor-8.13.jar
+.tools/gradle-8.13/lib/kotlinx-serialization-core-jvm-1.6.2.jar
+.tools/gradle-8.13/lib/kotlin-sam-with-receiver-compiler-plugin-2.0.21.jar
+.tools/gradle-8.13/lib/groovy-sql-3.0.22.jar
+.tools/gradle-8.13/lib/groovy-xml-3.0.22.jar
+.tools/gradle-8.13/lib/gradle-enterprise-logging-8.13.jar
+.tools/gradle-8.13/lib/gradle-wrapper-shared-8.13.jar
+.tools/gradle-8.13/lib/gradle-build-init-specs-8.13.jar
+.tools/gradle-8.13/lib/gradle-toolchains-jvm-shared-8.13.jar
+.tools/gradle-8.13/lib/kotlin-scripting-compiler-impl-embeddable-2.0.21.jar
+.tools/gradle-8.13/lib/kotlin-script-runtime-2.0.21.jar
+.tools/gradle-8.13/lib/gradle-process-services-8.13.jar
+.tools/gradle-8.13/lib/gradle-stdlib-java-extensions-8.13.jar
+docs/tasks/REV-CORE-002.md
+.tools/gradle-8.13/lib/gradle-service-registry-builder-8.13.jar
+docs/tasks/AND-001B.md
+.tools/gradle-8.13/lib/gradle-kotlin-dsl-tooling-models-8.13.jar
+docs/tasks/CORE-002.md
+.tools/gradle-8.13/lib/commons-io-2.15.1.jar
+docs/tasks/CORE-001.md
+.tools/gradle-8.13/lib/groovy-datetime-3.0.22.jar
+docs/tasks/AND-001.md
+.tools/gradle-8.13/lib/gradle-tooling-api-provider-8.13.jar
+docs/tasks/UX-001.md
+.tools/gradle-8.13/lib/gradle-enterprise-operations-8.13.jar
+docs/tasks/IF-003.md
+.tools/gradle-8.13/lib/gradle-service-provider-8.13.jar
+docs/tasks/ESP-CORE-001.md
+docs/tasks/ENV-002.md
+docs/tasks/REV-CORE-001.md
+.tools/gradle-8.13/lib/gradle-logging-8.13.jar
+docs/tasks/REV-AND-001B.md
+.tools/gradle-8.13/lib/native-platform-windows-amd64-0.22-milestone-28.jar
+.tools/gradle-8.13/lib/native-platform-windows-amd64-min-0.22-milestone-28.jar
+.tools/gradle-8.13/lib/groovy-groovydoc-3.0.22.jar
+docs/decisions.md
+.tools/gradle-8.13/lib/gradle-core-api-8.13.jar
+docs/task-board.md
+.tools/gradle-8.13/lib/ant-1.10.15.jar
+docs/interface-contract.md
+.tools/gradle-8.13/lib/gradle-core-8.13.jar
+docs/hardware-needed.md
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab
+docs/fixtures/protocol-v1.json
+docs/project-status.md
+docs/interface-framing-draft.md
+docs/test-report.md
+android/gradle/wrapper/gradle-wrapper.jar
+android/gradle/wrapper/gradle-wrapper.properties
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/counters.tab
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.values.at
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream
+android/app/build/intermediates/apk_ide_redirect_file/debug/createDebugApkListingFileRedirect/redirect.txt
+docs/evidence/AND-001B-codex.log
+docs/evidence/CORE-001-codex-result.txt
+docs/evidence/REV-AND-001B.log
+docs/evidence/AND-001-codex.log
+docs/evidence/core-tests-hermes.log
+docs/evidence/CORE-001-codex.log
+docs/evidence/ESP-CORE-001-result.txt
+docs/evidence/core-demo-hermes.log
+docs/evidence/REV-CORE-001.json
+docs/evidence/CORE-002-codex.log
+docs/evidence/UX-001-hermes-review.md
+docs/evidence/baseline.json
+docs/evidence/tool-inventory.txt
+docs/evidence/CORE-002-hermes.log
+docs/evidence/core-static-scan.json
+docs/evidence/REV-CORE-002.log
+docs/evidence/UX-001-agy-inline.txt
+docs/evidence/UX-001-inline-prompt.txt
+docs/evidence/CORE-002-result.txt
+docs/evidence/source-integrity.json
+docs/evidence/ESP-CORE-001-codex.log
+docs/evidence/AND-001B-result.txt
+docs/evidence/IF-003-codex.log
+docs/evidence/AND-001-codex-result.txt
+docs/evidence/UX-001-agy.txt
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab.keystream.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab.keystream
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab_i
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.values.at
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.values.at
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.values.at
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab_i.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab
+docs/evidence/android-env/diagnosis.md
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i.len
+docs/evidence/android-env/build-1.log
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.values.at
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab.values.at
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream.len
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream.len
+docs/evidence/android-env/host-network.log
+android/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.len
+docs/evidence/android-env/dependencies.log
+docs/evidence/android-env/sdk.log
+docs/evidence/android-env/wrapper-generation.log
+android/app/build/kotlin/compileDebugKotlin/cacheable/last-build.bin
+docs/evidence/REV-CORE-002.txt
+android/app/build/intermediates/app_metadata/debug/writeDebugAppMetadata/app-metadata.properties
+android/app/build/kotlin/compileDebugUnitTestKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin
+.git/hooks/pre-rebase.sample
+.git/hooks/pre-receive.sample
+.git/hooks/update.sample
+.git/hooks/pre-commit.sample
+.git/hooks/commit-msg.sample
+.git/hooks/prepare-commit-msg.sample
+.git/hooks/push-to-checkout.sample
+.git/hooks/pre-push.sample
+.git/hooks/pre-merge-commit.sample
+.git/hooks/post-update.sample
+.git/hooks/applypatch-msg.sample
+.git/hooks/pre-applypatch.sample
+.git/hooks/sendemail-validate.sample
+.git/hooks/fsmonitor-watchman.sample
+.git/config
+.tools/gradle-8.13/lib/plugins/gradle-build-cache-http-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-tooling-api-builders-8.13.jar
+.tools/gradle-8.13/lib/plugins/sshd-core-2.12.1.jar
+.tools/gradle-8.13/lib/plugins/gradle-language-java-8.13.jar
+.tools/gradle-8.13/lib/plugins/aws-java-sdk-kms-1.12.780.jar
+.tools/gradle-8.13/lib/plugins/gradle-testing-junit-platform-8.13.jar
+.tools/gradle-8.13/lib/plugins/snakeyaml-2.0.jar
+.tools/gradle-8.13/lib/plugins/gradle-configuration-cache-base-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-enterprise-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-unit-test-fixtures-8.13.jar
+.tools/gradle-8.13/lib/plugins/jatl-0.2.3.jar
+.tools/gradle-8.13/lib/plugins/google-api-services-storage-v1-rev20220705-1.32.1.jar
+.tools/gradle-8.13/lib/plugins/gradle-bean-serialization-services-8.13.jar
+.tools/gradle-8.13/lib/plugins/aws-java-sdk-core-1.12.780.jar
+.tools/gradle-8.13/lib/plugins/gradle-resources-gcs-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-reporting-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-testing-native-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-encryption-services-8.13.jar
+.tools/gradle-8.13/lib/plugins/plexus-utils-3.5.1.jar
+.tools/gradle-8.13/lib/plugins/maven-model-3.9.5.jar
+.tools/gradle-8.13/lib/plugins/gradle-declarative-dsl-tooling-builders-8.13.jar
+.tools/gradle-8.13/lib/plugins/bsh-2.0b6.jar
+.tools/gradle-8.13/lib/plugins/gradle-plugins-version-catalog-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-version-control-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-ide-plugins-8.13.jar
+.tools/gradle-8.13/lib/plugins/aws-java-sdk-s3-1.12.780.jar
+.git/info/exclude
+.git/description
+.git/HEAD
+.tools/gradle-8.13/lib/plugins/bcutil-jdk18on-1.78.1.jar
+.tools/gradle-8.13/lib/plugins/gradle-dependency-management-serialization-codecs-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-build-init-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-ide-native-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-scala-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-maven-8.13.jar
+.tools/gradle-8.13/lib/plugins/eddsa-0.3.0.jar
+.tools/gradle-8.13/lib/plugins/gradle-guava-serialization-codecs-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-plugins-test-report-aggregation-8.13.jar
+.tools/gradle-8.13/lib/plugins/junit-platform-commons-1.8.2.jar
+.tools/gradle-8.13/lib/plugins/gradle-war-8.13.jar
+.tools/gradle-8.13/lib/plugins/jsch-0.2.16.jar
+.tools/gradle-8.13/lib/plugins/gradle-wrapper-main-8.13.jar
+.tools/gradle-8.13/lib/plugins/opentest4j-1.3.0.jar
+.tools/gradle-8.13/lib/plugins/joda-time-2.12.2.jar
+.tools/gradle-8.13/lib/plugins/dd-plist-1.27.jar
+.tools/gradle-8.13/lib/plugins/google-oauth-client-1.34.1.jar
+.tools/gradle-8.13/lib/plugins/gradle-base-ide-plugins-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-test-kit-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-plugins-java-library-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-testing-jvm-8.13.jar
+.tools/gradle-8.13/lib/plugins/sshd-sftp-2.12.1.jar
+.tools/gradle-8.13/lib/plugins/gradle-ear-8.13.jar
+.tools/gradle-8.13/lib/plugins/bcprov-jdk18on-1.78.1.jar
+.tools/gradle-8.13/lib/plugins/org.eclipse.jgit.ssh.apache-5.13.3.202401111512-r.jar
+.tools/gradle-8.13/lib/plugins/grpc-context-1.27.2.jar
+.tools/gradle-8.13/lib/plugins/gradle-ide-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-flow-services-8.13.jar
+.tools/gradle-8.13/lib/plugins/jmespath-java-1.12.780.jar
+.tools/gradle-8.13/lib/plugins/opencensus-api-0.31.1.jar
+.tools/gradle-8.13/lib/plugins/gradle-language-jvm-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-composite-builds-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-language-groovy-8.13.jar
+.tools/gradle-8.13/lib/plugins/maven-repository-metadata-3.9.5.jar
+.tools/gradle-8.13/lib/plugins/google-http-client-apache-v2-1.42.2.jar
+.tools/gradle-8.13/lib/plugins/gradle-plugins-application-8.13.jar
+.tools/gradle-8.13/lib/plugins/google-api-client-1.34.0.jar
+.tools/gradle-8.13/lib/plugins/gradle-antlr-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-plugins-jvm-test-suite-8.13.jar
+.tools/gradle-8.13/lib/plugins/jcommander-1.78.jar
+.tools/gradle-8.13/lib/plugins/gradle-workers-8.13.jar
+.tools/gradle-8.13/lib/plugins/plexus-interpolation-1.26.jar
+.tools/gradle-8.13/lib/plugins/gradle-kotlin-dsl-provider-plugins-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-resources-sftp-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-kotlin-dsl-tooling-builders-8.13.jar
+.tools/gradle-8.13/lib/plugins/junit-platform-launcher-1.8.2.jar
+.tools/gradle-8.13/lib/plugins/gradle-plugins-distribution-8.13.jar
+.tools/gradle-8.13/lib/plugins/opencensus-contrib-http-util-0.31.1.jar
+.tools/gradle-8.13/lib/plugins/gradle-plugin-development-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-test-suites-base-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-plugins-jvm-test-fixtures-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-platform-native-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-resources-s3-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-build-profile-8.13.jar
+.tools/gradle-8.13/lib/plugins/plexus-cipher-2.0.jar
+.tools/gradle-8.13/lib/plugins/gradle-java-platform-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-tooling-native-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-plugins-java-base-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-security-8.13.jar
+.tools/gradle-8.13/lib/plugins/google-http-client-gson-1.42.2.jar
+.tools/gradle-8.13/lib/plugins/gradle-jacoco-8.13.jar
+.tools/gradle-8.13/lib/plugins/maven-settings-builder-3.9.5.jar
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.values.at
+.tools/gradle-8.13/lib/plugins/ivy-2.5.2.jar
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.len
+.tools/gradle-8.13/lib/plugins/gradle-code-quality-8.13.jar
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream
+.tools/gradle-8.13/lib/plugins/gradle-signing-8.13.jar
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/inputs/source-to-output.tab
+.tools/gradle-8.13/lib/plugins/maven-settings-3.9.5.jar
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i.len
+.tools/gradle-8.13/lib/plugins/gradle-testing-base-8.13.jar
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i
+.tools/gradle-8.13/lib/plugins/gradle-core-serialization-codecs-8.13.jar
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream.len
+.tools/gradle-8.13/lib/plugins/gradle-stdlib-serialization-codecs-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-ivy-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-plugins-groovy-8.13.jar
+.tools/gradle-8.13/lib/plugins/maven-builder-support-3.9.5.jar
+.tools/gradle-8.13/lib/plugins/gradle-platform-jvm-8.13.jar
+.tools/gradle-8.13/lib/plugins/sshd-common-2.12.1.jar
+.tools/gradle-8.13/lib/plugins/gradle-plugin-use-8.13.jar
+.tools/gradle-8.13/lib/plugins/junit-platform-engine-1.8.2.jar
+.tools/gradle-8.13/lib/plugins/gradle-language-native-8.13.jar
+.tools/gradle-8.13/lib/plugins/aws-java-sdk-sts-1.12.780.jar
+.tools/gradle-8.13/lib/plugins/google-http-client-1.42.2.jar
+.tools/gradle-8.13/lib/plugins/org.eclipse.jgit-5.13.3.202401111512-r.jar
+.tools/gradle-8.13/lib/plugins/gradle-java-compiler-plugin-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-publish-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-platform-base-8.13.jar
+.tools/gradle-8.13/lib/plugins/testng-6.3.1.jar
+.tools/gradle-8.13/lib/plugins/gradle-testing-base-infrastructure-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-configuration-cache-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-plugins-java-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-graph-serialization-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-software-diagnostics-8.13.jar
+.tools/gradle-8.13/lib/plugins/plexus-sec-dispatcher-2.0.jar
+.tools/gradle-8.13/lib/plugins/gradle-testing-jvm-infrastructure-8.13.jar
+.tools/gradle-8.13/lib/plugins/bcpg-jdk18on-1.78.1.jar
+.tools/gradle-8.13/lib/plugins/gradle-instrumentation-declarations-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-toolchains-jvm-8.13.jar
+.tools/gradle-8.13/lib/plugins/gradle-dependency-management-8.13.jar
+.tools/gradle-8.13/lib/gradle-base-diagnostics-8.13.jar
+.tools/gradle-8.13/lib/kotlin-scripting-common-2.0.21.jar
+.tools/gradle-8.13/lib/jackson-databind-2.16.1.jar
+.tools/gradle-8.13/lib/gradle-daemon-protocol-8.13.jar
+.tools/gradle-8.13/lib/gradle-model-core-8.13.jar
+.tools/gradle-8.13/lib/gradle-serialization-8.13.jar
+.tools/gradle-8.13/lib/gradle-base-services-8.13.jar
+.tools/gradle-8.13/lib/gradle-file-watching-8.13.jar
+.tools/gradle-8.13/lib/gradle-base-asm-8.13.jar
+.tools/gradle-8.13/lib/gradle-build-cache-packaging-8.13.jar
+.tools/gradle-8.13/lib/gradle-resources-8.13.jar
+.tools/gradle-8.13/lib/gradle-concurrent-8.13.jar
+.tools/gradle-8.13/lib/groovy-console-3.0.22.jar
+.tools/gradle-8.13/lib/gradle-service-registry-impl-8.13.jar
+.tools/gradle-8.13/lib/gradle-base-services-groovy-8.13.jar
+.tools/gradle-8.13/lib/groovy-nio-3.0.22.jar
+.tools/gradle-8.13/lib/gradle-build-cache-8.13.jar
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/counters.tab
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/lookups.tab
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/lookups.tab_i
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/file-to-id.tab
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/lookups.tab.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.values.at
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/lookups/id-to-file.tab
+android/app/build/intermediates/runtime_app_classes_jar/debug/bundleDebugClassesToRuntimeJar/classes.jar
+android/app/build/intermediates/dex_archive_input_jar_hashes/debug/dexBuilderDebug/out
+android/app/build/outputs/logs/manifest-merger-debug-report.txt
+android/app/build/intermediates/symbol_list_with_package_name/debug/processDebugResources/package-aware-r.txt
+android/app/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.values.at
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.values.at
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream.len
+android/app/build/kotlin/compileDebugUnitTestKotlin/cacheable/last-build.bin
+android/app/build/outputs/apk/debug/app-debug.apk
+android/app/build/outputs/apk/debug/output-metadata.json
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merger.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/compile-file-map.properties
+android/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/jar_ed683bc66767f6bca3f1e5d9cededca6ea472ff3e69d5a6da8321176383a15d4_bucket_1/graph.bin
+android/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/dirs_bucket_1/graph.bin
+android/app/build/test-results/testDebugUnitTest/binary/output.bin
+android/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/dirs_bucket_3/graph.bin
+android/app/build/intermediates/stable_resource_ids_file/debug/processDebugResources/stableIds.txt
+android/app/build/test-results/testDebugUnitTest/binary/output.bin.idx
+android/app/build/test-results/testDebugUnitTest/binary/results.bin
+android/app/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+android/app/build/test-results/testDebugUnitTest/TEST-vn.nckh27pa.fallsafe.DemoTests.xml
+android/app/build/intermediates/annotation_processor_list/debugUnitTest/javaPreCompileDebugUnitTest/annotationProcessors.json
+android/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/jar_ed683bc66767f6bca3f1e5d9cededca6ea472ff3e69d5a6da8321176383a15d4_bucket_0/graph.bin
+android/app/build/intermediates/source_set_path_map/debug/mapDebugSourceSetPaths/file-map.txt
+android/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/dirs_bucket_2/graph.bin
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-sr.json
+android/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/jar_ed683bc66767f6bca3f1e5d9cededca6ea472ff3e69d5a6da8321176383a15d4_bucket_3/graph.bin
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-pt-rPT.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-fi.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-ky.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-bs.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-be.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-kk.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-mk.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-pl.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-af.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-zh-rCN.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-nb.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-mr.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-ro.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-tr.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-pa.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-fr.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-ms.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-en-rXC.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-th.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-am.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-da.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-or.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-bg.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-ml.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-ne.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-bn.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-sv.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-zh-rTW.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-iw.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-el.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/mergeDebugResources.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-ja.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-is.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-eu.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-v30.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-sw.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-pt.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-sk.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-zu.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-ka.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-es-rUS.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-hr.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-kn.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-fa.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-ar.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-in.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-en-rCA.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-cs.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-lt.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-ur.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-gu.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-sl.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-en-rGB.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-as.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-v21.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-lv.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-ko.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-pt-rBR.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-hy.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-az.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-zh-rHK.json
+android/app/build/intermediates/merged_java_res/debug/mergeDebugJavaResource/base.jar
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-hu.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-nl.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-mn.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-vi.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-gl.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-de.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-es.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-uz.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-it.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-fr-rCA.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-te.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-uk.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-km.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-ru.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-my.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-en-rAU.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-ta.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-si.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-b+sr+Latn.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-tl.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-lo.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-sq.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-en-rIN.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-hi.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-et.json
+android/app/build/intermediates/merged_res_blame_folder/debug/mergeDebugResources/out/multi-v2/values-ca.json
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-hu/values-hu.xml
+android/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/dirs_bucket_0/graph.bin
+android/app/build/tmp/kotlin-classes/debug/core/DemoKt$main$clock$1.class
+android/app/build/tmp/kotlin-classes/debug/core/Status.class
+android/app/build/tmp/kotlin-classes/debug/core/RecordedEvent.class
+android/app/build/tmp/kotlin-classes/debug/core/RecordingSink.class
+android/app/build/tmp/kotlin-classes/debug/core/AlertCore.class
+android/app/build/tmp/kotlin-classes/debug/core/DemoKt.class
+android/app/build/tmp/kotlin-classes/debug/core/AlertSink.class
+android/app/build/tmp/kotlin-classes/debug/core/Snapshot.class
+android/app/build/tmp/kotlin-classes/debug/core/Alert.class
+android/app/build/tmp/kotlin-classes/debug/core/MonotonicClock.class
+android/app/build/tmp/kotlin-classes/debug/core/State.class
+android/app/build/tmp/kotlin-classes/debug/core/Response.class
+android/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/jar_ed683bc66767f6bca3f1e5d9cededca6ea472ff3e69d5a6da8321176383a15d4_bucket_2/graph.bin
+android/app/build/intermediates/compile_app_classes_jar/debug/bundleDebugClassesToCompileJar/classes.jar
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-ms/values-ms.xml
+android/app/build/intermediates/manifest_merge_blame_file/debug/processDebugMainManifest/manifest-merger-blame-debug-report.txt
+android/app/build/tmp/kotlin-classes/debug/META-INF/app_debug.kotlin_module
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-cs/values-cs.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-en-rIN/values-en-rIN.xml
+android/app/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-pt-rBR/values-pt-rBR.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-ca/values-ca.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-vi/values-vi.xml
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/MainActivityKt$DemoScreen$2$1$7$1.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/DemoController.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/LocalDemoSink.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/MainActivityKt.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/MainActivityKt$WhenMappings.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/MainActivity$onCreate$1.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/DemoSession.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/SensorKind.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/PhoneSensorPacket.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/MainActivityKt$SosButton$3$1.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/PhoneNormalizer$WhenMappings.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/DemoController$tick$1.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/MainActivityKt$SosButton$lambda$43$lambda$42$$inlined$onDispose$1.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/PhoneSensorCollector.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/PhoneNormalizer.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/MainActivity.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/MainActivityKt$DemoScreen$2$1$6$1.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/MainActivityKt$DemoScreen$2$1$9$1$1.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/DemoDetector.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/DemoApplication.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/MainActivity$poll$1.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/MainActivityKt$DemoScreen$2$1$2$1.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/MainActivityKt$SosButton$3$1$1.class
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-gl/values-gl.xml
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/MainActivityKt$DemoScreen$2$1$5$1.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/MainActivityKt$DemoScreen$2$1$4$1.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/MainActivityKt$DemoScreen$2$1$3$1.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/SosHold.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/DemoReplay.class
+android/app/build/tmp/kotlin-classes/debug/vn/nckh27pa/fallsafe/PhoneNormalizer$Reading.class
+android/app/src/main/AndroidManifest.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-pt/values-pt.xml
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/core/Response.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/core/Alert.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/core/DemoKt$main$clock$1.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/core/DemoKt.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/core/RecordingSink.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/core/AlertCore.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/core/MonotonicClock.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/core/RecordedEvent.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/core/Snapshot.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/core/Status.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/core/State.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/core/AlertSink.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/296a389750b5398f71856423fe0dabe253bb1b8094eb8bd720ac325229be862b_2.jar
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/296a389750b5398f71856423fe0dabe253bb1b8094eb8bd720ac325229be862b_0.jar
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/296a389750b5398f71856423fe0dabe253bb1b8094eb8bd720ac325229be862b_1.jar
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/296a389750b5398f71856423fe0dabe253bb1b8094eb8bd720ac325229be862b_3.jar
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-bs/values-bs.xml
+android/app/build/tmp/kotlin-classes/debugUnitTest/META-INF/app_debugUnitTest.kotlin_module
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-ur/values-ur.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-zh-rCN/values-zh-rCN.xml
+android/app/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+android/app/build/tmp/kotlin-classes/debugUnitTest/vn/nckh27pa/fallsafe/DemoTests.class
+android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
+android/app/src/main/java/vn/nckh27pa/fallsafe/DemoLogic.kt
+android/app/src/main/java/vn/nckh27pa/fallsafe/DemoApplication.kt
+android/app/src/main/java/vn/nckh27pa/fallsafe/PhoneSensorCollector.kt
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-en-rAU/values-en-rAU.xml
+android/README.md
+android/gradlew.bat
+android/app/build/intermediates/runtime_symbol_list/debug/processDebugResources/R.txt
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-sr/values-sr.xml
+android/app/build/intermediates/linked_resources_binary_format/debug/processDebugResources/linked-resources-binary-format-debug.ap_
+android/app/build/intermediates/merged_native_libs/debug/mergeDebugNativeLibs/out/lib/armeabi-v7a/libandroidx.graphics.path.so
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-kn/values-kn.xml
+android/app/build/intermediates/dex/debug/mergeProjectDexDebug/0/classes.dex
+android/app/build/intermediates/linked_resources_binary_format/debug/processDebugResources/output-metadata.json
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/SosHold.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/DemoController.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/PhoneSensorPacket.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/PhoneNormalizer$WhenMappings.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/MainActivityKt$DemoScreen$2$1$6$1.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/PhoneNormalizer$Reading.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/DemoSession.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/PhoneSensorCollector.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/DemoReplay.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/MainActivityKt$WhenMappings.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/DemoController$tick$1.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/MainActivity$poll$1.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/MainActivity$onCreate$1.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/MainActivityKt$DemoScreen$2$1$3$1.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/PhoneNormalizer.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/DemoApplication.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/LocalDemoSink.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/MainActivityKt$DemoScreen$2$1$4$1.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/MainActivity.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/DemoDetector.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/MainActivityKt$DemoScreen$2$1$2$1.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/SensorKind.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/MainActivityKt$SosButton$lambda$43$lambda$42$$inlined$onDispose$1.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/MainActivityKt$DemoScreen$2$1$7$1.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/MainActivityKt.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/MainActivityKt$DemoScreen$2$1$5$1.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/MainActivityKt$DemoScreen$2$1$9$1$1.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/MainActivityKt$SosButton$3$1$1.dex
+android/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/vn/nckh27pa/fallsafe/MainActivityKt$SosButton$3$1.dex
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-it/values-it.xml
+android/app/build/intermediates/merged_native_libs/debug/mergeDebugNativeLibs/out/lib/arm64-v8a/libandroidx.graphics.path.so
+android/app/build/intermediates/merged_native_libs/debug/mergeDebugNativeLibs/out/lib/x86_64/libandroidx.graphics.path.so
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-be/values-be.xml
+android/app/build/intermediates/dex/debug/mergeProjectDexDebug/6/classes.dex
+android/app/build/intermediates/signing_config_versions/debug/writeDebugSigningConfigVersions/signing-config-versions.json
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-gu/values-gu.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values/values.xml
+android/app/build/reports/tests/testDebugUnitTest/packages/vn.nckh27pa.fallsafe.html
+android/app/build/intermediates/dex/debug/mergeProjectDexDebug/2/classes.dex
+android/app/build/intermediates/merged_native_libs/debug/mergeDebugNativeLibs/out/lib/x86/libandroidx.graphics.path.so
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-sq/values-sq.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-pt-rPT/values-pt-rPT.xml
+android/app/build/reports/tests/testDebugUnitTest/js/report.js
+android/app/build/reports/tests/testDebugUnitTest/css/base-style.css
+android/app/build/reports/tests/testDebugUnitTest/css/style.css
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-ml/values-ml.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-th/values-th.xml
+android/app/build/intermediates/compatible_screen_manifest/debug/createDebugCompatibleScreenManifests/output-metadata.json
+android/app/build/reports/tests/testDebugUnitTest/classes/vn.nckh27pa.fallsafe.DemoTests.html
+android/app/build/reports/tests/testDebugUnitTest/index.html
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-hi/values-hi.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-eu/values-eu.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-en-rXC/values-en-rXC.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-sv/values-sv.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-in/values-in.xml
+android/app/build/intermediates/merged_manifest/debug/processDebugMainManifest/AndroidManifest.xml
+android/app/build/intermediates/compile_and_runtime_not_namespaced_r_class_jar/debug/processDebugResources/R.jar
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-te/values-te.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-mk/values-mk.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-lt/values-lt.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-el/values-el.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-ru/values-ru.xml
+android/app/build/intermediates/dex_number_of_buckets_file/debug/dexBuilderDebug/out
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-mr/values-mr.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-my/values-my.xml
+android/app/build/intermediates/dex/debug/mergeExtDexDebug/classes.dex
+android/app/build/intermediates/dex/debug/mergeExtDexDebug/classes2.dex
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-pl/values-pl.xml
+android/app/build/intermediates/merged_manifests/debug/processDebugManifest/AndroidManifest.xml
+android/app/build/intermediates/merged_manifests/debug/processDebugManifest/output-metadata.json
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-ar/values-ar.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-v21/values-v21.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-fr/values-fr.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-zu/values-zu.xml
+android/app/build/intermediates/incremental/mergeDebugShaders/merger.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-fa/values-fa.xml
+android/app/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+android/app/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-hy/values-hy.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-nl/values-nl.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-ta/values-ta.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-tr/values-tr.xml
+android/app/build/intermediates/java_res/debug/processDebugJavaRes/out/META-INF/app_debug.kotlin_module
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-iw_values-iw.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-ms_values-ms.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-tl_values-tl.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-bs_values-bs.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-te_values-te.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-nl_values-nl.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-sr_values-sr.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-zh-rCN_values-zh-rCN.arsc.flat
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-ja/values-ja.xml
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-lo_values-lo.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-tr_values-tr.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-eu_values-eu.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-fi_values-fi.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-gl_values-gl.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-km_values-km.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-zh-rHK_values-zh-rHK.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-or_values-or.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-vi_values-vi.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-af_values-af.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-mr_values-mr.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-az_values-az.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-et_values-et.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-sv_values-sv.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-is_values-is.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-ca_values-ca.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-my_values-my.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-it_values-it.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-en-rIN_values-en-rIN.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-in_values-in.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-zh-rTW_values-zh-rTW.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-ur_values-ur.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-fa_values-fa.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-bn_values-bn.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-ky_values-ky.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-pt-rBR_values-pt-rBR.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-fr_values-fr.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-mk_values-mk.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-fr-rCA_values-fr-rCA.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-es_values-es.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-hy_values-hy.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-en-rGB_values-en-rGB.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-sw_values-sw.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-mn_values-mn.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-ne_values-ne.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-pt_values-pt.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-si_values-si.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-ml_values-ml.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-v21_values-v21.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-v30_values-v30.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-el_values-el.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-be_values-be.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-lv_values-lv.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-sl_values-sl.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-en-rCA_values-en-rCA.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-kk_values-kk.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-ka_values-ka.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-pl_values-pl.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-ta_values-ta.arsc.flat
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-pa/values-pa.xml
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-de_values-de.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-hi_values-hi.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-sk_values-sk.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-es-rUS_values-es-rUS.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-en-rAU_values-en-rAU.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-b+sr+Latn_values-b+sr+Latn.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-da_values-da.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-uk_values-uk.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-ko_values-ko.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-sq_values-sq.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-zu_values-zu.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-hr_values-hr.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-ja_values-ja.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-hu_values-hu.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-ru_values-ru.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-bg_values-bg.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-th_values-th.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-gu_values-gu.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values_values.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-uz_values-uz.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-pa_values-pa.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-pt-rPT_values-pt-rPT.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-lt_values-lt.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-as_values-as.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-ro_values-ro.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-cs_values-cs.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-nb_values-nb.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-kn_values-kn.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-am_values-am.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-en-rXC_values-en-rXC.arsc.flat
+android/app/build/intermediates/merged_res/debug/mergeDebugResources/values-ar_values-ar.arsc.flat
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-mn/values-mn.xml
+android/app/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+android/app/build/intermediates/incremental/packageDebug/tmp/debug/dex-renamer-state.txt
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-v30/values-v30.xml
+android/app/build/intermediates/packaged_manifests/debug/processDebugManifestForPackage/AndroidManifest.xml
+android/app/build/intermediates/packaged_manifests/debug/processDebugManifestForPackage/output-metadata.json
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-zh-rHK/values-zh-rHK.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-nb/values-nb.xml
+android/app/build/intermediates/incremental/packageDebug/tmp/debug/zip-cache/javaResources0
+android/app/build/intermediates/incremental/packageDebug/tmp/debug/zip-cache/androidResources
+android/app/build/intermediates/incremental/mergeDebugAssets/merger.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-da/values-da.xml
+android/app/build/intermediates/incremental/debug-mergeJavaRes/merge-state
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-ne/values-ne.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-hr/values-hr.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-bg/values-bg.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-en-rCA/values-en-rCA.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-uz/values-uz.xml
+android/app/build/intermediates/stripped_native_libs/debug/stripDebugDebugSymbols/out/lib/x86_64/libandroidx.graphics.path.so
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-or/values-or.xml
+android/app/build/intermediates/stripped_native_libs/debug/stripDebugDebugSymbols/out/lib/armeabi-v7a/libandroidx.graphics.path.so
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-tl/values-tl.xml
+android/app/build/intermediates/stripped_native_libs/debug/stripDebugDebugSymbols/out/lib/arm64-v8a/libandroidx.graphics.path.so
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-ka/values-ka.xml
+android/app/build/intermediates/stripped_native_libs/debug/stripDebugDebugSymbols/out/lib/x86/libandroidx.graphics.path.so
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/Sy7YIPoxk5Hl12AKXWjarQ==
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-is/values-is.xml
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/QS44A88Fx5DlSOVnOu4pag==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/XGc8FTVetb7eB8D51qjJrQ==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/xN7945QcndaxG+E9NI4u_w==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/6MmYEMCruQrsl93xLDF_RA==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/N5jkBhCJFwrgepQnsmT1eQ==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/Wy3flnt9s_j6gnV4FAyvsA==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/OGdFbIlVywAfcL9pB9g2tg==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/FbBXe4waG2omQ49nVyaamg==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/lo0Pgd0umO+6yRvcvAuj8w==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/PBXiAqgKepqj9MYyzLIdPQ==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/Sk7GQz2K01JZcsI6WQt6Sg==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/ezI8qV760z5gjPnNkFskJw==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/ZSGE9lA_ufP8K1t2tK4I9g==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/9sNO1cl_Rk8l3ifI+xv4Og==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/mS8gtXc5xyfxpr8wlYO3Hg==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/H5JA9uxykw13irkk+5kOUQ==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/VRx_gm9jOIqEhKIhoG_z6A==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/5xbU+tKyDMPcwjXH3LDYYg==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/tqUbGssLW1qRSYC8p1ApWQ==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/YbG6qyLLqQEFq+Pkih5Lwg==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/7f1N8I3Vl3P006uJB8JCnQ==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/MyumW4TlQ5t8WOKsN5H+pQ==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/_UtBWe4s6Vv73kdb7TnHMg==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/Togef_c6LvbpHjH87CCqzQ==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/BG5JKq8uS5ayNbwmL53SoQ==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/VX3DUJx47j5DOtDLjkeM2Q==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/_h4jUUVCHoq69dNKbSdEpw==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/gbdI+QmbMsDe+Y3i+Yqu_w==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/99_cB+fF1ZlO3ogHA69fog==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/b_7UEfWZp0BaXE_qAbsTjg==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/5NjC_lgZnGBcgN59vfgpHg==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/jSTXGojEOkj_6uX2f2VcGw==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/aeZjPfMjcvcEF1q9F8O9kw==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/mWMlui0OzSuQIMy0fd+DFQ==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/XkKadZAkzc97cq7cxfLQkg==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/f2vOycNq7wm2CJwmN_ZqzQ==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/qzQ1z0hfg6xurTE4grIvcw==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/hKjEbeNeLVUFw1pyXMGVeg==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/w_rUT2TNk5ONPIJ97socIg==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/eX3aZl8PDK8dbVPRP+mDlA==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/hE00Yu7meGFXYbnoMiTdvg==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/R+7guEjdF5XkmhxISq_54g==
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-et/values-et.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-km/values-km.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-uk/values-uk.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-sl/values-sl.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-si/values-si.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-ky/values-ky.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-lv/values-lv.xml
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/XzkdkGlbghi_niXl3Tfvrg==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/UGRyzh5wdKZiTk+foMe7QA==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/y2FB6Un30BdAweNt+JD7Vw==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/ZD4A5HMh5TGwrFWFhyxXbQ==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/AmVrTZmnwZRdVefTU1Jqig==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/AZ2UEvn+yX78T_nMCw1HEw==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/ni_H_q8mRXRIcHTjayl7Uw==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/7_V0Bw0YbcEZlvW4RzOERQ==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/fVfpmMK9dsiYRZnKAktIxg==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/t0ysqq+pnqJZOkK_F0c++w==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/LMCnOamq4PsR9FxyUl9Q8g==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/F1iP_x4hk+XI85kU_FqZ4w==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/N44jBcWf1ToTtUhEYsVSOw==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/sKCIYfIPVp0w1ZDZ7dwbBQ==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/n6Y1tmZ3p5wBuspZZz1Lag==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/zKFi7weQF1yqtcm_s2M31w==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/Pv4Dt5zQRlLWh9UGl6Vp4Q==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/WgRMjb55AgVm9+Klm3AL9w==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/RPegvVTDrrYVbPtuxUvlJQ==
+android/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/9BoCmb_Lf01RyILOjGTq4w==
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-iw/values-iw.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-bn/values-bn.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-en-rGB/values-en-rGB.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-es-rUS/values-es-rUS.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-ko/values-ko.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-es/values-es.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-lo/values-lo.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-as/values-as.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-b+sr+Latn/values-b+sr+Latn.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-fr-rCA/values-fr-rCA.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-de/values-de.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-zh-rTW/values-zh-rTW.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-ro/values-ro.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-az/values-az.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-af/values-af.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-fi/values-fi.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-sk/values-sk.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-kk/values-kk.xml
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-sw/values-sw.xml
+android/app/build/intermediates/java_res/debugUnitTest/processDebugUnitTestJavaRes/out/META-INF/app_debugUnitTest.kotlin_module
+android/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-am/values-am.xml
+
+exec
+/bin/bash -lc "cat docs/tasks/REV-AND-001B.md; rg --files -g AGENTS.md -g '"'!**/build/**'"' -g '"'!**/.gradle/**'"' -g '"'!.tools/**'"'; rg --files android/app/src android/core/src android/core/tests docs/tasks" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+# REV-AND-001B
+Mục tiêu: review Android demo độc lập người triển khai. Người Codex gpt-6-astra phiên riêng; read-only. Nguồn docs/tasks/AND-001B.md + Android yêu cầu PHONE_ONLY, no-response tự gửi fake, GPS không chặn.
+Đầu vào: android/app/src/main/* (manifest/5 Kotlin), app/src/test/*, core/src/Core.kt và android/README.md. Không toàn repo hoặc logs dài. Phạm vi sửa: không; CLI output docs/evidence/REV-AND-001B.txt. Phụ thuộc source AND-001B đã bàn giao, Hermes đang Gradle build.
+Bàn giao PASS/FAIL, findings severity file:line/repro; tập trung sensor conversions/freshness, callback/lifecycle/countdown/scheduling, replay isolation, SOS hold, SAFE deadline và lỗi sink, UI state. Không yêu cầu tính năng ngoài lát này làm blocker nhưng ghi rõ foreground-only/process-death là giới hạn, không phát hiện ngã y khoa. Test fake không actual emergency permission.
+Nghiệm thu không logic/security bug chặn trong demo. Không build/emulator/network/agent con, không thay code. Retry2 fix/review tối đa. Không cho PASS chỉ vì checklist hoặc lời tác giả.
+docs/tasks/REV-CORE-002.md
+docs/tasks/AND-001B.md
+docs/tasks/CORE-002.md
+docs/tasks/CORE-001.md
+docs/tasks/AND-001.md
+docs/tasks/UX-001.md
+docs/tasks/IF-003.md
+docs/tasks/ESP-CORE-001.md
+docs/tasks/ENV-002.md
+docs/tasks/REV-CORE-001.md
+docs/tasks/REV-AND-001B.md
+android/core/src/RecordingSink.kt
+android/core/src/Demo.kt
+android/core/src/Core.kt
+android/core/tests/CoreTests.kt
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt
+android/app/src/main/java/vn/nckh27pa/fallsafe/DemoLogic.kt
+android/app/src/main/java/vn/nckh27pa/fallsafe/DemoApplication.kt
+android/app/src/main/java/vn/nckh27pa/fallsafe/PhoneSensorCollector.kt
+
+exec
+/bin/bash -lc 'cat docs/tasks/AND-001B.md android/README.md; nl -ba android/app/src/main/java/vn/nckh27pa/fallsafe/DemoLogic.kt; nl -ba android/app/src/main/java/vn/nckh27pa/fallsafe/PhoneSensorCollector.kt' in /home/pdd/nckh27pa
+ succeeded in 0ms:
+# AND-001B — Android PHONE_ONLY demo có source thực
+Mục tiêu: app Compose 4 tab chạy được: nhận gia tốc điện thoại + replay mẫu mô phỏng → xử lý chuỗi → core countdown → UI/test sink. Không chỉ checklist.
+Nguồn: Android §3,4.2–4.5,7,10,11 phase1; chỉ thị tiếp tục. Người: Codex gpt-6-astra đã gọi được. Hermes build bằng terminal host, không nới sandbox.
+Đọc: phiếu, android/core/src, README; android-plan chỉ §3,4.4,4.5.1–4.5.2,11; android/app/build.gradle.kts. Không đọc toàn repo. API: tái dùng core.AlertCore, không sửa core. Gói PhoneSensorPacket chính xác tên theo plan; collector thật SensorManager accelerometer và optional gyro/rotation/pressure/linear accel; unsupported/stale=null. Bắt đầu nhỏ, ghi rõ cảm biến/bước/vị trí nào chưa tích hợp.
+Phạm vi sửa: android/app/src/, android/README.md, android/evidence/AND-001B-*; không build.gradle, core, docs, hai kế hoạch. Hermes quản lý Gradle + dependency, không agent con/build Gradle/network trong sandbox. Tối đa2 triển khai đồng thời, không sửa tệp chung.
+Phụ thuộc: CORE-001/002 cùng API ổn định; ENV-002 cung cấp wrapper/dependencies. Bàn giao source app/tests, README chạy, đơn vị/unit và demo notes; TDD logic mới qua compiler offline rồi Hermes JUnit build.
+Nghiệm thu:
+- MainActivity Compose và 4 tab Trang chủ/Sự kiện/Người thân/Cài đặt có nội dung thật, hiển thị banner THỬ NGHIỆM không gửi ngoài, source PHONE_ONLY/giả phân biệt, cảm biến unavailable không ghi an toàn, BLE chưa tích hợp không chặn PHONE_ONLY; font/scroll/nhãn rõ.
+- PhoneSensorCollector thật m/s², gyro rad/s→Dps, pressure hPa→Pa; phone optional fields null khi thiếu; đăng ký/unregister lifecycle, độ mới dữ liệu; không map zero vào sensor thiếu. No bogus on-body certainty; confidence UNKNOWN khi chưa có thuật toán.
+- Pipeline detection DEMO riêng nhiều mẫu: va đập rồi yên trong cửa sổ có thời gian; không một sample gọi là ngã, replay tự cấp dữ liệu vào cùng logic. Không tuyên bố detector chính xác. tick Handler monotonic trên main thread, tiếp tục countdown qua pause nếu process sống; lifecycle hạn chế ghi rõ, không nói foreground service khi chưa có.
+- SOS UI giữ2giây, NEED_HELP ngay/SAFE deadline core; event history bounded; sink fake tại chỗ, tuyệt đối không SMS/CALL_PHONE/INTERNET hoặc Intent gọi thật. Đang gửi/thất bại/đã nhận giả phân biệt.
+- Có thể kiểm demo no-response trên emulator: nút 'Chạy dữ liệu mô phỏng', đếm10s, tự chuyển đã gửi THỬ NGHIỆM; test sink lỗi toggle; hoàn tất sự kiện và thử lại. SAFE trước hạn và SOS2s phải thao tác được.
+- Không location permission ở lát này: ghi chưa lấy vị trí; không chờ GPS. Màn người thân chỉ người nhận mô phỏng không danh bạ thật.
+- Tests JUnit pure pipeline/normalization/replay với sample times và invalid/NaN/stale nếu có; test-first cho source mới, riêng core existing là regression. Có thể thêm offline harness Kotlin trong evidence để xem RED/GREEN; không bịa build/test output.
+Cách kiểm: Hermes ./gradlew --no-daemon --max-workers=2 testDebugUnitTest assembleDebug và emulator một máy. Agent chạy pure tests offline nếu khả thi. Sau2 lỗi không tiến triển dừng hướng đó, bàn giao source đã viết cho Hermes; không dừng toàn task chỉ vì Gradle sandbox không mạng đã biết. Chưa nghiệm thu phần nền/phần cứng/độ chính xác.
+# Android PHONE_ONLY — AND-001B
+
+Source demo Compose ở `app/src/main`, 4 tab Trang chủ / Sự kiện / Người thân / Cài đặt. Tất cả cảnh báo chỉ đến sink bộ nhớ tại máy. Manifest không yêu cầu quyền SMS, gọi điện, mạng, danh bạ hoặc vị trí. BLE chưa tích hợp và không chặn PHONE_ONLY.
+
+## Chạy test offline
+
+Từ root repo:
+
+```sh
+bash android/evidence/AND-001B-test.sh
+```
+
+Runner gọi Kotlin compiler có sẵn tại `/home/pdd/.local/opt/nckh27pa/android-studio/plugins/Kotlin/kotlinc/bin/kotlinc`, Java 21 và hai jar JUnit/Hamcrest có sẵn trong `.tools/gradle-8.13/lib`. Chỉ đọc jar, không chạy Gradle hoặc tải mạng. Output jar trong `/tmp`, tự dọn. Cùng `DemoTests.kt` được Gradle nhận qua source set test mặc định. Đã chạy thật 9 test JUnit PASS; không có test Android/Compose trong runner này.
+
+Hermes build trên host, từ thư mục `android`:
+
+```sh
+./gradlew --no-daemon --max-workers=2 testDebugUnitTest assembleDebug
+```
+
+Gradle/dependency/core do Hermes quản lý; AND-001B không sửa chúng. Chưa chạy Gradle/APK/emulator trong sandbox; host cần xác minh compile Compose và thao tác thiết bị.
+
+## Demo trên emulator / máy thật
+
+1. Mở app: banner THỬ NGHIỆM, nguồn PHONE_ONLY. Thiếu accelerometer vẫn vào app và chạy replay được; không hiển thị “an toàn” khi thiếu dữ liệu.
+2. Bấm **Chạy dữ liệu mô phỏng**. Nguồn đổi sang MÔ PHỎNG; 17 mẫu cách nhau 100 ms chạy qua cùng detector như cảm biến thật. Sau khoảng 1,3 giây xuất hiện câu hỏi và countdown 10 giây. Không phản hồi: tự chuyển **Đã gửi THỬ NGHIỆM**, sink đã nhận GIẢ.
+3. Bấm **Hoàn tất sự kiện để thử lại**, chạy replay và chọn **TÔI VẪN ỔN** trước hạn. Không có alert mới. SAFE tại/sau hạn không hủy timeout của core.
+4. Chạy lại; **CẦN GIÚP ĐỠ** gửi ngay. Hoặc giữ vùng **SOS — GIỮ 2 GIÂY** khi không có countdown: thả sớm hoặc kéo hủy không gửi; đủ 2 giây gửi một lần. Với TalkBack, kích hoạt để bắt đầu 2 giây, kích hoạt lần nữa để hủy. Rời Activity không cho SOS đang giữ gửi.
+5. Hoàn tất, vào Cài đặt bật **Giả lập lỗi gửi**. Chạy replay và chờ: **Gửi GIẢ thất bại**; không tự retry. Hoàn tất, tắt lỗi, thử lại được với ID mới.
+6. Xem Sự kiện: tối đa 32 chuyển trạng thái; có **Đang gửi GIẢ** trước **Đã gửi THỬ NGHIỆM** hoặc **Gửi GIẢ thất bại**. Sink đồng bộ nên SENDING chỉ tồn tại tức thời, được giữ trong nhật ký, không tạo độ trễ giả. ACKNOWLEDGED là hoàn tất tại máy, không phải người thân xác nhận.
+7. Khi countdown, chuyển tab/rời app/quay lại hoặc xoay máy: phiên cấp Application giữ countdown nếu process sống. Tick ở main Handler dùng elapsedRealtime; pause không hủy tick. Máy ngủ có thể trì hoãn callback; resume gọi tick ngay. Đây chưa phải bảo đảm chạy nền.
+8. Bấm **Dùng cảm biến điện thoại** khi MONITORING để đổi lại PHONE_ONLY; reset detector để không trộn nguồn. Xem các giá trị cảm biến tại Cài đặt. Thử cỡ chữ lớn, cuộn, dark mode và TalkBack trên host.
+
+## Thiết kế và giới hạn
+
+- `PhoneSensorCollector`: SensorManager accelerometer m/s²; linear acceleration m/s²; gyro rad/s → °/s; rotation vector → pitch/roll/yaw độ; pressure hPa → Pa. Đăng ký ở onResume, unregister/xóa cache ở onPause, callback main looper. Thiếu sensor hoặc đăng ký thất bại không tạo giá trị 0. Thiếu accelerometer thì toàn packet null vì schema yêu cầu ba trục non-null.
+- `PhoneNormalizer`: giữ bản sao giá trị; bỏ NaN/Infinity/thiếu trục; reject dữ liệu tương lai khi đọc, bỏ packet sau 500 ms. Optional quá 500 ms là null. Không đo bước, vị trí, độ cao tương đối; các trường tương ứng null. `phoneMotionState=UNKNOWN`, confidence=0 nghĩa chưa ước lượng, không khẳng định máy mang theo người; sensorQuality=0 chưa được chấm điểm.
+- `DemoDetector`: va đập ≥25 m/s² rồi độ lớn gia tốc 9.81±1 m/s² trong ≥1 giây, ít nhất 6 mẫu, hoàn tất trong 3 giây. Gap >250 ms, thời gian lặp/lùi hoặc dữ liệu invalid làm mất bằng chứng. Một mẫu không kích hoạt cảnh báo. Các ngưỡng chỉ phục vụ demo, có thể nhầm đặt/rơi điện thoại với ngã; chưa đánh giá độ chính xác.
+- Không foreground service, wake lock, persistence hoặc phục hồi process chết. Cảm biến chỉ thu khi Activity resumed; countdown/replay đã khởi động tiếp tục trong process, không phụ thuộc UI. Không bảo đảm giờ chạy khi hệ điều hành ngủ/giết process. Không có overlay màn hình khóa, rung/âm thanh, pin, BLE, vị trí, bước chân hay liên lạc thật.
+- Nhật ký chuyển trạng thái và sink đều tối đa 32 bản ghi RAM. ID trong phiên; chưa lưu thời gian lịch/nguồn từng sự kiện, biểu đồ hoặc dữ liệu raw lịch sử. Nguồn hiển thị ở đầu màn hình là nguồn hiện tại. Không có danh bạ thật hay thông tin cá nhân.
+
+Bằng chứng: `evidence/AND-001B-report.md`, các log RED/GREEN/final và runner. Nghiệm thu source/pure logic hoàn tất; build host, UI emulator, phần cứng, nền và độ chính xác còn cần xác minh.
+     1	package vn.nckh27pa.fallsafe
+     2	
+     3	import core.*
+     4	import kotlin.math.abs
+     5	import kotlin.math.sqrt
+     6	
+     7	/** Names/types follow plan §4.5.2. Confidence 0 + UNKNOWN means unestimated. */
+     8	data class PhoneSensorPacket(
+     9	    val timestampNs: Long, val wallClockTimestampMs: Long,
+    10	    val accelXMs2: Float, val accelYMs2: Float, val accelZMs2: Float,
+    11	    val linearAccelXMs2: Float? = null, val linearAccelYMs2: Float? = null,
+    12	    val linearAccelZMs2: Float? = null,
+    13	    val gyroXDps: Float? = null, val gyroYDps: Float? = null, val gyroZDps: Float? = null,
+    14	    val pitchDeg: Float? = null, val rollDeg: Float? = null, val yawDeg: Float? = null,
+    15	    val pressurePa: Float? = null, val altitudeDeltaM: Float? = null,
+    16	    val stepCount: Long? = null, val stepDetected: Boolean? = null,
+    17	    val phoneMotionState: String = "UNKNOWN", val phonePlacementConfidence: Int = 0,
+    18	    val sensorQuality: Int = 0
+    19	)
+    20	enum class SensorKind { ACCEL, LINEAR, GYRO, ORIENTATION, PRESSURE }
+    21	class PhoneNormalizer {
+    22	    private data class Reading(val ns: Long, val values: List<Float>)
+    23	    private val readings = mutableMapOf<SensorKind, Reading>()
+    24	    fun clear() = readings.clear()
+    25	    fun update(kind: SensorKind, ns: Long, values: FloatArray) {
+    26	        val count = if (kind == SensorKind.PRESSURE) 1 else 3
+    27	        if (ns < 0 || values.size < count || values.take(count).any { !it.isFinite() } ||
+    28	            (kind == SensorKind.PRESSURE && values[0] <= 0f)) {
+    29	            readings.remove(kind); return
+    30	        }
+    31	        if (ns < (readings[kind]?.ns ?: -1)) return
+    32	        val scale = when (kind) {
+    33	            SensorKind.GYRO -> (180.0 / Math.PI).toFloat()
+    34	            SensorKind.PRESSURE -> 100f
+    35	            else -> 1f
+    36	        }
+    37	        val converted = values.take(count).map { it * scale }
+    38	        if (converted.any { !it.isFinite() }) { readings.remove(kind); return }
+    39	        readings[kind] = Reading(ns, converted)
+    40	    }
+    41	    fun packet(nowNs: Long, wallMs: Long): PhoneSensorPacket? {
+    42	        fun fresh(kind: SensorKind) = readings[kind]?.takeIf {
+    43	            nowNs >= it.ns && nowNs - it.ns <= 500_000_000
+    44	        }
+    45	        val a = fresh(SensorKind.ACCEL) ?: return null
+    46	        val l = fresh(SensorKind.LINEAR)?.values
+    47	        val g = fresh(SensorKind.GYRO)?.values
+    48	        val o = fresh(SensorKind.ORIENTATION)?.values
+    49	        return PhoneSensorPacket(a.ns, wallMs, a.values[0], a.values[1], a.values[2],
+    50	            l?.get(0), l?.get(1), l?.get(2), g?.get(0), g?.get(1), g?.get(2),
+    51	            o?.get(0), o?.get(1), o?.get(2), fresh(SensorKind.PRESSURE)?.values?.get(0))
+    52	    }
+    53	}
+    54	
+    55	/** DEMO only: impact >=25 m/s², then >=1 s quiet at 9.81±1 within 3 s.
+    56	 * At least 6 quiet samples; gaps >250 ms, invalid or reversed times break evidence.
+    57	 * These illustrative thresholds are not a validated fall detector.
+    58	 */
+    59	class DemoDetector {
+    60	    private var last: Long? = null
+    61	    private var impact: Long? = null
+    62	    private var quiet: Long? = null
+    63	    private var count = 0
+    64	    fun reset() { last = null; impact = null; quiet = null; count = 0 }
+    65	    fun accept(p: PhoneSensorPacket): Boolean {
+    66	        val t = p.timestampNs
+    67	        val a = listOf(p.accelXMs2, p.accelYMs2, p.accelZMs2)
+    68	        if (t < 0 || a.any { !it.isFinite() }) { reset(); return false }
+    69	        val previous = last
+    70	        if (previous != null && (t <= previous || t - previous > 250_000_000)) {
+    71	            reset(); last = t; return false
+    72	        }
+    73	        last = t
+    74	        val magnitude = sqrt(a.sumOf { it.toDouble() * it.toDouble() })
+    75	        if (magnitude >= 25) { impact = t; quiet = null; count = 0; return false }
+    76	        val hit = impact ?: return false
+    77	        if (t - hit > 3_000_000_000L) { impact = null; quiet = null; count = 0; return false }
+    78	        if (abs(magnitude - 9.81) > 1) { quiet = null; count = 0; return false }
+    79	        if (quiet == null) quiet = t
+    80	        count++
+    81	        if (count >= 6 && t - quiet!! >= 1_000_000_000) { reset(); return true }
+    82	        return false
+    83	    }
+    84	}
+    85	class DemoReplay(private val startMs: Long) {
+    86	    private var index = 0
+    87	    val finished get() = index > 16
+    88	    fun due(nowMs: Long): List<PhoneSensorPacket> {
+    89	        val result = mutableListOf<PhoneSensorPacket>()
+    90	        while (!finished && nowMs >= startMs && nowMs - startMs >= index * 100L) {
+    91	            result += PhoneSensorPacket((startMs + index * 100L) * 1_000_000, 0,
+    92	                0f, 0f, if (index == 2) 30f else 9.81f)
+    93	            index++
+    94	        }
+    95	        return result
+    96	    }
+    97	}
+    98	class LocalDemoSink : AlertSink {
+    99	    var fail = false
+   100	    private val received = ArrayDeque<Alert>()
+   101	    override fun send(alert: Alert) {
+   102	        if (fail) error("Lỗi mô phỏng")
+   103	        received.addLast(alert)
+   104	        while (received.size > 32) received.removeFirst()
+   105	    }
+   106	    fun alerts() = received.toList()
+   107	}
+   108	class DemoSession(clock: MonotonicClock, val sink: LocalDemoSink = LocalDemoSink()) {
+   109	    private val core = AlertCore(clock, sink)
+   110	    private val detector = DemoDetector()
+   111	    fun resetDetection() = detector.reset()
+   112	    fun accept(packet: PhoneSensorPacket) {
+   113	        if (core.snapshot().state == State.MONITORING && detector.accept(packet)) {
+   114	            core.suspected(); core.evidenceConfirmed()
+   115	        }
+   116	    }
+   117	    fun snapshot() = core.snapshot()
+   118	    fun events() = core.events()
+   119	    fun tick() = core.tick()
+   120	    fun safe() { core.safe(); detector.reset() }
+   121	    fun needHelp() { core.needHelp(); detector.reset() }
+   122	    fun complete() { core.complete(); detector.reset() }
+   123	}
+   124	class SosHold {
+   125	    private var started: Long? = null
+   126	    fun start(nowMs: Long) { started = nowMs }
+   127	    fun cancel() { started = null }
+   128	    fun ready(nowMs: Long): Boolean {
+   129	        val start = started ?: return false
+   130	        if (nowMs >= start && nowMs - start >= 2000) { cancel(); return true }
+   131	        return false
+   132	    }
+   133	}
+     1	package vn.nckh27pa.fallsafe
+     2	
+     3	import android.content.Context
+     4	import android.hardware.Sensor
+     5	import android.hardware.SensorEvent
+     6	import android.hardware.SensorEventListener
+     7	import android.hardware.SensorManager
+     8	import android.os.Handler
+     9	import android.os.Looper
+    10	import android.os.SystemClock
+    11	
+    12	/** Activity starts/stops collection; all callbacks are confined to main looper. */
+    13	class PhoneSensorCollector(context: Context, private val onPacket: (PhoneSensorPacket) -> Unit) : SensorEventListener {
+    14	    private val manager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    15	    private val normalizer = PhoneNormalizer()
+    16	    private val kinds = mapOf(
+    17	        Sensor.TYPE_ACCELEROMETER to SensorKind.ACCEL,
+    18	        Sensor.TYPE_LINEAR_ACCELERATION to SensorKind.LINEAR,
+    19	        Sensor.TYPE_GYROSCOPE to SensorKind.GYRO,
+    20	        Sensor.TYPE_ROTATION_VECTOR to SensorKind.ORIENTATION,
+    21	        Sensor.TYPE_PRESSURE to SensorKind.PRESSURE
+    22	    )
+    23	    var activeSensors: Set<SensorKind> = emptySet(); private set
+    24	    private var running = false
+    25	    fun start() {
+    26	        stop()
+    27	        running = true
+    28	        activeSensors = kinds.mapNotNull { (type, kind) ->
+    29	            val sensor = manager.getDefaultSensor(type) ?: return@mapNotNull null
+    30	            val registered = try {
+    31	                manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME, Handler(Looper.getMainLooper()))
+    32	            } catch (_: SecurityException) { false }
+    33	            if (registered) kind else null
+    34	        }.toSet()
+    35	    }
+    36	    fun stop() {
+    37	        running = false
+    38	        manager.unregisterListener(this)
+    39	        normalizer.clear()
+    40	        activeSensors = emptySet()
+    41	    }
+    42	    fun latest(): PhoneSensorPacket? = normalizer.packet(SystemClock.elapsedRealtimeNanos(), System.currentTimeMillis())
+    43	    override fun onSensorChanged(event: SensorEvent) {
+    44	        if (!running) return
+    45	        val kind = kinds[event.sensor.type] ?: return
+    46	        if (kind == SensorKind.ORIENTATION) {
+    47	            if (event.values.size < 3 || event.values.any { !it.isFinite() }) {
+    48	                normalizer.update(kind, event.timestamp, floatArrayOf(Float.NaN)); return
+    49	            }
+    50	            val rotation = FloatArray(9)
+    51	            val orientation = FloatArray(3)
+    52	            SensorManager.getRotationMatrixFromVector(rotation, event.values)
+    53	            SensorManager.getOrientation(rotation, orientation)
+    54	            normalizer.update(kind, event.timestamp, floatArrayOf(
+    55	                Math.toDegrees(orientation[1].toDouble()).toFloat(),
+    56	                Math.toDegrees(orientation[2].toDouble()).toFloat(),
+    57	                Math.toDegrees(orientation[0].toDouble()).toFloat()
+    58	            ))
+    59	        } else normalizer.update(kind, event.timestamp, event.values)
+    60	        if (kind == SensorKind.ACCEL) latest()?.let(onPacket)
+    61	    }
+    62	    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+    63	}
+
+exec
+/bin/bash -lc 'nl -ba android/app/src/main/java/vn/nckh27pa/fallsafe/DemoApplication.kt; nl -ba android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt; nl -ba android/core/src/Core.kt; nl -ba android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt; cat android/app/src/main/AndroidManifest.xml' in /home/pdd/nckh27pa
+ succeeded in 0ms:
+     1	package vn.nckh27pa.fallsafe
+     2	
+     3	import android.app.Application
+     4	import android.os.Handler
+     5	import android.os.Looper
+     6	import android.os.SystemClock
+     7	import androidx.compose.runtime.getValue
+     8	import androidx.compose.runtime.mutableStateOf
+     9	import androidx.compose.runtime.setValue
+    10	import core.MonotonicClock
+    11	import core.State
+    12	
+    13	/** Process-scoped session survives Activity recreation. No foreground service. */
+    14	class DemoApplication : Application() {
+    15	    lateinit var controller: DemoController; private set
+    16	    override fun onCreate() { super.onCreate(); controller = DemoController() }
+    17	}
+    18	class DemoController {
+    19	    var foreground by mutableStateOf(false)
+    20	    val session = DemoSession(MonotonicClock { SystemClock.elapsedRealtime() })
+    21	    var snapshot by mutableStateOf(session.snapshot()); private set
+    22	    var events by mutableStateOf(session.events()); private set
+    23	    var source by mutableStateOf("PHONE_ONLY • cảm biến thật"); private set
+    24	    var packet by mutableStateOf<PhoneSensorPacket?>(null); private set
+    25	    var replaying by mutableStateOf(false); private set
+    26	    var fail by mutableStateOf(false); private set
+    27	    private var replay: DemoReplay? = null
+    28	    private val handler = Handler(Looper.getMainLooper())
+    29	    private val tick = object : Runnable {
+    30	        override fun run() {
+    31	            val now = SystemClock.elapsedRealtime()
+    32	            replay?.let { r ->
+    33	                r.due(now).forEach { packet = it; session.accept(it) }
+    34	                if (r.finished) { replay = null; replaying = false }
+    35	            }
+    36	            session.tick()
+    37	            refresh()
+    38	            if (replay != null || snapshot.state == State.VERIFYING) handler.postDelayed(this, 50)
+    39	        }
+    40	    }
+    41	    fun refresh() { snapshot = session.snapshot(); events = session.events() }
+    42	    private fun schedule() { handler.removeCallbacks(tick); handler.post(tick) }
+    43	    fun acceptPhone(p: PhoneSensorPacket) {
+    44	        if (!source.startsWith("PHONE_ONLY")) return
+    45	        packet = p
+    46	        session.accept(p)
+    47	        refresh()
+    48	        if (snapshot.state == State.VERIFYING) schedule()
+    49	    }
+    50	    fun displayPhone(p: PhoneSensorPacket?) {
+    51	        if (source.startsWith("PHONE_ONLY")) packet = p
+    52	    }
+    53	    fun runReplay() {
+    54	        if (snapshot.state != State.MONITORING || replaying) return
+    55	        source = "MÔ PHỎNG • dữ liệu giả"
+    56	        session.resetDetection()
+    57	        packet = null
+    58	        replay = DemoReplay(SystemClock.elapsedRealtime())
+    59	        replaying = true
+    60	        schedule()
+    61	    }
+    62	    fun usePhone() {
+    63	        if (snapshot.state != State.MONITORING) return
+    64	        replay = null; replaying = false; packet = null
+    65	        source = "PHONE_ONLY • cảm biến thật"
+    66	        session.resetDetection()
+    67	    }
+    68	    fun safe() { session.safe(); refresh() }
+    69	    fun sos() { if (foreground) help() }
+    70	    fun help() { session.needHelp(); refresh() }
+    71	    fun complete() { replay = null; replaying = false; session.complete(); refresh() }
+    72	    fun setFailure(value: Boolean) { fail = value; session.sink.fail = value }
+    73	    fun resumed() { session.tick(); refresh(); schedule() }
+    74	}
+     1	package vn.nckh27pa.fallsafe
+     2	
+     3	import android.os.Bundle
+     4	import android.os.Handler
+     5	import android.os.Looper
+     6	import android.os.SystemClock
+     7	import androidx.activity.ComponentActivity
+     8	import androidx.activity.compose.setContent
+     9	import androidx.compose.foundation.background
+    10	import androidx.compose.foundation.gestures.detectTapGestures
+    11	import androidx.compose.foundation.isSystemInDarkTheme
+    12	import androidx.compose.foundation.layout.*
+    13	import androidx.compose.foundation.rememberScrollState
+    14	import androidx.compose.foundation.verticalScroll
+    15	import androidx.compose.material3.*
+    16	import androidx.compose.runtime.*
+    17	import androidx.compose.runtime.saveable.rememberSaveable
+    18	import androidx.compose.ui.Modifier
+    19	import androidx.compose.ui.input.pointer.pointerInput
+    20	import androidx.compose.ui.semantics.*
+    21	import androidx.compose.ui.unit.dp
+    22	import androidx.compose.ui.unit.sp
+    23	import core.State
+    24	import core.Status
+    25	
+    26	class MainActivity : ComponentActivity() {
+    27	    private lateinit var collector: PhoneSensorCollector
+    28	    private val controller get() = (application as DemoApplication).controller
+    29	    private val handler = Handler(Looper.getMainLooper())
+    30	    private var sensorSummary by mutableStateOf("Chưa thu cảm biến")
+    31	    private val poll = object : Runnable {
+    32	        override fun run() {
+    33	            controller.displayPhone(collector.latest())
+    34	            handler.postDelayed(this, 250)
+    35	        }
+    36	    }
+    37	    override fun onCreate(savedInstanceState: Bundle?) {
+    38	        super.onCreate(savedInstanceState)
+    39	        collector = PhoneSensorCollector(this, controller::acceptPhone)
+    40	        setContent {
+    41	            MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
+    42	                DemoScreen(controller, sensorSummary)
+    43	            }
+    44	        }
+    45	    }
+    46	    override fun onResume() {
+    47	        super.onResume()
+    48	        controller.foreground = true
+    49	        collector.start()
+    50	        sensorSummary = collector.activeSensors.joinToString().ifEmpty { "Không có cảm biến khả dụng" }
+    51	        controller.resumed()
+    52	        handler.post(poll)
+    53	    }
+    54	    override fun onPause() {
+    55	        controller.foreground = false
+    56	        collector.stop()
+    57	        handler.removeCallbacks(poll)
+    58	        controller.displayPhone(null)
+    59	        controller.session.resetDetection()
+    60	        super.onPause()
+    61	    }
+    62	}
+    63	
+    64	@Composable
+    65	private fun DemoScreen(c: DemoController, sensorSummary: String) {
+    66	    var tab by rememberSaveable { mutableIntStateOf(0) }
+    67	    val tabs = listOf("Trang chủ", "Sự kiện", "Người thân", "Cài đặt")
+    68	    Scaffold(bottomBar = {
+    69	        NavigationBar {
+    70	            tabs.forEachIndexed { i, title ->
+    71	                NavigationBarItem(selected = tab == i, onClick = { tab = i },
+    72	                    icon = { Text(listOf("⌂", "≡", "♡", "⚙")[i]) }, label = { Text(title) })
+    73	            }
+    74	        }
+    75	    }) { inset ->
+    76	        Column(Modifier.fillMaxSize().padding(inset).verticalScroll(rememberScrollState())
+    77	            .padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    78	            Text("THỬ NGHIỆM — không gửi ra ngoài", fontSize = 22.sp,
+    79	                color = MaterialTheme.colorScheme.error)
+    80	            Text(c.source, style = MaterialTheme.typography.titleMedium)
+    81	            // Verification remains accessible from every tab, with no blocking modal.
+    82	            if (c.snapshot.state == State.VERIFYING) {
+    83	                Text("! Bạn có ổn không?", style = MaterialTheme.typography.headlineMedium)
+    84	                Text("Còn ${((c.snapshot.remainingMs ?: 0) + 999) / 1000} giây",
+    85	                    fontSize = 32.sp, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+    86	                Action("TÔI VẪN ỔN", c::safe)
+    87	                Action("CẦN GIÚP ĐỠ", c::help)
+    88	            }
+    89	            when (tab) {
+    90	                0 -> {
+    91	                    Text(stateLabel(c), style = MaterialTheme.typography.headlineSmall)
+    92	                    Text("BLE: chưa tích hợp • PHONE_ONLY vẫn dùng được")
+    93	                    Text(if (c.packet == null) "! Thiếu hoặc cũ dữ liệu; không thể đánh giá nguy cơ."
+    94	                        else "Có mẫu gia tốc • chưa thể kết luận an toàn.")
+    95	                    Text("Mang theo người: UNKNOWN — chưa có thuật toán xác định.")
+    96	                    Text("Vị trí: chưa lấy vị trí; không chờ GPS.")
+    97	                    if (c.foreground) SosButton(c::sos)
+    98	                    Action("Chạy dữ liệu mô phỏng", c::runReplay,
+    99	                        c.snapshot.state == State.MONITORING && !c.replaying)
+   100	                    if (c.replaying) Text("Đang cấp chuỗi va đập rồi yên mô phỏng…")
+   101	                    Action("Dùng cảm biến điện thoại", c::usePhone, c.snapshot.state == State.MONITORING)
+   102	                    if (c.snapshot.state == State.ALERTING || c.snapshot.state == State.AWAITING_HELP) {
+   103	                        Text("Người nhận: Người thân mô phỏng 1 • kênh: bộ nhớ tại máy")
+   104	                        Text(if (c.snapshot.status == Status.SENT) "Đã nhận GIẢ tại sink; không phải người thật xác nhận."
+   105	                            else "Gửi GIẢ thất bại; không tự gửi lại.")
+   106	                        Action("Hoàn tất sự kiện để thử lại", c::complete)
+   107	                    }
+   108	                }
+   109	                1 -> {
+   110	                    Text("Sự kiện thử nghiệm", style = MaterialTheme.typography.headlineSmall)
+   111	                    Text("32 chuyển trạng thái gần nhất trong phiên; ID không lưu qua khởi động lại. Độ tin cậy: chưa đánh giá.")
+   112	                    if (c.events.isEmpty()) Text("Chưa có sự kiện.")
+   113	                    c.events.asReversed().forEach {
+   114	                        Text("#${it.eventId} • ${it.state}\n${statusLabel(it.status)}")
+   115	                    }
+   116	                }
+   117	                2 -> {
+   118	                    Text("Người thân mô phỏng", style = MaterialTheme.typography.headlineSmall)
+   119	                    Text("Ưu tiên 1 • Người thân mô phỏng 1\nKênh nhận: bộ nhớ tại máy; không số điện thoại, không danh bạ thật.")
+   120	                    Text("Sink đã nhận ${c.session.sink.alerts().size} cảnh báo giả (tối đa 32).")
+   121	                    Text("Không SMS, cuộc gọi hoặc liên lạc mạng.")
+   122	                }
+   123	                3 -> {
+   124	                    Text("Kiểm tra hệ thống", style = MaterialTheme.typography.headlineSmall)
+   125	                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+   126	                        Text("Giả lập lỗi gửi", Modifier.weight(1f), fontSize = 20.sp)
+   127	                        Switch(c.fail, c::setFailure, Modifier.semantics { contentDescription = "Giả lập lỗi gửi" })
+   128	                    }
+   129	                    Text("Đã đăng ký: $sensorSummary")
+   130	                    val p = c.packet
+   131	                    Text("Gia tốc m/s²: ${p?.let { "${it.accelXMs2}, ${it.accelYMs2}, ${it.accelZMs2}" } ?: "không có / quá 500 ms"}")
+   132	                    Text("Gyro °/s: ${p?.gyroXDps ?: "—"}, ${p?.gyroYDps ?: "—"}, ${p?.gyroZDps ?: "—"}")
+   133	                    Text("Pitch/roll/yaw °: ${p?.pitchDeg ?: "—"}, ${p?.rollDeg ?: "—"}, ${p?.yawDeg ?: "—"}")
+   134	                    Text("Áp suất Pa: ${p?.pressurePa ?: "—"}; gia tốc tuyến tính: ${p?.linearAccelXMs2 ?: "—"}, ${p?.linearAccelYMs2 ?: "—"}, ${p?.linearAccelZMs2 ?: "—"}")
+   135	                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, độ cao, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
+   136	                    Text("Luật DEMO: va đập ≥25 m/s² rồi yên ≥1 giây trong cửa sổ 3 giây; chưa kiểm chứng độ chính xác phát hiện ngã.")
+   137	                    Text("Thu cảm biến khi màn hình app hoạt động. Countdown tiếp tục khi tạm rời app nếu process còn sống; máy ngủ có thể trễ. Không có foreground service, không phục hồi sau process chết.")
+   138	                }
+   139	            }
+   140	        }
+   141	    }
+   142	}
+   143	@Composable
+   144	private fun Action(label: String, action: () -> Unit, enabled: Boolean = true) {
+   145	    Button(onClick = action, enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+   146	        Text(label, fontSize = 20.sp)
+   147	    }
+   148	}
+   149	@Composable
+   150	private fun SosButton(onSos: () -> Unit) {
+   151	    val currentAction by rememberUpdatedState(onSos)
+   152	    val hold = remember { SosHold() }
+   153	    val handler = remember { Handler(Looper.getMainLooper()) }
+   154	    var holding by remember { mutableStateOf(false) }
+   155	    var accessibleArmed by remember { mutableStateOf(false) }
+   156	    val fire = remember { Runnable {
+   157	        if (hold.ready(SystemClock.elapsedRealtime())) {
+   158	            holding = false; accessibleArmed = false; currentAction()
+   159	        }
+   160	    } }
+   161	    DisposableEffect(Unit) {
+   162	        onDispose { handler.removeCallbacks(fire); hold.cancel() }
+   163	    }
+   164	    Box(Modifier.fillMaxWidth().heightIn(min = 80.dp)
+   165	        .background(MaterialTheme.colorScheme.errorContainer)
+   166	        .semantics {
+   167	            role = Role.Button
+   168	            contentDescription = "SOS giữ 2 giây. Với TalkBack, kích hoạt để bắt đầu, kích hoạt lần nữa để hủy."
+   169	            onClick {
+   170	                if (accessibleArmed) { hold.cancel(); handler.removeCallbacks(fire); accessibleArmed = false; holding = false }
+   171	                else { accessibleArmed = true; holding = true; hold.start(SystemClock.elapsedRealtime()); handler.postDelayed(fire, 2000) }
+   172	                true
+   173	            }
+   174	        }
+   175	        .pointerInput(Unit) {
+   176	            detectTapGestures(onPress = {
+   177	                holding = true
+   178	                hold.start(SystemClock.elapsedRealtime())
+   179	                handler.postDelayed(fire, 2000)
+   180	                try { tryAwaitRelease() } finally {
+   181	                    handler.removeCallbacks(fire); hold.cancel(); holding = false
+   182	                }
+   183	            })
+   184	        }.padding(20.dp)) {
+   185	        Text(if (holding) "Đang giữ SOS…" else "SOS — GIỮ 2 GIÂY", fontSize = 24.sp,
+   186	            color = MaterialTheme.colorScheme.onErrorContainer)
+   187	    }
+   188	}
+   189	private fun statusLabel(status: Status): String = when (status) {
+   190	    Status.NOT_REQUIRED -> "Chưa yêu cầu gửi"
+   191	    Status.COUNTDOWN -> "Đang đếm ngược"
+   192	    Status.SENDING -> "Đang gửi GIẢ"
+   193	    Status.SENT -> "Đã gửi THỬ NGHIỆM"
+   194	    Status.FAILED -> "Gửi GIẢ thất bại"
+   195	    Status.ACKNOWLEDGED -> "Đã hoàn tất tại máy (không phải biên nhận)"
+   196	}
+   197	private fun stateLabel(c: DemoController): String = when (c.snapshot.state) {
+   198	    State.MONITORING -> if (c.snapshot.status == Status.ACKNOWLEDGED) "✓ Đã hoàn tất sự kiện" else "○ Theo dõi thử nghiệm"
+   199	    State.SUSPECTED -> "! Cần chú ý"
+   200	    State.VERIFYING -> "! Đang xác minh"
+   201	    State.ALERTING, State.AWAITING_HELP -> statusLabel(c.snapshot.status)
+   202	}
+     1	package core
+     2	
+     3	/** Nondecreasing elapsed milliseconds, never civil/wall time. */
+     4	fun interface MonotonicClock { fun nowMs(): Long }
+     5	
+     6	/** Synchronous acceptance: return means SENT; throw Exception means FAILED. */
+     7	fun interface AlertSink { fun send(alert: Alert) }
+     8	
+     9	enum class State { MONITORING, SUSPECTED, VERIFYING, ALERTING, AWAITING_HELP }
+    10	enum class Response { UNKNOWN, SAFE, NEED_HELP, NO_RESPONSE }
+    11	enum class Status { NOT_REQUIRED, COUNTDOWN, SENDING, SENT, FAILED, ACKNOWLEDGED }
+    12	data class Alert(
+    13	    val eventId: Long,
+    14	    val response: Response,
+    15	    val locationMessage: String = "chưa xác định được vị trí"
+    16	)
+    17	data class Snapshot(
+    18	    val state: State,
+    19	    val eventId: Long,
+    20	    val response: Response,
+    21	    val status: Status,
+    22	    val remainingMs: Long?
+    23	)
+    24	data class RecordedEvent(val eventId: Long, val state: State, val status: Status)
+    25	
+    26	/**
+    27	 * Confined to the creating thread, including reads and sink callbacks.
+    28	 * Host must call tick at the deadline; this core does not schedule background work.
+    29	 * Calls reentering from the synchronous sink cannot finish or resend the active event.
+    30	 */
+    31	class AlertCore(
+    32	    private val clock: MonotonicClock,
+    33	    private val sink: AlertSink,
+    34	    private val timeoutMs: Long = 10_000,
+    35	    private val logCapacity: Int = 32
+    36	) {
+    37	    init {
+    38	        require(timeoutMs > 0) { "timeoutMs must be positive" }
+    39	        require(logCapacity > 0) { "logCapacity must be positive" }
+    40	    }
+    41	
+    42	    private val owner = Thread.currentThread()
+    43	    private var state = State.MONITORING
+    44	    private var eventId = 0L
+    45	    private var response = Response.UNKNOWN
+    46	    private var status = Status.NOT_REQUIRED
+    47	    private var started = 0L
+    48	    private var sending = false
+    49	    private val log = ArrayDeque<RecordedEvent>()
+    50	
+    51	    private fun owned() {
+    52	        check(Thread.currentThread() === owner) { "Call on owner thread" }
+    53	    }
+    54	
+    55	    /** Display-only read; never sends an alert. */
+    56	    fun snapshot(): Snapshot {
+    57	        owned()
+    58	        val remaining = if (state == State.VERIFYING)
+    59	            (timeoutMs - (clock.nowMs() - started)).coerceAtLeast(0) else null
+    60	        return Snapshot(state, eventId, response, status, remaining)
+    61	    }
+    62	
+    63	    fun events(): List<RecordedEvent> {
+    64	        owned()
+    65	        return log.toList()
+    66	    }
+    67	
+    68	    private fun record() {
+    69	        log.addLast(RecordedEvent(eventId, state, status))
+    70	        while (log.size > logCapacity) log.removeFirst()
+    71	    }
+    72	
+    73	    fun suspected() {
+    74	        owned()
+    75	        if (state == State.MONITORING) {
+    76	            eventId++
+    77	            response = Response.UNKNOWN
+    78	            status = Status.NOT_REQUIRED
+    79	            state = State.SUSPECTED
+    80	            record()
+    81	        }
+    82	    }
+    83	
+    84	    fun evidenceConfirmed() {
+    85	        owned()
+    86	        if (state == State.SUSPECTED) {
+    87	            started = clock.nowMs()
+    88	            state = State.VERIFYING
+    89	            status = Status.COUNTDOWN
+    90	            record()
+    91	        }
+    92	    }
+    93	
+    94	    fun riskCleared() {
+    95	        owned()
+    96	        if (state == State.SUSPECTED) {
+    97	            state = State.MONITORING
+    98	            record()
+    99	        }
+   100	    }
+   101	
+   102	    private fun dispatch(reason: Response) {
+   103	        if (state == State.ALERTING || state == State.AWAITING_HELP) return
+   104	        if (state == State.MONITORING) eventId++
+   105	        response = reason
+   106	        state = State.ALERTING
+   107	        status = Status.SENDING
+   108	        record()
+   109	        // Set both state and guard before invoking external code.
+   110	        sending = true
+   111	        try {
+   112	            sink.send(Alert(eventId, reason))
+   113	            status = Status.SENT
+   114	            state = State.AWAITING_HELP
+   115	        } catch (_: Exception) {
+   116	            // Never retain transport messages, which may contain private data.
+   117	            status = Status.FAILED
+   118	        } finally {
+   119	            sending = false
+   120	        }
+   121	        record()
+   122	    }
+   123	
+   124	    fun tick() {
+   125	        owned()
+   126	        if (state == State.VERIFYING && clock.nowMs() - started >= timeoutMs)
+   127	            dispatch(Response.NO_RESPONSE)
+   128	    }
+   129	
+   130	    fun safe() {
+   131	        owned()
+   132	        tick()
+   133	        if (state == State.VERIFYING || state == State.SUSPECTED) {
+   134	            response = Response.SAFE
+   135	            status = Status.NOT_REQUIRED
+   136	            state = State.MONITORING
+   137	            record()
+   138	        }
+   139	    }
+   140	
+   141	    fun needHelp() {
+   142	        owned()
+   143	        dispatch(Response.NEED_HELP)
+   144	    }
+   145	
+   146	    fun sos() {
+   147	        owned()
+   148	        dispatch(Response.NEED_HELP)
+   149	    }
+   150	
+   151	    fun complete() {
+   152	        owned()
+   153	        if (!sending && (state == State.AWAITING_HELP || state == State.ALERTING)) {
+   154	            state = State.MONITORING
+   155	            status = Status.ACKNOWLEDGED
+   156	            record()
+   157	        }
+   158	    }
+   159	}
+     1	package vn.nckh27pa.fallsafe
+     2	
+     3	import core.*
+     4	import org.junit.Assert.*
+     5	import org.junit.Test
+     6	
+     7	class DemoTests {
+     8	    @Test fun normalizationAndMissingValues() {
+     9	        val n = PhoneNormalizer()
+    10	        assertNull(n.packet(0, 0))
+    11	        n.update(SensorKind.ACCEL, 0, floatArrayOf(0f, 0f, 9.81f))
+    12	        var p = n.packet(0, 123)!!
+    13	        assertNull(p.gyroXDps)
+    14	        assertEquals("UNKNOWN", p.phoneMotionState)
+    15	        assertEquals(0, p.phonePlacementConfidence)
+    16	        assertEquals(123L, p.wallClockTimestampMs)
+    17	        n.update(SensorKind.GYRO, 0, floatArrayOf(Math.PI.toFloat(), 0f, 0f))
+    18	        n.update(SensorKind.PRESSURE, 0, floatArrayOf(1013.25f))
+    19	        p = n.packet(0, 0)!!
+    20	        assertEquals(180f, p.gyroXDps!!, 0.001f)
+    21	        assertEquals(101325f, p.pressurePa!!, 0.1f)
+    22	        assertNull(p.stepCount)
+    23	        assertNull(p.altitudeDeltaM)
+    24	        n.update(SensorKind.ACCEL, 600_000_000, floatArrayOf(0f, 0f, 9.81f))
+    25	        assertNull(n.packet(600_000_000, 0)!!.pressurePa)
+    26	        assertNull(n.packet(1_200_000_000, 0))
+    27	    }
+    28	    @Test fun invalidAndFutureSamplesNeverBecomeMeasurements() {
+    29	        val n = PhoneNormalizer()
+    30	        n.update(SensorKind.ACCEL, 10, floatArrayOf(Float.NaN, 0f, 0f))
+    31	        assertNull(n.packet(10, 0))
+    32	        n.update(SensorKind.ACCEL, 20, floatArrayOf(0f, 0f, 9.81f))
+    33	        assertNull(n.packet(19, 0))
+    34	        n.update(SensorKind.GYRO, 20, floatArrayOf(Float.POSITIVE_INFINITY, 0f, 0f))
+    35	        assertNull(n.packet(20, 0)!!.gyroXDps)
+    36	        n.update(SensorKind.ACCEL, 21, floatArrayOf(1f))
+    37	        assertNull(n.packet(21, 0))
+    38	    }
+    39	    @Test fun detectorNeedsContinuousTimedEvidence() {
+    40	        val d = DemoDetector()
+    41	        assertFalse(d.accept(sample(0, 30f)))
+    42	        assertFalse(d.accept(sample(100, 9.81f)))
+    43	        assertFalse(d.accept(sample(2000, 9.81f))) // gap cannot prove quiet
+    44	        assertFalse(d.accept(sample(2100, 9.81f)))
+    45	        d.reset()
+    46	        assertFalse(d.accept(sample(0, 30f)))
+    47	        assertFalse(d.accept(sample(100, 9.81f)))
+    48	        assertFalse(d.accept(sample(100, 9.81f))) // duplicate resets
+    49	        assertFalse(d.accept(sample(200, 9.81f)))
+    50	        d.reset()
+    51	        repeat(30) { assertFalse(d.accept(sample(it * 100L, 9.81f))) }
+    52	        assertFalse(d.accept(sample(4000, Float.NaN)))
+    53	    }
+    54	    @Test fun replayUsesSamePipelineAndDeadline() {
+    55	        var now = 0L
+    56	        val sink = LocalDemoSink()
+    57	        val session = DemoSession(MonotonicClock { now }, sink)
+    58	        val replay = DemoReplay(0)
+    59	        assertTrue(replay.due(0).isNotEmpty())
+    60	        // Fresh replay: consume each sample exactly once at its scheduled time.
+    61	        val r = DemoReplay(0)
+    62	        for (t in 0L..1600L step 100) {
+    63	            now = t
+    64	            r.due(t).forEach { session.accept(it) }
+    65	        }
+    66	        assertTrue(r.finished)
+    67	        assertTrue(r.due(5000).isEmpty())
+    68	        assertEquals(State.VERIFYING, session.snapshot().state)
+    69	        val remaining = session.snapshot().remainingMs!!
+    70	        now += remaining - 1
+    71	        session.tick()
+    72	        assertEquals(Status.COUNTDOWN, session.snapshot().status)
+    73	        now++
+    74	        session.tick()
+    75	        assertEquals(Response.NO_RESPONSE, session.snapshot().response)
+    76	        assertEquals(Status.SENT, session.snapshot().status)
+    77	        assertEquals(1, sink.alerts().size)
+    78	        session.tick()
+    79	        assertEquals(1, sink.alerts().size)
+    80	    }
+    81	    @Test fun safeFailureCompleteAndBoundedHistory() {
+    82	        var now = 0L
+    83	        val sink = LocalDemoSink()
+    84	        val s = DemoSession(MonotonicClock { now }, sink)
+    85	        DemoReplay(0).due(1600).forEach { s.accept(it) }
+    86	        s.safe()
+    87	        now = 20000
+    88	        s.tick()
+    89	        assertTrue(sink.alerts().isEmpty())
+    90	        sink.fail = true
+    91	        s.needHelp()
+    92	        assertEquals(Status.FAILED, s.snapshot().status)
+    93	        s.complete()
+    94	        sink.fail = false
+    95	        repeat(40) { s.needHelp(); s.complete() }
+    96	        assertEquals(32, sink.alerts().size)
+    97	        assertTrue(s.events().size <= 32)
+    98	        assertEquals(Status.ACKNOWLEDGED, s.snapshot().status)
+    99	    }
+   100	    @Test fun sosRequiresTwoSecondsAndCancels() {
+   101	        val h = SosHold()
+   102	        h.start(100)
+   103	        assertFalse(h.ready(2099))
+   104	        assertTrue(h.ready(2100))
+   105	        assertFalse(h.ready(2200))
+   106	        h.start(3000)
+   107	        h.cancel()
+   108	        assertFalse(h.ready(6000))
+   109	    }
+   110	    @Test fun optionalNormalizationAndFreshnessBoundary() {
+   111	        val n = PhoneNormalizer()
+   112	        n.update(SensorKind.ACCEL, 0, floatArrayOf(1f, 2f, 3f))
+   113	        n.update(SensorKind.LINEAR, 0, floatArrayOf(4f, 5f, 6f))
+   114	        n.update(SensorKind.ORIENTATION, 0, floatArrayOf(10f, 20f, 30f))
+   115	        val p = n.packet(500_000_000, 0)!!
+   116	        assertEquals(6f, p.linearAccelZMs2!!, 0f)
+   117	        assertEquals(10f, p.pitchDeg!!, 0f)
+   118	        assertEquals(30f, p.yawDeg!!, 0f)
+   119	        assertNull(n.packet(500_000_001, 0))
+   120	        n.clear()
+   121	        assertNull(n.packet(0, 0))
+   122	    }
+   123	    @Test fun motionAndExpiredWindowCannotConfirm() {
+   124	        val d = DemoDetector()
+   125	        assertFalse(d.accept(sample(0, 30f)))
+   126	        for (t in 100L..4000L step 100) {
+   127	            assertFalse(d.accept(sample(t, if (t < 3000) 15f else 9.81f)))
+   128	        }
+   129	        d.reset()
+   130	        assertFalse(d.accept(sample(0, 30f)))
+   131	        for (t in 100L..1000L step 100) assertFalse(d.accept(sample(t, 9.81f)))
+   132	        assertFalse(d.accept(sample(1050, Float.NaN)))
+   133	        for (t in 1100L..2200L step 100) assertFalse(d.accept(sample(t, 9.81f)))
+   134	    }
+   135	    @Test fun helpDuringCountdownAndSafeAtDeadline() {
+   136	        var now = 0L
+   137	        val s = DemoSession(MonotonicClock { now })
+   138	        DemoReplay(0).due(1600).forEach(s::accept)
+   139	        s.needHelp()
+   140	        assertEquals(Response.NEED_HELP, s.snapshot().response)
+   141	        assertEquals(1, s.sink.alerts().size)
+   142	        s.complete()
+   143	        DemoReplay(2000).due(3600).forEach(s::accept)
+   144	        now = 10000
+   145	        s.safe()
+   146	        assertEquals(Response.NO_RESPONSE, s.snapshot().response)
+   147	        assertEquals(Status.SENT, s.snapshot().status)
+   148	        assertEquals(2, s.sink.alerts().size)
+   149	    }
+   150	    private fun sample(ms: Long, z: Float) = PhoneSensorPacket(
+   151	        timestampNs = ms * 1_000_000, wallClockTimestampMs = 0,
+   152	        accelXMs2 = 0f, accelYMs2 = 0f, accelZMs2 = z
+   153	    )
+   154	}
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="false" />
+    <application android:name=".DemoApplication" android:label="FallSafe THỬ NGHIỆM"
+        android:allowBackup="false" android:supportsRtl="true"
+        android:theme="@android:style/Theme.Material.Light.NoActionBar">
+        <activity android:name=".MainActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+
+codex
+Tôi thấy hai lỗi tích hợp đáng chú ý: `onPause()` xóa bằng chứng của replay đang chạy, và mẫu accelerometer invalid bị loại trước khi detector có thể reset bằng chứng. Tôi đang đối chiếu các đường gọi với test để xác định repro và tách chúng khỏi giới hạn chạy nền đã công bố.
+
+exec
+/bin/bash -lc "nl -ba android/README.md | sed -n '24,55p'; rg -n 'DemoController|PhoneSensorCollector|onPause|SosButton|invalid|NaN|safe|deadline' android/app/src/test android/core/tests/CoreTests.kt" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+    24	
+    25	1. Mở app: banner THỬ NGHIỆM, nguồn PHONE_ONLY. Thiếu accelerometer vẫn vào app và chạy replay được; không hiển thị “an toàn” khi thiếu dữ liệu.
+    26	2. Bấm **Chạy dữ liệu mô phỏng**. Nguồn đổi sang MÔ PHỎNG; 17 mẫu cách nhau 100 ms chạy qua cùng detector như cảm biến thật. Sau khoảng 1,3 giây xuất hiện câu hỏi và countdown 10 giây. Không phản hồi: tự chuyển **Đã gửi THỬ NGHIỆM**, sink đã nhận GIẢ.
+    27	3. Bấm **Hoàn tất sự kiện để thử lại**, chạy replay và chọn **TÔI VẪN ỔN** trước hạn. Không có alert mới. SAFE tại/sau hạn không hủy timeout của core.
+    28	4. Chạy lại; **CẦN GIÚP ĐỠ** gửi ngay. Hoặc giữ vùng **SOS — GIỮ 2 GIÂY** khi không có countdown: thả sớm hoặc kéo hủy không gửi; đủ 2 giây gửi một lần. Với TalkBack, kích hoạt để bắt đầu 2 giây, kích hoạt lần nữa để hủy. Rời Activity không cho SOS đang giữ gửi.
+    29	5. Hoàn tất, vào Cài đặt bật **Giả lập lỗi gửi**. Chạy replay và chờ: **Gửi GIẢ thất bại**; không tự retry. Hoàn tất, tắt lỗi, thử lại được với ID mới.
+    30	6. Xem Sự kiện: tối đa 32 chuyển trạng thái; có **Đang gửi GIẢ** trước **Đã gửi THỬ NGHIỆM** hoặc **Gửi GIẢ thất bại**. Sink đồng bộ nên SENDING chỉ tồn tại tức thời, được giữ trong nhật ký, không tạo độ trễ giả. ACKNOWLEDGED là hoàn tất tại máy, không phải người thân xác nhận.
+    31	7. Khi countdown, chuyển tab/rời app/quay lại hoặc xoay máy: phiên cấp Application giữ countdown nếu process sống. Tick ở main Handler dùng elapsedRealtime; pause không hủy tick. Máy ngủ có thể trì hoãn callback; resume gọi tick ngay. Đây chưa phải bảo đảm chạy nền.
+    32	8. Bấm **Dùng cảm biến điện thoại** khi MONITORING để đổi lại PHONE_ONLY; reset detector để không trộn nguồn. Xem các giá trị cảm biến tại Cài đặt. Thử cỡ chữ lớn, cuộn, dark mode và TalkBack trên host.
+    33	
+    34	## Thiết kế và giới hạn
+    35	
+    36	- `PhoneSensorCollector`: SensorManager accelerometer m/s²; linear acceleration m/s²; gyro rad/s → °/s; rotation vector → pitch/roll/yaw độ; pressure hPa → Pa. Đăng ký ở onResume, unregister/xóa cache ở onPause, callback main looper. Thiếu sensor hoặc đăng ký thất bại không tạo giá trị 0. Thiếu accelerometer thì toàn packet null vì schema yêu cầu ba trục non-null.
+    37	- `PhoneNormalizer`: giữ bản sao giá trị; bỏ NaN/Infinity/thiếu trục; reject dữ liệu tương lai khi đọc, bỏ packet sau 500 ms. Optional quá 500 ms là null. Không đo bước, vị trí, độ cao tương đối; các trường tương ứng null. `phoneMotionState=UNKNOWN`, confidence=0 nghĩa chưa ước lượng, không khẳng định máy mang theo người; sensorQuality=0 chưa được chấm điểm.
+    38	- `DemoDetector`: va đập ≥25 m/s² rồi độ lớn gia tốc 9.81±1 m/s² trong ≥1 giây, ít nhất 6 mẫu, hoàn tất trong 3 giây. Gap >250 ms, thời gian lặp/lùi hoặc dữ liệu invalid làm mất bằng chứng. Một mẫu không kích hoạt cảnh báo. Các ngưỡng chỉ phục vụ demo, có thể nhầm đặt/rơi điện thoại với ngã; chưa đánh giá độ chính xác.
+    39	- Không foreground service, wake lock, persistence hoặc phục hồi process chết. Cảm biến chỉ thu khi Activity resumed; countdown/replay đã khởi động tiếp tục trong process, không phụ thuộc UI. Không bảo đảm giờ chạy khi hệ điều hành ngủ/giết process. Không có overlay màn hình khóa, rung/âm thanh, pin, BLE, vị trí, bước chân hay liên lạc thật.
+    40	- Nhật ký chuyển trạng thái và sink đều tối đa 32 bản ghi RAM. ID trong phiên; chưa lưu thời gian lịch/nguồn từng sự kiện, biểu đồ hoặc dữ liệu raw lịch sử. Nguồn hiển thị ở đầu màn hình là nguồn hiện tại. Không có danh bạ thật hay thông tin cá nhân.
+    41	
+    42	Bằng chứng: `evidence/AND-001B-report.md`, các log RED/GREEN/final và runner. Nghiệm thu source/pure logic hoàn tất; build host, UI emulator, phần cứng, nền và độ chính xác còn cần xác minh.
+android/core/tests/CoreTests.kt:16:    test("deadline 10s, no response, absent location, one send") {
+android/core/tests/CoreTests.kt:26:    test("SAFE before deadline cancels; at and after deadline preserves alert") {
+android/core/tests/CoreTests.kt:29:            c.suspected(); c.evidenceConfirmed(); clock.time = time; c.safe()
+android/core/tests/CoreTests.kt:34:                check(sent.size == 1); c.safe(); check(c.snapshot().status == Status.SENT)
+android/core/tests/CoreTests.kt:45:            c.sos(); c.needHelp(); c.safe(); check(sent.size == 1)
+android/core/tests/CoreTests.kt:55:            c.complete(); c.sos(); c.needHelp(); c.safe(); c.tick(); c.suspected(); c.evidenceConfirmed()
+android/core/tests/CoreTests.kt:62:    test("invalid timeout and log capacity rejected") {
+android/core/tests/CoreTests.kt:76:    test("wall time jumps do not advance injected monotonic deadline") {
+android/core/tests/CoreTests.kt:86:            { c.riskCleared() }, { c.tick() }, { c.safe() }, { c.needHelp() }, { c.sos() },
+android/core/tests/CoreTests.kt:101:            c.complete(); c.sos(); c.needHelp(); c.safe(); c.tick()
+android/core/tests/CoreTests.kt:119:    test("deadline at Long.MAX_VALUE preserves remaining time and SAFE boundary") {
+android/core/tests/CoreTests.kt:120:        for (safeBefore in listOf(true, false)) {
+android/core/tests/CoreTests.kt:126:            if (safeBefore) c.safe()
+android/core/tests/CoreTests.kt:128:            if (safeBefore) {
+android/core/tests/CoreTests.kt:133:                c.safe(); c.tick(); c.sos()
+android/core/tests/CoreTests.kt:139:    test("Long.MAX_VALUE timeout uses valid elapsed time without deadline overflow") {
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:1:package vn.nckh27pa.fallsafe
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:28:    @Test fun invalidAndFutureSamplesNeverBecomeMeasurements() {
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:30:        n.update(SensorKind.ACCEL, 10, floatArrayOf(Float.NaN, 0f, 0f))
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:52:        assertFalse(d.accept(sample(4000, Float.NaN)))
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:81:    @Test fun safeFailureCompleteAndBoundedHistory() {
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:86:        s.safe()
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:132:        assertFalse(d.accept(sample(1050, Float.NaN)))
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:145:        s.safe()
+
+codex
+**FAIL — 2 bug mức Medium/P2 trong tích hợp demo.** Kết luận từ đọc source/test độc lập; không chạy build/test/emulator, không network/agent con, không sửa hoặc ghi file, không dùng log/kết luận tác giả làm bằng chứng.
+
+1. **P2 — Pause Activity làm mất bằng chứng replay đang chạy.**  
+   Vị trí: [MainActivity.kt:59](/home/pdd/nckh27pa/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt:59), [DemoApplication.kt:33](/home/pdd/nckh27pa/android/app/src/main/java/vn/nckh27pa/fallsafe/DemoApplication.kt:33).  
+   **Repro:** chạy mô phỏng; khoảng 0,5 giây sau bấm Home hoặc xoay máy, giữ process sống. `onPause()` reset detector dù nguồn đang MÔ PHỎNG. Replay tiếp tục nhưng mẫu va đập duy nhất ở 200 ms đã tiêu thụ; các mẫu còn lại đều yên. Kết quả: replay kết thúc mà không countdown/tự gửi.  
+   Đây là bug isolation/lifecycle, không phải giới hạn ngủ máy/process chết: README công bố replay tiếp tục độc lập UI.
+
+2. **P2 — Accelerometer invalid không xóa bằng chứng detector trong pipeline thật.**  
+   Vị trí: [PhoneSensorCollector.kt:59–60](/home/pdd/nckh27pa/android/app/src/main/java/vn/nckh27pa/fallsafe/PhoneSensorCollector.kt:59), [DemoLogic.kt:27](/home/pdd/nckh27pa/android/app/src/main/java/vn/nckh27pa/fallsafe/DemoLogic.kt:27).  
+   **Repro:** cấp va đập 30 m/s² tại 0 ms; mẫu yên mỗi 100 ms từ 100–1000 ms; NaN tại 1050 ms; mẫu yên tại 1100 ms. Normalizer xóa accel, `latest()` trả null nên collector không gọi detector và không reset. Tại 1100 ms, detector vẫn giữ bằng chứng cũ và xác nhận, dẫn tới countdown dù chuỗi đã invalid.  
+   Test [DemoTests.kt:132](/home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:132) đưa NaN **trực tiếp** vào detector, nên không bắt được lỗi nối collector–normalizer–detector này.
+
+Qua đọc source, chưa thấy bug chặn khác ở chuyển đổi gyro/pressure, null/freshness của normalizer, SAFE tại deadline, gửi fake thất bại, giới hạn lịch sử hoặc logic giữ SOS thuần. **SOS gesture/cancellation và callback Android chưa được kiểm chứng runtime**; test hiện có không bao phủ controller/lifecycle/Compose.
+
+Foreground-only, callback trễ khi máy ngủ, mất phiên khi process chết, detector không được kiểm chứng y khoa, thiếu GPS/BLE/liên lạc thật và SENDING tức thời đã được công bố; **không tính là bug/blocker của lát demo này**.
+tokens used
+34,573
+**FAIL — 2 bug mức Medium/P2 trong tích hợp demo.** Kết luận từ đọc source/test độc lập; không chạy build/test/emulator, không network/agent con, không sửa hoặc ghi file, không dùng log/kết luận tác giả làm bằng chứng.
+
+1. **P2 — Pause Activity làm mất bằng chứng replay đang chạy.**  
+   Vị trí: [MainActivity.kt:59](/home/pdd/nckh27pa/android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt:59), [DemoApplication.kt:33](/home/pdd/nckh27pa/android/app/src/main/java/vn/nckh27pa/fallsafe/DemoApplication.kt:33).  
+   **Repro:** chạy mô phỏng; khoảng 0,5 giây sau bấm Home hoặc xoay máy, giữ process sống. `onPause()` reset detector dù nguồn đang MÔ PHỎNG. Replay tiếp tục nhưng mẫu va đập duy nhất ở 200 ms đã tiêu thụ; các mẫu còn lại đều yên. Kết quả: replay kết thúc mà không countdown/tự gửi.  
+   Đây là bug isolation/lifecycle, không phải giới hạn ngủ máy/process chết: README công bố replay tiếp tục độc lập UI.
+
+2. **P2 — Accelerometer invalid không xóa bằng chứng detector trong pipeline thật.**  
+   Vị trí: [PhoneSensorCollector.kt:59–60](/home/pdd/nckh27pa/android/app/src/main/java/vn/nckh27pa/fallsafe/PhoneSensorCollector.kt:59), [DemoLogic.kt:27](/home/pdd/nckh27pa/android/app/src/main/java/vn/nckh27pa/fallsafe/DemoLogic.kt:27).  
+   **Repro:** cấp va đập 30 m/s² tại 0 ms; mẫu yên mỗi 100 ms từ 100–1000 ms; NaN tại 1050 ms; mẫu yên tại 1100 ms. Normalizer xóa accel, `latest()` trả null nên collector không gọi detector và không reset. Tại 1100 ms, detector vẫn giữ bằng chứng cũ và xác nhận, dẫn tới countdown dù chuỗi đã invalid.  
+   Test [DemoTests.kt:132](/home/pdd/nckh27pa/android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:132) đưa NaN **trực tiếp** vào detector, nên không bắt được lỗi nối collector–normalizer–detector này.
+
+Qua đọc source, chưa thấy bug chặn khác ở chuyển đổi gyro/pressure, null/freshness của normalizer, SAFE tại deadline, gửi fake thất bại, giới hạn lịch sử hoặc logic giữ SOS thuần. **SOS gesture/cancellation và callback Android chưa được kiểm chứng runtime**; test hiện có không bao phủ controller/lifecycle/Compose.
+
+Foreground-only, callback trễ khi máy ngủ, mất phiên khi process chết, detector không được kiểm chứng y khoa, thiếu GPS/BLE/liên lạc thật và SENDING tức thời đã được công bố; **không tính là bug/blocker của lát demo này**.

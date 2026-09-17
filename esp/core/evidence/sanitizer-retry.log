@@ -1,0 +1,15 @@
++ g++ -std=c++17 -Wall -Wextra -Werror -pedantic -I. -fsanitize=address,undefined -fno-omit-frame-pointer -g local_alert.cpp tests/local_alert_test.cpp -o .build/tests
++ .build/tests
+PASS suspected
+PASS no-response
+PASS SOS
+PASS disconnect
+PASS duplicate/deadline
+PASS cancel/wrong-ID
+PASS ACK/STOP
+PASS monotonic/max
+PASS invalid countdown/ID
+PASS sensor recovery
+PASS late SAFE record
+tests=11 failures=0
+ASAN_OPTIONS=detect_leaks=0; exit=0

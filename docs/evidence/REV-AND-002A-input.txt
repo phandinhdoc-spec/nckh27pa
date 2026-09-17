@@ -1,0 +1,264 @@
+REV-AND-002A. Bạn reviewer độc lập, NO TOOLS, inline only. Trả tối đa400từ, PASS/FAIL, bug file:line/repro. Scope demo user-started FGS type health HIGH_SAMPLING_RATE_SENSORS official prerequisite, notification permission allowed denied but clearly labeled; no real alerts. Need sample ownership Activity/service, bounded wakelock VERIFYING only, noResponse not reset on pause, lifecycle start/stop failure. No sticky/process recovery intentionally yet, not blocker. Inspect integration, not own run claims.
+
+FILE MonitoringService.kt
+1|package vn.nckh27pa.fallsafe
+2|
+3|import android.app.Notification
+4|import android.app.NotificationChannel
+5|import android.app.NotificationManager
+6|import android.app.PendingIntent
+7|import android.app.Service
+8|import android.content.Intent
+9|import android.content.pm.ServiceInfo
+10|import android.os.Build
+11|import android.os.Handler
+12|import android.os.IBinder
+13|import android.os.Looper
+14|import android.os.PowerManager
+15|import core.State
+16|
+17|/** Explicitly user-started demo monitoring; no boot receiver or hidden restart. */
+18|class MonitoringService : Service() {
+19|    private val controller get() = (application as DemoApplication).controller
+20|    private lateinit var collector: PhoneSensorCollector
+21|    private lateinit var wake: PowerManager.WakeLock
+22|    private var protectedEvent: Long? = null
+23|    private val handler = Handler(Looper.getMainLooper())
+24|    private val poll = object : Runnable {
+25|        override fun run() {
+26|            controller.displayPhone(collector.latest())
+27|            controller.session.tick()
+28|            controller.refresh()
+29|            handler.postDelayed(this, 250)
+30|        }
+31|    }
+32|    override fun onCreate() {
+33|        super.onCreate()
+34|        val manager = getSystemService(NotificationManager::class.java)
+35|        manager.createNotificationChannel(NotificationChannel("monitor", "Giám sát thử nghiệm", NotificationManager.IMPORTANCE_LOW))
+36|        val open = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+37|        val notification = Notification.Builder(this, "monitor")
+38|            .setSmallIcon(android.R.drawable.ic_dialog_info)
+39|            .setContentTitle("FallSafe — GIÁM SÁT THỬ NGHIỆM")
+40|            .setContentText("Đọc cảm biến điện thoại; không liên hệ người thật. Mở app để dừng.")
+41|            .setContentIntent(open).setOngoing(true).build()
+42|        try {
+43|            if (Build.VERSION.SDK_INT >= 34) startForeground(27, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH)
+44|            else startForeground(27, notification)
+45|        } catch (_: RuntimeException) {
+46|            controller.backgroundMessage = "Không thể bật giám sát nền; kiểm tra quyền/hệ thống."
+47|            stopSelf(); return
+48|        }
+49|        wake = getSystemService(PowerManager::class.java).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "nckh27pa:verification")
+50|        wake.setReferenceCounted(false)
+51|        collector = PhoneSensorCollector(this, controller::acceptPhone)
+52|        controller.backgroundMonitoring = true
+53|        controller.backgroundMessage = if (manager.areNotificationsEnabled()) "Giám sát nền thử đang bật; có thông báo hệ thống."
+54|            else "Giám sát nền đang bật, nhưng quyền/kênh thông báo bị tắt; xem mục ứng dụng đang chạy của Android."
+55|        controller.onStateChanged = ::protectVerification
+56|        collector.start()
+57|        controller.backgroundSensors = collector.activeSensors.joinToString()
+58|        protectVerification()
+59|        handler.post(poll)
+60|    }
+61|    private fun protectVerification() {
+62|        val state = controller.snapshot
+63|        if (state.state == State.VERIFYING) {
+64|            if (protectedEvent != state.eventId) {
+65|                protectedEvent = state.eventId
+66|                wake.acquire(((state.remainingMs ?: 0).coerceIn(0, 10000) + 1000))
+67|            }
+68|        } else {
+69|            protectedEvent = null
+70|            if (wake.isHeld) wake.release()
+71|        }
+72|    }
+73|    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_NOT_STICKY
+74|    override fun onBind(intent: Intent?): IBinder? = null
+75|    override fun onDestroy() {
+76|        handler.removeCallbacks(poll)
+77|        controller.onStateChanged = null
+78|        if (::collector.isInitialized) collector.stop()
+79|        if (::wake.isInitialized && wake.isHeld) wake.release()
+80|        controller.backgroundMonitoring = false
+81|        controller.backgroundSensors = ""
+82|        controller.backgroundMessage = "Giám sát nền đã dừng; mở app để thu cảm biến."
+83|        controller.displayPhone(null)
+84|        controller.session.resetDetection()
+85|        stopForeground(STOP_FOREGROUND_REMOVE)
+86|        super.onDestroy()
+87|    }
+88|}
+
+FILE DemoApplication.kt
+1|package vn.nckh27pa.fallsafe
+2|
+3|import android.app.Application
+4|import android.os.Handler
+5|import android.os.Looper
+6|import android.os.SystemClock
+7|import androidx.compose.runtime.getValue
+8|import androidx.compose.runtime.mutableStateOf
+9|import androidx.compose.runtime.setValue
+10|import core.MonotonicClock
+11|import core.State
+12|
+13|/** Process-scoped session survives Activity recreation. No foreground service. */
+14|class DemoApplication : Application() {
+15|    lateinit var controller: DemoController; private set
+16|    override fun onCreate() { super.onCreate(); controller = DemoController() }
+17|}
+18|class DemoController {
+19|    var foreground by mutableStateOf(false)
+20|    var backgroundMonitoring by mutableStateOf(false)
+21|    var backgroundMessage by mutableStateOf("Giám sát nền chưa bật")
+22|    var backgroundSensors by mutableStateOf("")
+23|    var onStateChanged: (() -> Unit)? = null
+24|    val session = DemoSession(MonotonicClock { SystemClock.elapsedRealtime() })
+25|    var snapshot by mutableStateOf(session.snapshot()); private set
+26|    var events by mutableStateOf(session.events()); private set
+27|    var source by mutableStateOf("PHONE_ONLY • cảm biến thật"); private set
+28|    var packet by mutableStateOf<PhoneSensorPacket?>(null); private set
+29|    var replaying by mutableStateOf(false); private set
+30|    var fail by mutableStateOf(false); private set
+31|    private val input = DemoInputAdapter(session, { source.startsWith("PHONE_ONLY") }, { packet = it })
+32|    private var replay: DemoReplay? = null
+33|    private val handler = Handler(Looper.getMainLooper())
+34|    private val tick = object : Runnable {
+35|        override fun run() {
+36|            val now = SystemClock.elapsedRealtime()
+37|            replay?.let { r ->
+38|                r.due(now).forEach(input::acceptReplay)
+39|                if (r.finished) { replay = null; replaying = false }
+40|            }
+41|            session.tick()
+42|            refresh()
+43|            if (replay != null || snapshot.state == State.VERIFYING) handler.postDelayed(this, 50)
+44|        }
+45|    }
+46|    fun refresh() { snapshot = session.snapshot(); events = session.events(); onStateChanged?.invoke() }
+47|    private fun schedule() { handler.removeCallbacks(tick); handler.post(tick) }
+48|    fun acceptPhone(p: PhoneSensorPacket?) {
+49|        if (!source.startsWith("PHONE_ONLY")) return
+50|        input.acceptPhone(p)
+51|        refresh()
+52|        if (snapshot.state == State.VERIFYING) schedule()
+53|    }
+54|    fun displayPhone(p: PhoneSensorPacket?) {
+55|        if (source.startsWith("PHONE_ONLY")) packet = p
+56|    }
+57|    fun runReplay() {
+58|        if (snapshot.state != State.MONITORING || replaying) return
+59|        source = "MÔ PHỎNG • dữ liệu giả"
+60|        session.resetDetection()
+61|        packet = null
+62|        replay = DemoReplay(SystemClock.elapsedRealtime())
+63|        replaying = true
+64|        schedule()
+65|    }
+66|    fun usePhone() {
+67|        if (snapshot.state != State.MONITORING) return
+68|        replay = null; replaying = false; packet = null
+69|        source = "PHONE_ONLY • cảm biến thật"
+70|        session.resetDetection()
+71|    }
+72|    fun safe() { session.safe(); refresh() }
+73|    fun sos() { if (foreground) help() }
+74|    fun help() { session.needHelp(); refresh() }
+75|    fun complete() { replay = null; replaying = false; session.complete(); refresh() }
+76|    fun setFailure(value: Boolean) { fail = value; session.sink.fail = value }
+77|    fun paused() { input.paused(backgroundMonitoring); refresh() }
+78|    fun resumed() { session.tick(); refresh(); schedule() }
+79|}
+
+FILE MainActivity.kt
+1|package vn.nckh27pa.fallsafe
+2|
+3|import android.os.Bundle
+4|import android.Manifest
+5|import android.content.Intent
+6|import android.content.pm.PackageManager
+7|import android.os.Build
+8|import android.os.Handler
+9|import android.os.Looper
+10|import android.os.SystemClock
+11|import androidx.activity.ComponentActivity
+12|import androidx.activity.compose.setContent
+13|import androidx.compose.foundation.background
+14|import androidx.compose.foundation.gestures.detectTapGestures
+15|import androidx.compose.foundation.isSystemInDarkTheme
+16|import androidx.compose.foundation.layout.*
+17|import androidx.compose.foundation.rememberScrollState
+18|import androidx.compose.foundation.verticalScroll
+19|import androidx.compose.material3.*
+20|import androidx.compose.runtime.*
+21|import androidx.compose.runtime.saveable.rememberSaveable
+22|import androidx.compose.ui.Modifier
+23|import androidx.compose.ui.input.pointer.pointerInput
+24|import androidx.compose.ui.semantics.*
+25|import androidx.compose.ui.unit.dp
+26|import androidx.compose.ui.unit.sp
+27|import core.State
+28|import core.Status
+29|
+30|class MainActivity : ComponentActivity() {
+31|    private lateinit var collector: PhoneSensorCollector
+32|    private val controller get() = (application as DemoApplication).controller
+33|    private val handler = Handler(Looper.getMainLooper())
+34|    private var sensorSummary by mutableStateOf("Chưa thu cảm biến")
+35|    private val poll = object : Runnable {
+36|        override fun run() {
+37|            if (!controller.backgroundMonitoring) controller.displayPhone(collector.latest())
+38|            handler.postDelayed(this, 250)
+39|        }
+40|    }
+41|    override fun onCreate(savedInstanceState: Bundle?) {
+42|        super.onCreate(savedInstanceState)
+43|        collector = PhoneSensorCollector(this, controller::acceptPhone)
+44|        setContent {
+45|            MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
+46|                DemoScreen(controller, sensorSummary, ::startBackground, ::stopBackground)
+47|            }
+48|        }
+49|    }
+50|    override fun onResume() {
+51|        super.onResume()
+52|        controller.foreground = true
+53|        if (!controller.backgroundMonitoring) collector.start()
+54|        sensorSummary = if (controller.backgroundMonitoring) controller.backgroundSensors else collector.activeSensors.joinToString().ifEmpty { "Không có cảm biến khả dụng" }
+55|        controller.resumed()
+56|        handler.post(poll)
+57|    }
+58|    private fun startBackground() {
+59|        if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+60|            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 27)
+61|        } else beginMonitoring()
+62|    }
+63|    private fun beginMonitoring() {
+64|        collector.stop()
+65|        try { startForegroundService(Intent(this, MonitoringService::class.java)) }
+66|        catch (_: RuntimeException) {
+67|            controller.backgroundMessage = "Hệ thống từ chối giám sát nền; vẫn thu khi mở app."
+68|            if (controller.foreground) collector.start()
+69|        }
+70|    }
+71|    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+72|        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+73|        if (requestCode == 27 && controller.foreground) beginMonitoring()
+74|    }
+75|    private fun stopBackground() {
+76|        if (controller.snapshot.state != State.MONITORING) return
+77|        stopService(Intent(this, MonitoringService::class.java))
+78|        handler.postDelayed({ if (controller.foreground && !controller.backgroundMonitoring) collector.start() }, 100)
+79|    }
+80|    override fun onPause() {
+81|        controller.foreground = false
+82|        collector.stop()
+83|        handler.removeCallbacks(poll)
+84|        controller.paused()
+85|        super.onPause()
+86|    }
+87|}
+88|
+
+DemoInputAdapter.paused(backgroundMonitoring=false): if(phoneOnly() && !backgroundMonitoring) {display(null); session.resetDetection()} . Core strict single owner thread, tick advances to SENT fake or FAILED; snapshot read no side-effects. Manifest service exported=false foregroundServiceType health with proper5 permissions (no Internet/SMS/call).

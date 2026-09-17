@@ -1,0 +1,5 @@
+{
+  "scope": "new application/core/protocol source (unborn Git repository, not empty diff)",
+  "pattern_findings": [],
+  "limitation": "Pattern scan does not prove absence of vulnerabilities; independent reviews retained."
+}

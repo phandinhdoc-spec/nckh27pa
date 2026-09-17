@@ -1,0 +1,13 @@
+**PASS — không phát hiện bug chặn trong phạm vi regression CORE-002 qua đọc source/tests.**
+
+Ba nhóm test bổ sung kiểm tra đúng reentrancy thành công, SAFE tại biên deadline và timeout `Long.MAX_VALUE`. Assertions của các nhóm mới nằm ngoài sink; lỗi sẽ thoát khỏi test runner, không bị chuyển thành lỗi transport.
+
+**Finding không chặn:**
+
+- **P3 — assertion trong test lỗi sink có thể bị nuốt:** [CoreTests.kt:54](/home/pdd/nckh27pa/android/core/tests/CoreTests.kt:54) dùng `check()` trong callback. Nếu assertion thất bại, `IllegalStateException` bị [Core.kt:115](/home/pdd/nckh27pa/android/core/src/Core.kt:115) bắt và chuyển thành `FAILED`, đúng trạng thái test đang mong đợi. Nên lưu snapshot trong callback rồi assert bên ngoài, tương tự nhóm regression mới.
+
+Đây là **tests bổ sung sau triển khai**, không phải test-first hay bằng chứng RED/GREEN.
+
+Log Hermes ghi 12 nhóm PASS và demo `exit_code=0`; tôi không chạy lại và không dùng lời người triển khai làm chứng cứ. Không thể xác nhận source “không thay đổi” khi không có baseline trong input.
+
+Đã giữ read-only: không sửa/ghi file, build, network hay agent con.

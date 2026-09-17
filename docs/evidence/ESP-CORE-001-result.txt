@@ -1,0 +1,7 @@
+Đã thực hiện trong [esp/core/](/home/pdd/nckh27pa/esp/core/README.md): state machine C++17, host tests, runner và demo.
+
+- TDD thật: 11 nhóm RED → GREEN, suite exit 0.
+- ASan/UBSan và demo exit 0. Tắt riêng LeakSanitizer ở lần thử lại vì lỗi ptrace; giữ đầy đủ log.
+- Chỉ sửa `esp/core/`; không network, agent con, commit hoặc build Arduino.
+
+Chưa có kiểm tra bo thật hay review độc lập.

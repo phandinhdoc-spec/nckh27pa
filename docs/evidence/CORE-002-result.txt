@@ -1,0 +1,9 @@
+Đã thêm 3 nhóm regression: reentrant sink thành công, deadline sát `Long.MAX_VALUE`, timeout `Long.MAX_VALUE`.
+
+- Suite: **12 nhóm PASS, exit 0**.
+- Demo: **exit 0**, chỉ fake recipient; không có cảnh báo compiler/runtime.
+- Giữ nguyên source; chỉ sửa tests, README và evidence trong core.
+- Ghi rõ tests bổ sung **sau triển khai**, không giả TDD; thiếu sót TDD CORE-001 vẫn còn.
+- Review cũ PASS; chưa có review độc lập mới cho CORE-002.
+
+[Bằng chứng và giới hạn bàn giao](/home/pdd/nckh27pa/android/core/evidence/core-002-report.md). Không agent con, network hoặc commit.

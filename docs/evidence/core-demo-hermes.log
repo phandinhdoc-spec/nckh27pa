@@ -1,0 +1,7 @@
+CORE ONLY: fake monotonic clock and fake recipient; no sensors/UI/real transport
+MONITORING
+SUSPECTED
+VERIFYING: 10000 ms
+ALERTING: fake recipient accepted event 1, NO_RESPONSE; chưa xác định được vị trí
+AWAITING_HELP: SENT
+exit_code=0

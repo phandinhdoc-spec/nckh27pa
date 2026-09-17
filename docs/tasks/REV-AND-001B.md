@@ -1,0 +1,5 @@
+# REV-AND-001B
+Mục tiêu: review Android demo độc lập người triển khai. Người Codex gpt-6-astra phiên riêng; read-only. Nguồn docs/tasks/AND-001B.md + Android yêu cầu PHONE_ONLY, no-response tự gửi fake, GPS không chặn.
+Đầu vào: android/app/src/main/* (manifest/5 Kotlin), app/src/test/*, core/src/Core.kt và android/README.md. Không toàn repo hoặc logs dài. Phạm vi sửa: không; CLI output docs/evidence/REV-AND-001B.txt. Phụ thuộc source AND-001B đã bàn giao, Hermes đang Gradle build.
+Bàn giao PASS/FAIL, findings severity file:line/repro; tập trung sensor conversions/freshness, callback/lifecycle/countdown/scheduling, replay isolation, SOS hold, SAFE deadline và lỗi sink, UI state. Không yêu cầu tính năng ngoài lát này làm blocker nhưng ghi rõ foreground-only/process-death là giới hạn, không phát hiện ngã y khoa. Test fake không actual emergency permission.
+Nghiệm thu không logic/security bug chặn trong demo. Không build/emulator/network/agent con, không thay code. Retry2 fix/review tối đa. Không cho PASS chỉ vì checklist hoặc lời tác giả.

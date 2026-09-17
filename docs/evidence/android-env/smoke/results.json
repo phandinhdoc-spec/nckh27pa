@@ -1,0 +1,32 @@
+[
+  {
+    "name": "no-response",
+    "passed": true,
+    "elapsedSeconds": 24.42
+  },
+  {
+    "name": "safe",
+    "passed": true,
+    "elapsedSeconds": 28.29
+  },
+  {
+    "name": "sos-short-long",
+    "passed": true,
+    "elapsedSeconds": 12.99
+  },
+  {
+    "name": "sink-failure",
+    "passed": true,
+    "elapsedSeconds": 33.96
+  },
+  {
+    "name": "replay-survives-pause",
+    "passed": true,
+    "elapsedSeconds": 23.05
+  },
+  {
+    "name": "tabs-and-sensors",
+    "passed": true,
+    "elapsedSeconds": 23.33
+  }
+]

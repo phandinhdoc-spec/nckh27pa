@@ -1,0 +1,8 @@
+**Kết quả:**
+Xác minh [final-verification.json](file:///home/pdd/nckh27pa/docs/evidence/final-verification.json) ghi nhận Gradle build/lint đạt (21 tests pass, 7 warnings, 0 error); APK debug hoàn thành. Core Kotlin pass 12 nhóm; ESP C++ host pass 11 nhóm kèm sanitizer/demo; Framing lab pass 52 scenarios mỗi ngôn ngữ và 56 cross-language, sanitizer host pass. Trên emulator (môi trường ảo, không phải phần cứng thật), APK cuối vượt qua smoke 6 nhóm, background 2 nhóm và [SensorManager](file:///home/pdd/nckh27pa/android)+scroll 1 nhóm. Hai kế hoạch cùng setup script bảo toàn SHA256.
+
+**Chưa kiểm chứng và còn lại:**
+Chưa thử nghiệm trên điện thoại/ESP thật, chưa live/approved BLE hay recipients thực tế; chưa đo đạc độ chính xác ngã, pin, OEM Doze và phục hồi process death; ESP chưa build Arduino cho bo thật. Các tính năng persistence, vị trí, đếm bước, pin, âm-rung vẫn nằm trong backlog. Chưa tái kiểm quota Codex sau giới hạn sử dụng trước đây, giá model chưa quan sát; chính sách phân công mới không làm thay đổi các kết quả cũ.
+
+**NEXT_ACTION:**
+Cập nhật hồ sơ mốc và chọn một nhiệm vụ sẵn sàng từ backlog với đầy đủ STATUS/OWNER/FILES/GOAL/RESULT/NEXT_ACTION theo ma trận định tuyến (Hermes làm PM, AGY Gemini cho routine/docs/test, Codex cho sửa mã Android/ESP nhiều file, AGY Claude cho review); không tự ý sửa mã trước khi giao việc cho worker.

@@ -1,0 +1,10 @@
+PASS suspected, clear, confirmed and duplicate callbacks
+PASS deadline 10s, no response, absent location, one send
+PASS SAFE before deadline cancels; at and after deadline preserves alert
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at core.CoreTestsKt.main$lambda$3(CoreTests.kt:44)
+	at core.CoreTestsKt.main$test(CoreTests.kt:6)
+	at core.CoreTestsKt.main(CoreTests.kt:39)
+	at core.CoreTestsKt.main(CoreTests.kt)
+
+EXIT 1

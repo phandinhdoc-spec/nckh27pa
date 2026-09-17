@@ -1,0 +1,20 @@
+PASS suspected, clear, confirmed and duplicate callbacks
+PASS deadline 10s, no response, absent location, one send
+PASS SAFE before deadline cancels; at and after deadline preserves alert
+PASS immediate NEED_HELP and SOS, dedup, completion permits new event
+PASS sink failure stays FAILED; reentrant calls cannot send or complete
+PASS invalid timeout and log capacity rejected
+PASS bounded sink and state history retain latest records; copies isolated
+PASS wall time jumps do not advance injected monotonic deadline
+PASS all public core and recording sink access is owner-thread only
+PASS successful reentrant sink preserves sending event and completes after return
+PASS deadline at Long.MAX_VALUE preserves remaining time and SAFE boundary
+PASS Long.MAX_VALUE timeout uses valid elapsed time without deadline overflow
+PASS 12 tests
+CORE ONLY: fake monotonic clock and fake recipient; no sensors/UI/real transport
+MONITORING
+SUSPECTED
+VERIFYING: 10000 ms
+ALERTING: fake recipient accepted event 1, NO_RESPONSE; chưa xác định được vị trí
+AWAITING_HELP: SENT
+exit_code=0

@@ -1,0 +1,2 @@
+# REV-AND-002A
+Người AGY gemini-3.8-flash-high: lựa chọn mới từ danh sách do gemini-3.1-pro-high timeout nhiều lượt; probe này kiểm khả năng thực. Nguồn AND-002A + manifest/FGS docs. Input service/controller/lifecycle inline không tool, không sửa. Output docs/evidence/REV-AND-002A.txt. Check lifecycle sample ownership/wakelock/notification/failure; no autorestart known limit. Acceptance PASS/no blocker; Hermes build/runtime riêng.2 cycles sửa-review tối đa.

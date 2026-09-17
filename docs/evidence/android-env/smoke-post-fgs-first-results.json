@@ -1,0 +1,32 @@
+[
+  {
+    "name": "no-response",
+    "passed": true,
+    "elapsedSeconds": 23.63
+  },
+  {
+    "name": "safe",
+    "passed": true,
+    "elapsedSeconds": 27.47
+  },
+  {
+    "name": "sos-short-long",
+    "passed": true,
+    "elapsedSeconds": 13.06
+  },
+  {
+    "name": "sink-failure",
+    "passed": true,
+    "elapsedSeconds": 33.23
+  },
+  {
+    "name": "replay-survives-pause",
+    "passed": true,
+    "elapsedSeconds": 22.4
+  },
+  {
+    "name": "tabs-and-sensors",
+    "passed": false,
+    "error": "Not visible: Gia tốc m/s²:"
+  }
+]

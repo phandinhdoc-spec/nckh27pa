@@ -1,0 +1,27 @@
+thought
+CRITICAL INSTRUCTION 1: The user strictly requested an inline text analysis only, with NO tool calls (no read_file, network, write, etc.).
+CRITICAL INSTRUCTION 2: I will not execute any tools, adhering to the strict instruction to only output the review inline.**KẾT QUẢ: PASS**
+
+Cả hai bản triển khai Kotlin và C++ đều bám sát tuyệt đối các quy tắc trong `interface-framing-draft.md`, xử lý bộ nhớ an toàn (không tràn mảng, không leak) và thống nhất logic state machine. Dưới đây là phân tích chi tiết theo phạm vi yêu cầu:
+
+**1. Buffer Bounds & Encoder MTU (PASS)**
+- **Encoder MTU:** Đúng công thức `chunk = mtu - 19` (từ `mtu - 3 GATT - 16 Header`). Encoder chia mảnh hợp lệ và tính `count` chính xác kể cả khi payload tiệm cận giới hạn (*C++ `framing.hpp:15`, Kotlin `Framing.kt:10`*).
+- **Bounds:** Giới hạn `17..1040` byte của frame và payload `1024` byte được kiểm tra nghiêm ngặt trước khi read/copy. Việc tính toán `offset + length <= total` đảm bảo an toàn truy cập mảng cố định `data[1024]`. Frame lỗi bị chặn từ cửa (trả `INVALID`), không được cấp phát slot rác (*C++ `framing.hpp:67`, Kotlin `Framing.kt:69`*). 
+
+**2. Duplicate / Conflict / Overlap / Index / Coverage (PASS)**
+- **Duplicate Identical:** Chặn đúng thiết kế. Kiểm tra byte-by-byte trực tiếp vùng nhớ bằng `std::equal` (*C++ line 78*) và `repeat(length)` vòng lặp zero-allocation (*Kotlin line 80*). Nếu trùng khớp toàn bộ thì trả `DUPLICATE` (bỏ qua, không lặp count), nếu sai lệch lập tức clear slot và trả `CONFLICT`.
+- **Overlap:** Kiểm tra giao nhau an toàn bằng phép so sánh mảng `offset < offsets[i] + lengths[i] && offsets[i] < offset + length` (*C++ line 81*, *Kotlin line 84*). Phép cộng không bị tràn kiểu (overflow) vì các giới hạn offset/length đã bị chặn dưới 1024 từ khâu parse.
+- **Coverage & Contiguous Index:** Việc vét cạn khi `received == count` rất thông minh. Mã nguồn không yêu cầu thứ tự mảnh đến, nhưng khi ráp đủ, vòng lặp `for(int i=0; i<count; ++i)` dùng biến `end` cộng dồn để ép buộc mảng `offsets` phải xuất phát từ 0 và liên tục tuyệt đối, không có khoảng hở (gap) theo đúng chuẩn `index0 offset0` (*C++ line 85-87*, *Kotlin line 89-91*).
+
+**3. Clock Reversal & Timeout (PASS)**
+- **Clock Reversal:** Hàm `advance(now)` kiểm tra `now < lastNow` chặn clock đi lùi, trả về `CLOCK` mà không làm hỏng state đang ráp dở (*C++ line 45*, *Kotlin line 45*).
+- **Timeout 2000ms:** Deadline ráp mảnh được cố định từ `s.start` (thời điểm nhận mảnh hợp lệ đầu tiên). Phép thử `now - s.start >= 2000` được đặt trong `advance()` và chạy trước khi nhận bất kỳ mảnh nào. Message quá hạn bị xóa ngay lập tức. Nếu mảnh retry của sender (cùng messageId) đến sau mốc này, nó sẽ được cấp một slot ráp hoàn toàn mới, chính xác theo thiết kế (*C++ line 47*, *Kotlin line 47*).
+
+**4. Disconnect Generation (PASS)**
+- Ngắt kết nối `disconnect()` xóa toàn bộ 2 slot đang ráp để tránh rò rỉ state cũ, đồng thời tăng bộ đếm `generation`. 
+- Frame của session cũ (generation lạc hậu) bị từ chối bằng lỗi `STALE` trước khi can thiệp vào bất kỳ data nào (*C++ line 61*, *Kotlin line 58*). 
+- Xử lý kịch bản kịch trần (exhaustion) an toàn: `Long.MAX_VALUE` trong Kotlin và max `uint64_t` trong C++ sẽ ngừng cấp generation mới (fail closed) thay vì wrap around, đảm bảo không bao giờ đụng độ ID phiên (*C++ line 55*, *Kotlin line 52*).
+
+**5. Cross-language Parity (PASS)**
+- **Kiểu dữ liệu:** Kotlin dùng `u(4,4)` ép kiểu lên `Long` (64-bit signed) với phép `and 255`, giữ chính xác giá trị unsigned 32-bit của `messageId` không bị âm. Điều này tương đồng hoàn toàn với `uint64_t` trong C++.
+- **Mã lỗi:** Trạng thái trả về (`INVALID`, `CAPACITY`, `CONFLICT`, `DUPLICATE`, `PENDING`, `COMPLETE`, `STALE`, `CLOCK`, `TICK`, `DISCONNECTED`) đồng nhất tuyệt đối giữa hai runtime, pass trọn vẹn 56 ma trận chéo trong test harness. Cả hai ngôn ngữ đều không dùng bộ đệm heap động cho quá trình dò tìm, bảo vệ nghiêm ngặt RAM host/thiết bị nhúng (memory footprint cố định 4KB-6KB).

@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import runpy; m=runpy.run_path('android/scripts/emulator-background.py');m['denied_notifications']()
+                                                                             ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "android/scripts/emulator-background.py", line 62, in denied_notifications
+    start_with_permission('Don’t allow', expected_active=False)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "android/scripts/emulator-background.py", line 32, in start_with_permission
+    assert ('isForeground=true' in service('foreground-'+label.replace(' ','-'))) == expected_active, 'unexpected service state after permission result'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: unexpected service state after permission result
+exit_code=1

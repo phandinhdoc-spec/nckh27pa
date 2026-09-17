@@ -1,0 +1,4 @@
+# REV-ESP-CORE-001
+Mục tiêu review độc lập local C++ alert. Người Codex gpt-6-astra phiên riêng read-only. Nguồn ESP-CORE-001, ESP7/11 (đọc phiếu đủ); input esp/core/{local_alert.h,local_alert.cpp,tests,README.md}, docs/evidence/esp-core-*-hermes.log.
+Phạm vi không sửa; CLI ghi docs/evidence/REV-ESP-CORE-001.txt. Phụ thuộc impl và Hermes test. Bàn giao PASS/FAIL, security/logic findings file:line/repro. Check bounded ID, countdown/overflow/clock regression, ACK != cancellation, stop buzzer vs pending deadline, SOS DEGRADED, no-response disconnect, wrong-ID/replay commands, action semantics timeout+cancel.
+Nghiệm thu no blocker phạm vi host, không coi là firmware Arduino. Không build/network/agent con; chỉ đọc.2 fix/review tối đa. TDD source dùng nhóm test trước cả implementation, ghi đúng giới hạn không per-behavior strict nếu thấy.

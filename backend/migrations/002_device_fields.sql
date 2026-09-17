@@ -1,0 +1,2 @@
+ALTER TABLE devices ADD COLUMN timestamp_ms INTEGER;
+ALTER TABLE devices ADD COLUMN uptime_seconds INTEGER NOT NULL DEFAULT 0;

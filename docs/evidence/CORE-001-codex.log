@@ -1,0 +1,1759 @@
+OpenAI Codex v0.154.0
+--------
+workdir: /home/pdd/nckh27pa
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: none
+reasoning summaries: none
+session id: 01a09f09-1e5d-7030-87a9-3d6898165f4b
+--------
+user
+Thực hiện đúng docs/tasks/CORE-001.md. Chỉ sửa android/core/. Đây là hướng mới offline sau blocker network, không lặp tải Gradle. Không đọc toàn bộ kế hoạch lần nữa: chỉ các mục phiếu dẫn. Dùng Kotlin compiler local và TDD từng hành vi; chạy demo/test thật, không agent con. Không nới sandbox. Báo kết quả và giới hạn trung thực.
+codex
+Tôi sẽ đọc phiếu CORE-001 và các mục được dẫn, rồi triển khai trong `android/core/` bằng Kotlin compiler local, theo TDD từng hành vi. Tôi sẽ không tải lại Gradle, dùng agent con hay nới sandbox.
+
+exec
+/bin/bash -lc "pwd; rg --files -g AGENTS.md -g 'CORE-001.md' -g '*kotlinc*' -g '*gradle*' android docs .agents" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+/home/pdd/nckh27pa
+android/evidence/gradle-download-attempt-2.log
+docs/tasks/CORE-001.md
+
+exec
+/bin/bash -lc 'cat docs/tasks/CORE-001.md; for f in /home/AGENTS.md /home/pdd/AGENTS.md /home/pdd/nckh27pa/AGENTS.md; do if [ -f "$f" ]; then cat "$f"; fi; done' in /home/pdd/nckh27pa
+ succeeded in 0ms:
+# CORE-001 — Lõi cảnh báo Kotlin chạy ngoại tuyến
+Mục tiêu: triển khai lõi Kotlin tái sử dụng cho AND-001, không cần Gradle/network; không coi là hoàn thành AND-001/APK.
+Nguồn: Android §4.4, §7, §9 (NO_RESPONSE/SAFE/NEED_HELP; trạng thái), yêu cầu người dùng cảnh báo không cần phản hồi. Đọc chỉ các mục này và phiếu, không đọc lại toàn repo.
+Người: Codex CLI gpt-6-astra đã thực sự gọi được (header docs/evidence/AND-001-codex.log). Không đổi model vì blocker là sandbox DNS không phải reasoning.
+Đầu vào: Kotlin local /home/pdd/.local/opt/nckh27pa/android-studio/plugins/Kotlin/kotlinc/bin/kotlinc; JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64. Xác minh chạy compiler trước. Không network. Không có source trước.
+Phạm vi sửa: android/core/ (source, tests, run-tests.sh, README, evidence). Không file khác, không sửa kế hoạch, không commit hoặc subprocess agent. Phụ thuộc SUR-001; AND-001 hạ tầng bị chặn, CORE không phụ thuộc hạ tầng mạng.
+Bàn giao: source Kotlin không Android dependency, test harness check/assert, executable test runner tái lập và log RED/GREEN từng hành vi. Có thể dùng kotlinc compile jar + java -jar. Lõi gồm state machine tách UI, monotonic clock injection, test sink/recorded events bounded, snapshot hiển thị. Không triển khai thuật toán ngã tưởng tượng: suspected và evidenceConfirmed đầu vào do detection tương lai phát. CLI demo chuyển MONITORING→SUSPECTED→VERIFYING→ALERTING→AWAITING_HELP với đồng hồ giả và người nhận giả; rõ chỉ core, không sensor/UI thật.
+Nghiệm thu: mỗi hành vi TDD RED rồi GREEN, final suite exit0. Không phản hồi tại deadline10s tự gửi test sink đúng1lần; SAFE trước deadline hủy nhưng tại/sau deadline không xóa cảnh báo; NEED_HELP/SOS ngay; nhận SOS khi đang cần trợ giúp không spam; complete event quay monitoring và SOS mới được; callback trùng/repeated suspect không kéo dài hạn; thiếu vị trí không chặn; sink failure không SENT; wall time không điều khiển deadline. Test boundary và invalid config (timeout<=0), bounded log nếu có. Thread ownership/concurrency contract rõ, state mutation tránh reentrant sink tạo gửi trùng. Không raw phone/contact/location logs.
+Kiểm chứng: run-tests.sh và demo, Hermes chạy lại, reviewer phiên riêng trước tích hợp. Retry tối đa2 lần không tiến triển mỗi hướng. Nếu compiler bị chặn quyền dừng không bypass. Mục này là lõi thử nghiệm, không tuyên bố giải quyết background/persistence/real transport.
+
+exec
+/bin/bash -lc "find android -name AGENTS.md -print; rg --files docs | rg -i 'android|plan'; ls android; /home/pdd/.local/opt/nckh27pa/android-studio/plugins/Kotlin/kotlinc/bin/kotlinc -version" in /home/pdd/nckh27pa
+ succeeded in 2230ms:
+info: kotlinc-jvm 2.3.10 (JRE 25.0.3+-15898627-b508.16)
+
+exec
+/bin/bash -lc "rg -n '"'^#{1,6} |4'"\\.4|NO_RESPONSE|SAFE|NEED_HELP' android/android-plan.md; git status --short; JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 /home/pdd/.local/opt/nckh27pa/android-studio/plugins/Kotlin/kotlinc/bin/kotlinc -version" in /home/pdd/nckh27pa
+ succeeded in 1876ms:
+info: kotlinc-jvm 2.3.10 (JRE 21.0.12+8-1-26.04-Ubuntu)
+
+exec
+/bin/bash -lc "sed -n '209,222p' android/android-plan.md; sed -n '651,673p' android/android-plan.md; sed -n '688,721p' android/android-plan.md" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+### 4.4. Máy trạng thái phát hiện
+
+| Trạng thái | Ý nghĩa | Điều kiện chuyển chính |
+|---|---|---|
+| `MONITORING` | Theo dõi bình thường | Có dấu hiệu bất thường → `SUSPECTED` |
+| `SUSPECTED` | Thu thập thêm dữ liệu vài giây | Hết nguy cơ → `MONITORING`; đủ bằng chứng → `VERIFYING` |
+| `VERIFYING` | Hỏi người dùng và đếm ngược | Người dùng báo ổn → `MONITORING`; cần giúp/hết giờ → `ALERTING` |
+| `ALERTING` | Đang gửi cảnh báo | Đã gửi → `AWAITING_HELP` |
+| `AWAITING_HELP` | Chờ xác nhận đã được hỗ trợ | Kết thúc sự kiện → `MONITORING` |
+
+Nút SOS được phép chuyển trực tiếp từ mọi trạng thái sang `ALERTING`.
+
+---
+
+## 7. Kết hợp vị trí và gửi cảnh báo
+
+Thứ tự chọn vị trí:
+
+1. Vị trí mới, đủ chính xác từ điện thoại.
+2. Vị trí GNSS của thiết bị đeo nếu có và tốt hơn.
+3. Vị trí cuối cùng kèm thời gian và sai số.
+4. Nếu không có tọa độ, vẫn gửi cảnh báo cùng thời điểm, trạng thái kết nối và lời nhắn “chưa xác định được vị trí”.
+
+Không được trì hoãn cảnh báo khẩn cấp chỉ để chờ GPS. Nội dung gửi đi nên gồm:
+
+- Tên người dùng.
+- Loại nguy cơ.
+- Thời điểm.
+- Liên kết bản đồ nếu có.
+- Độ chính xác và tuổi của vị trí.
+- Pin thiết bị đeo và pin điện thoại.
+- Số điện thoại gọi lại.
+
+Ứng dụng phải xin quyền Android theo từng tính năng và giải thích dễ hiểu. Cần kiểm thử riêng giới hạn SMS, cuộc gọi, thông báo, vị trí nền và chạy nền trên từng hãng điện thoại.
+
+---
+
+## 9. Dữ liệu cần lưu
+
+Không lưu vô hạn toàn bộ dữ liệu thô. Chia thành ba mức:
+
+- **Bộ đệm thời gian thực:** giữ một khoảng ngắn trước và sau hiện tại.
+- **Cửa sổ sự kiện:** lưu dữ liệu quanh sự kiện để phân tích nghiên cứu.
+- **Nhật ký dài hạn:** chỉ lưu tóm tắt, kết quả xác minh, lỗi và thống kê.
+
+Mỗi sự kiện Android nên có các biến chính:
+
+```kotlin
+data class DetectionEvent(
+    val eventId: String,
+    val deviceId: String,
+    val startedAtMs: Long,
+    val endedAtMs: Long?,
+    val detectionType: String,
+    val riskScore: Int,
+    val triggerReasons: List<String>,
+    val userResponse: String?,
+    val alertStatus: String,
+    val latitude: Double?,
+    val longitude: Double?,
+    val locationAccuracyM: Float?,
+    val locationTimestampMs: Long?
+)
+```
+
+Giá trị `userResponse`: `SAFE`, `NEED_HELP`, `NO_RESPONSE`, `UNKNOWN`.
+
+Giá trị `alertStatus`: `NOT_REQUIRED`, `COUNTDOWN`, `SENDING`, `SENT`, `FAILED`, `ACKNOWLEDGED`.
+
+---
+
+
+codex
+Compiler local chạy được với Java 21. Tôi sẽ dùng deadline từ đồng hồ monotonic, kiểm tra hết hạn trước khi xử lý SAFE, và khóa việc gửi trước khi gọi sink để tránh gửi trùng khi sink gọi ngược vào core. Demo sẽ dùng đồng hồ và người nhận giả; không đại diện cho sensor, UI hay vận chuyển cảnh báo thật.
+
+exec
+/bin/bash -lc "mkdir -p android/core/src android/core/tests android/core/evidence; cat > android/core/run-tests.sh <<'EOF'
+#"'!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")"
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+KOTLINC=/home/pdd/.local/opt/nckh27pa/android-studio/plugins/Kotlin/kotlinc/bin/kotlinc
+build=$(mktemp -d)
+trap '"'rm -rf \""'$build"'"' EXIT
+\""'$KOTLINC" src/*.kt tests/*.kt -include-runtime -d "$build/core.jar"
+"$JAVA_HOME/bin/java" -cp "$build/core.jar" "${1:-core.CoreTestsKt}"
+EOF
+chmod +x android/core/run-tests.sh
+cat > android/core/src/Core.kt <<'"'EOF'
+package core
+
+fun interface MonotonicClock { fun nowMs(): Long }
+fun interface AlertSink { fun send(alert: Alert) }
+enum class State { MONITORING, SUSPECTED, VERIFYING, ALERTING, AWAITING_HELP }
+enum class Response { UNKNOWN, SAFE, NEED_HELP, NO_RESPONSE }
+enum class Status { NOT_REQUIRED, COUNTDOWN, SENDING, SENT, FAILED, ACKNOWLEDGED }
+data class Alert(val eventId: Long, val response: Response, val locationMessage: String = \"chưa xác định được vị trí\")
+data class Snapshot(val state: State, val eventId: Long, val response: Response, val status: Status, val remainingMs: Long?)
+data class RecordedEvent(val eventId: Long, val state: State, val status: Status)
+
+class AlertCore(private val clock: MonotonicClock, private val sink: AlertSink,
+                private val timeoutMs: Long = 10_000, private val logCapacity: Int = 32) {
+    private val owner = Thread.currentThread()
+    private var state = State.MONITORING
+    private var eventId = 0L
+    private var response = Response.UNKNOWN
+    private var status = Status.NOT_REQUIRED
+    private var started = 0L
+    private var sending = false
+    private val log = ArrayDeque<RecordedEvent>()
+    private fun owned() { check(Thread.currentThread() === owner) { \"Call on owner thread\" } }
+    fun snapshot(): Snapshot { owned(); return Snapshot(state, eventId, response, status,
+        if (state == State.VERIFYING) (timeoutMs - (clock.nowMs() - started)).coerceAtLeast(0) else null) }
+    fun events(): List<RecordedEvent> { owned(); return log.toList() }
+    private fun record() { log.addLast(RecordedEvent(eventId, state, status)); while (log.size > logCapacity) log.removeFirst() }
+    fun suspected() { owned() }
+    fun evidenceConfirmed() { owned() }
+    fun riskCleared() { owned() }
+    fun tick() { owned() }
+    fun safe() { owned() }
+    fun needHelp() { owned() }
+    fun sos() { owned() }
+    fun complete() { owned() }
+}
+EOF
+cat > android/core/tests/CoreTests.kt <<'EOF'
+package core
+
+class FakeClock(var time: Long = 0) : MonotonicClock { override fun nowMs() = time }
+fun main() {
+    var passed = 0
+    fun test(name: String, body: () -> Unit) { body(); println(\"PASS "'$name"); passed++ }
+    test("suspected, clear, confirmed and duplicate callbacks") {
+        val clock = FakeClock(); val c = AlertCore(clock, AlertSink {})
+        c.evidenceConfirmed(); check(c.snapshot().state == State.MONITORING)
+        c.suspected(); check(c.snapshot().state == State.SUSPECTED)
+        c.riskCleared(); check(c.snapshot().state == State.MONITORING)
+        c.suspected(); c.evidenceConfirmed(); check(c.snapshot().remainingMs == 10_000L)
+        clock.time = 9_999; c.suspected(); c.evidenceConfirmed(); c.riskCleared()
+        check(c.snapshot().state == State.VERIFYING); check(c.snapshot().remainingMs == 1L)
+    }
+    // NEXT
+    println("PASS $passed tests")
+}
+EOF
+./android/core/run-tests.sh > android/core/evidence/01-red.log 2>&1; result=$?; cat android/core/evidence/01-red.log; test "$result" -ne 0' in /home/pdd/nckh27pa
+ succeeded in 5008ms:
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at core.CoreTestsKt.main$lambda$0(CoreTests.kt:10)
+	at core.CoreTestsKt.main$test(CoreTests.kt:6)
+	at core.CoreTestsKt.main(CoreTests.kt:7)
+	at core.CoreTestsKt.main(CoreTests.kt)
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+p='android/core/src/Core.kt'
+s=open(p).read().replace('fun suspected() { owned() }','fun suspected() { owned(); if (state == State.MONITORING) { eventId++; response = Response.UNKNOWN; status = Status.NOT_REQUIRED; state = State.SUSPECTED; record() } }').replace('fun evidenceConfirmed() { owned() }','fun evidenceConfirmed() { owned(); if (state == State.SUSPECTED) { started = clock.nowMs(); state = State.VERIFYING; status = Status.COUNTDOWN; record() } }').replace('fun riskCleared() { owned() }','fun riskCleared() { owned(); if (state == State.SUSPECTED) { state = State.MONITORING; record() } }')
+open(p,'w').write(s)
+PY
+./android/core/run-tests.sh > android/core/evidence/01-green.log 2>&1" in /home/pdd/nckh27pa
+ succeeded in 5274ms:
+exec
+/bin/bash -lc "cat > android/core/evidence/tdd-stages.py <<'PY'
+\"\"\"Historical staged TDD driver, run once after stage 01. Not the final test runner.\"\"\"
+from pathlib import Path
+import subprocess
+root = Path(__file__).resolve().parents[1]
+def stage(n, test, old, new):
+    path = root/'tests/CoreTests.kt'
+    path.write_text(path.read_text().replace('    // NEXT', test+'\\n    // NEXT'))
+    def run(color):
+        result = subprocess.run([str(root/'run-tests.sh')], capture_output=True, text=True)
+        (root/f'evidence/{n}-{color}.log').write_text(result.stdout+result.stderr+f'\\nEXIT {result.returncode}\\n')
+        print(f'{n} {color}: exit {result.returncode}', flush=True)
+        return result.returncode
+    assert run('red') "'!= 0
+    path = root/'"'src/Core.kt'; source = path.read_text(); assert old in source
+    path.write_text(source.replace(old,new))
+    assert run('green') == 0
+stage('02', '''    test(\"deadline 10s, no response, absent location, one send\") {
+        val clock = FakeClock(500); val sent = mutableListOf<Alert>()
+        val c = AlertCore(clock, AlertSink { sent += it }); c.suspected(); c.evidenceConfirmed()
+        clock.time = 10_499; c.tick(); check(sent.isEmpty())
+        clock.time = 10_500; c.tick(); c.tick(); c.evidenceConfirmed(); c.suspected()
+        check(sent.size == 1); check(sent.single().response == Response.NO_RESPONSE)
+        check(sent.single().locationMessage == \"chưa xác định được vị trí\")
+        check(c.snapshot().state == State.AWAITING_HELP); check(c.snapshot().status == Status.SENT)
+        check(c.events().map { it.state }.contains(State.ALERTING))
+    }''', 'fun tick() { owned() }', '''private fun dispatch(reason: Response) {
+        if (state == State.ALERTING || state == State.AWAITING_HELP) return
+        if (state == State.MONITORING) eventId++
+        response = reason; state = State.ALERTING; status = Status.SENDING; record()
+        sink.send(Alert(eventId, reason))
+        status = Status.SENT; state = State.AWAITING_HELP; record()
+    }
+    fun tick() { owned(); if (state == State.VERIFYING && clock.nowMs() - started >= timeoutMs) dispatch(Response.NO_RESPONSE) }''')
+stage('03', '''    test(\"SAFE before deadline cancels; at and after deadline preserves alert\") {
+        for (time in listOf(9_999L, 10_000L, 10_001L)) {
+            val clock = FakeClock(); val sent = mutableListOf<Alert>(); val c = AlertCore(clock, AlertSink { sent += it })
+            c.suspected(); c.evidenceConfirmed(); clock.time = time; c.safe()
+            if (time < 10_000) {
+                check(c.snapshot().state == State.MONITORING); check(c.snapshot().response == Response.SAFE)
+                clock.time = 20_000; c.tick(); check(sent.isEmpty())
+            } else {
+                check(sent.size == 1); c.safe(); check(c.snapshot().status == Status.SENT)
+                check(c.snapshot().response == Response.NO_RESPONSE)
+            }
+        }
+    }''', 'fun safe() { owned() }', '''fun safe() { owned(); tick(); if (state == State.VERIFYING || state == State.SUSPECTED) {
+        response = Response.SAFE; status = Status.NOT_REQUIRED; state = State.MONITORING; record()
+    } }''')
+stage('04', '''    test(\"immediate NEED_HELP and SOS, dedup, completion permits new event\") {
+        for (action in listOf(\"help\", \"sos\")) for (initial in 0..2) {
+            val sent = mutableListOf<Alert>(); val c = AlertCore(FakeClock(), AlertSink { sent += it })
+            if (initial >= 1) c.suspected(); if (initial == 2) c.evidenceConfirmed()
+            c.complete(); if (action == \"help\") c.needHelp() else c.sos()
+            check(sent.size == 1); check(sent.single().response == Response.NEED_HELP)
+            c.sos(); c.needHelp(); c.safe(); check(sent.size == 1)
+            c.complete(); check(c.snapshot().state == State.MONITORING)
+            check(c.snapshot().status == Status.ACKNOWLEDGED)
+            c.sos(); check(sent.size == 2); check(sent[0].eventId "'!= sent[1].eventId)
+        }
+    }'"''', '''fun needHelp() { owned() }
+    fun sos() { owned() }
+    fun complete() { owned() }''', '''fun needHelp() { owned(); dispatch(Response.NEED_HELP) }
+    fun sos() { owned(); dispatch(Response.NEED_HELP) }
+    fun complete() { owned(); if ("'!sending && (state == State.AWAITING_HELP || state == State.ALERTING)) {
+        state = State.MONITORING; status = Status.ACKNOWLEDGED; record()
+    } }'"''')
+stage('05', '''    test(\"sink failure stays FAILED; reentrant calls cannot send or complete\") {
+        var calls = 0; lateinit var c: AlertCore
+        c = AlertCore(FakeClock(), AlertSink {
+            calls++; check(c.snapshot().state == State.ALERTING); check(c.snapshot().status == Status.SENDING)
+            c.complete(); c.sos(); c.needHelp(); c.safe(); c.tick(); c.suspected(); c.evidenceConfirmed()
+            throw IllegalStateException(\"private transport details\")
+        })
+        c.sos(); check(calls == 1); check(c.snapshot().status == Status.FAILED)
+        check(c.snapshot().state == State.ALERTING); c.sos(); check(calls == 1)
+        check("'!c.events().toString().contains("private")); c.complete(); c.sos(); check(calls == 2)
+    }'"''', '''sink.send(Alert(eventId, reason))
+        status = Status.SENT; state = State.AWAITING_HELP; record()''', '''sending = true
+        try {
+            sink.send(Alert(eventId, reason))
+            status = Status.SENT; state = State.AWAITING_HELP
+        } catch (_: Exception) {
+            status = Status.FAILED
+        } finally { sending = false }
+        record()''')
+stage('06', '''    test(\"invalid timeout and log capacity rejected\") {
+        for (timeout in listOf(0L, -1L)) check(runCatching { AlertCore(FakeClock(), AlertSink {}, timeout) }.exceptionOrNull() is IllegalArgumentException)
+        for (capacity in listOf(0, -1)) check(runCatching { AlertCore(FakeClock(), AlertSink {}, logCapacity = capacity) }.exceptionOrNull() is IllegalArgumentException)
+    }''', 'private val owner = Thread.currentThread()', '''init { require(timeoutMs > 0) { \"timeoutMs must be positive\" }; require(logCapacity > 0) { \"logCapacity must be positive\" } }
+    private val owner = Thread.currentThread()''')
+PY
+python3 android/core/evidence/tdd-stages.py" in /home/pdd/nckh27pa
+exec
+/bin/bash -lc "cat > android/core/src/Demo.kt <<'EOF'
+package core
+
+fun main() {
+    println(\"CORE ONLY: fake monotonic clock and fake recipient; no sensors/UI/real transport\")
+    val clock = object : MonotonicClock {
+        var time = 0L
+        override fun nowMs() = time
+    }
+    lateinit var core: AlertCore
+    core = AlertCore(clock, AlertSink { alert ->
+        println(\""'${core.snapshot().state}: fake recipient accepted event ${alert.eventId}, ${alert.response}; ${alert.locationMessage}")
+    })
+    println(core.snapshot().state)
+    core.suspected(); println(core.snapshot().state)
+    core.evidenceConfirmed(); println("${core.snapshot().state}: ${core.snapshot().remainingMs} ms")
+    clock.time = 10_000; core.tick(); println("${core.snapshot().state}: ${core.snapshot().status}")
+}
+EOF' in /home/pdd/nckh27pa
+ succeeded in 0ms:
+codex
+Các vòng RED/GREEN cho deadline 10 giây và SAFE ở mốc 9.999/10.000/10.001 ms đã qua. Test xác nhận không phản hồi tự gửi đúng một lần và thiếu vị trí vẫn gửi. Tôi đang kiểm tra SOS, kết thúc sự kiện, lỗi sink và callback gọi ngược; log từng vòng được lưu trong `android/core/evidence/`.
+
+ succeeded in 58605ms:
+02 red: exit 1
+02 green: exit 0
+03 red: exit 1
+03 green: exit 0
+04 red: exit 1
+04 green: exit 0
+05 red: exit 1
+05 green: exit 0
+06 red: exit 1
+06 green: exit 0
+
+exec
+/bin/bash -lc "cat > android/core/evidence/tdd-final-stages.py <<'PY'
+\"\"\"Historical continuation: execute only after stages 01–06.\"\"\"
+from pathlib import Path
+import subprocess
+root = Path(__file__).resolve().parents[1]
+def run(name):
+    result = subprocess.run([str(root/'run-tests.sh')], capture_output=True, text=True)
+    (root/f'evidence/{name}.log').write_text(result.stdout+result.stderr+f'\\nEXIT {result.returncode}\\n')
+    print(name, result.returncode, flush=True)
+    return result.returncode
+p = root/'tests/CoreTests.kt'
+p.write_text(p.read_text().replace('    // NEXT', '''    test(\"bounded sink and state history retain latest records; copies isolated\") {
+        val sink = RecordingSink(2); val c = AlertCore(FakeClock(), sink, logCapacity = 3)
+        repeat(20) { c.sos(); c.complete() }
+        check(sink.alerts().map { it.eventId } == listOf(19L, 20L))
+        check(c.events().size == 3); check(c.events().last().status == Status.ACKNOWLEDGED)
+        val copy = c.events().toMutableList(); copy.clear(); check(c.events().size == 3)
+        val alerts = sink.alerts().toMutableList(); alerts.clear(); check(sink.alerts().size == 2)
+        check(runCatching { RecordingSink(0) }.exceptionOrNull() is IllegalArgumentException)
+        check(runCatching { RecordingSink(-1) }.exceptionOrNull() is IllegalArgumentException)
+    }
+    // NEXT'''))
+assert run('07-red') "'!= 0
+(root/'"'src/RecordingSink.kt').write_text('''package core
+
+/** In-memory fake recipient; use only on its creating thread. No contact/location data. */
+class RecordingSink(private val capacity: Int = 32) : AlertSink {
+    init { require(capacity > 0) { \"capacity must be positive\" } }
+    private val owner = Thread.currentThread()
+    private val recorded = ArrayDeque<Alert>()
+    private fun owned() { check(Thread.currentThread() === owner) { \"Call on owner thread\" } }
+    override fun send(alert: Alert) {
+        owned(); recorded.addLast(alert)
+        while (recorded.size > capacity) recorded.removeFirst()
+    }
+    fun alerts(): List<Alert> { owned(); return recorded.toList() }
+}
+''')
+assert run('07-green') == 0
+p.write_text(p.read_text().replace('    // NEXT', '''    test(\"wall time jumps do not advance injected monotonic deadline\") {
+        val clock = DualClock(); val sink = RecordingSink(); val c = AlertCore(clock, sink)
+        c.suspected(); c.evidenceConfirmed()
+        clock.wall = Long.MAX_VALUE; c.tick(); check(c.snapshot().remainingMs == 10_000L)
+        clock.wall = Long.MIN_VALUE; clock.monotonic = 9_999; c.tick(); check(sink.alerts().isEmpty())
+        clock.monotonic = 10_000; c.tick(); check(sink.alerts().size == 1)
+    }
+    test(\"all public core and recording sink access is owner-thread only\") {
+        val sink = RecordingSink(); val c = AlertCore(FakeClock(), sink)
+        val actions = listOf<() -> Unit>({ c.suspected() }, { c.evidenceConfirmed() },
+            { c.riskCleared() }, { c.tick() }, { c.safe() }, { c.needHelp() }, { c.sos() },
+            { c.complete() }, { c.snapshot() }, { c.events() }, { sink.alerts() },
+            { sink.send(Alert(1, Response.NEED_HELP)) })
+        var failures = 0
+        val t = Thread { for (action in actions) if (runCatching(action).exceptionOrNull() is IllegalStateException) failures++ }
+        t.start(); t.join(); check(failures == actions.size)
+        check(c.snapshot().state == State.MONITORING); check(sink.alerts().isEmpty())
+    }
+    // NEXT'''))
+p.write_text(p.read_text()+'''\\n// Test-only independent time domains: core receives only monotonic time.
+class DualClock(var monotonic: Long = 0, var wall: Long = 0) : MonotonicClock {
+    override fun nowMs() = monotonic
+}
+''')
+assert run('08-contract-checks') == 0
+PY" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+exec
+/bin/bash -lc 'python3 android/core/evidence/tdd-final-stages.py' in /home/pdd/nckh27pa
+exec
+/bin/bash -lc 'cat android/core/src/Core.kt; cat android/core/evidence/05-red.log; cat android/core/evidence/06-green.log' in /home/pdd/nckh27pa
+ succeeded in 0ms:
+package core
+
+fun interface MonotonicClock { fun nowMs(): Long }
+fun interface AlertSink { fun send(alert: Alert) }
+enum class State { MONITORING, SUSPECTED, VERIFYING, ALERTING, AWAITING_HELP }
+enum class Response { UNKNOWN, SAFE, NEED_HELP, NO_RESPONSE }
+enum class Status { NOT_REQUIRED, COUNTDOWN, SENDING, SENT, FAILED, ACKNOWLEDGED }
+data class Alert(val eventId: Long, val response: Response, val locationMessage: String = "chưa xác định được vị trí")
+data class Snapshot(val state: State, val eventId: Long, val response: Response, val status: Status, val remainingMs: Long?)
+data class RecordedEvent(val eventId: Long, val state: State, val status: Status)
+
+class AlertCore(private val clock: MonotonicClock, private val sink: AlertSink,
+                private val timeoutMs: Long = 10_000, private val logCapacity: Int = 32) {
+    init { require(timeoutMs > 0) { "timeoutMs must be positive" }; require(logCapacity > 0) { "logCapacity must be positive" } }
+    private val owner = Thread.currentThread()
+    private var state = State.MONITORING
+    private var eventId = 0L
+    private var response = Response.UNKNOWN
+    private var status = Status.NOT_REQUIRED
+    private var started = 0L
+    private var sending = false
+    private val log = ArrayDeque<RecordedEvent>()
+    private fun owned() { check(Thread.currentThread() === owner) { "Call on owner thread" } }
+    fun snapshot(): Snapshot { owned(); return Snapshot(state, eventId, response, status,
+        if (state == State.VERIFYING) (timeoutMs - (clock.nowMs() - started)).coerceAtLeast(0) else null) }
+    fun events(): List<RecordedEvent> { owned(); return log.toList() }
+    private fun record() { log.addLast(RecordedEvent(eventId, state, status)); while (log.size > logCapacity) log.removeFirst() }
+    fun suspected() { owned(); if (state == State.MONITORING) { eventId++; response = Response.UNKNOWN; status = Status.NOT_REQUIRED; state = State.SUSPECTED; record() } }
+    fun evidenceConfirmed() { owned(); if (state == State.SUSPECTED) { started = clock.nowMs(); state = State.VERIFYING; status = Status.COUNTDOWN; record() } }
+    fun riskCleared() { owned(); if (state == State.SUSPECTED) { state = State.MONITORING; record() } }
+    private fun dispatch(reason: Response) {
+        if (state == State.ALERTING || state == State.AWAITING_HELP) return
+        if (state == State.MONITORING) eventId++
+        response = reason; state = State.ALERTING; status = Status.SENDING; record()
+        sending = true
+        try {
+            sink.send(Alert(eventId, reason))
+            status = Status.SENT; state = State.AWAITING_HELP
+        } catch (_: Exception) {
+            status = Status.FAILED
+        } finally { sending = false }
+        record()
+    }
+    fun tick() { owned(); if (state == State.VERIFYING && clock.nowMs() - started >= timeoutMs) dispatch(Response.NO_RESPONSE) }
+    fun safe() { owned(); tick(); if (state == State.VERIFYING || state == State.SUSPECTED) {
+        response = Response.SAFE; status = Status.NOT_REQUIRED; state = State.MONITORING; record()
+    } }
+    fun needHelp() { owned(); dispatch(Response.NEED_HELP) }
+    fun sos() { owned(); dispatch(Response.NEED_HELP) }
+    fun complete() { owned(); if (!sending && (state == State.AWAITING_HELP || state == State.ALERTING)) {
+        state = State.MONITORING; status = Status.ACKNOWLEDGED; record()
+    } }
+}
+PASS suspected, clear, confirmed and duplicate callbacks
+PASS deadline 10s, no response, absent location, one send
+PASS SAFE before deadline cancels; at and after deadline preserves alert
+PASS immediate NEED_HELP and SOS, dedup, completion permits new event
+Exception in thread "main" java.lang.StackOverflowError
+	at core.AlertCore.record(Core.kt:26)
+	at core.AlertCore.complete(Core.kt:44)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+	at core.AlertCore.sos(Core.kt:42)
+	at core.CoreTestsKt.main$lambda$4$0(CoreTests.kt:55)
+	at core.AlertCore.dispatch(Core.kt:34)
+
+EXIT 1
+PASS suspected, clear, confirmed and duplicate callbacks
+PASS deadline 10s, no response, absent location, one send
+PASS SAFE before deadline cancels; at and after deadline preserves alert
+PASS immediate NEED_HELP and SOS, dedup, completion permits new event
+PASS sink failure stays FAILED; reentrant calls cannot send or complete
+PASS invalid timeout and log capacity rejected
+PASS 6 tests
+
+EXIT 0
+
+ succeeded in 17416ms:
+07-red 1
+07-green 0
+08-contract-checks 0
+
+exec
+/bin/bash -lc "cat > android/core/src/Core.kt <<'EOF'
+package core
+
+/** Nondecreasing elapsed milliseconds, never civil/wall time. */
+fun interface MonotonicClock { fun nowMs(): Long }
+
+/** Synchronous acceptance: return means SENT; throw Exception means FAILED. */
+fun interface AlertSink { fun send(alert: Alert) }
+
+enum class State { MONITORING, SUSPECTED, VERIFYING, ALERTING, AWAITING_HELP }
+enum class Response { UNKNOWN, SAFE, NEED_HELP, NO_RESPONSE }
+enum class Status { NOT_REQUIRED, COUNTDOWN, SENDING, SENT, FAILED, ACKNOWLEDGED }
+data class Alert(
+    val eventId: Long,
+    val response: Response,
+    val locationMessage: String = \"chưa xác định được vị trí\"
+)
+data class Snapshot(
+    val state: State,
+    val eventId: Long,
+    val response: Response,
+    val status: Status,
+    val remainingMs: Long?
+)
+data class RecordedEvent(val eventId: Long, val state: State, val status: Status)
+
+/**
+ * Confined to the creating thread, including reads and sink callbacks.
+ * Host must call tick at the deadline; this core does not schedule background work.
+ * Calls reentering from the synchronous sink cannot finish or resend the active event.
+ */
+class AlertCore(
+    private val clock: MonotonicClock,
+    private val sink: AlertSink,
+    private val timeoutMs: Long = 10_000,
+    private val logCapacity: Int = 32
+) {
+    init {
+        require(timeoutMs > 0) { \"timeoutMs must be positive\" }
+        require(logCapacity > 0) { \"logCapacity must be positive\" }
+    }
+
+    private val owner = Thread.currentThread()
+    private var state = State.MONITORING
+    private var eventId = 0L
+    private var response = Response.UNKNOWN
+    private var status = Status.NOT_REQUIRED
+    private var started = 0L
+    private var sending = false
+    private val log = ArrayDeque<RecordedEvent>()
+
+    private fun owned() {
+        check(Thread.currentThread() === owner) { \"Call on owner thread\" }
+    }
+
+    /** Display-only read; never sends an alert. */
+    fun snapshot(): Snapshot {
+        owned()
+        val remaining = if (state == State.VERIFYING)
+            (timeoutMs - (clock.nowMs() - started)).coerceAtLeast(0) else null
+        return Snapshot(state, eventId, response, status, remaining)
+    }
+
+    fun events(): List<RecordedEvent> {
+        owned()
+        return log.toList()
+    }
+
+    private fun record() {
+        log.addLast(RecordedEvent(eventId, state, status))
+        while (log.size > logCapacity) log.removeFirst()
+    }
+
+    fun suspected() {
+        owned()
+        if (state == State.MONITORING) {
+            eventId++
+            response = Response.UNKNOWN
+            status = Status.NOT_REQUIRED
+            state = State.SUSPECTED
+            record()
+        }
+    }
+
+    fun evidenceConfirmed() {
+        owned()
+        if (state == State.SUSPECTED) {
+            started = clock.nowMs()
+            state = State.VERIFYING
+            status = Status.COUNTDOWN
+            record()
+        }
+    }
+
+    fun riskCleared() {
+        owned()
+        if (state == State.SUSPECTED) {
+            state = State.MONITORING
+            record()
+        }
+    }
+
+    private fun dispatch(reason: Response) {
+        if (state == State.ALERTING || state == State.AWAITING_HELP) return
+        if (state == State.MONITORING) eventId++
+        response = reason
+        state = State.ALERTING
+        status = Status.SENDING
+        record()
+        // Set both state and guard before invoking external code.
+        sending = true
+        try {
+            sink.send(Alert(eventId, reason))
+            status = Status.SENT
+            state = State.AWAITING_HELP
+        } catch (_: Exception) {
+            // Never retain transport messages, which may contain private data.
+            status = Status.FAILED
+        } finally {
+            sending = false
+        }
+        record()
+    }
+
+    fun tick() {
+        owned()
+        if (state == State.VERIFYING && clock.nowMs() - started >= timeoutMs)
+            dispatch(Response.NO_RESPONSE)
+    }
+
+    fun safe() {
+        owned()
+        tick()
+        if (state == State.VERIFYING || state == State.SUSPECTED) {
+            response = Response.SAFE
+            status = Status.NOT_REQUIRED
+            state = State.MONITORING
+            record()
+        }
+    }
+
+    fun needHelp() {
+        owned()
+        dispatch(Response.NEED_HELP)
+    }
+
+    fun sos() {
+        owned()
+        dispatch(Response.NEED_HELP)
+    }
+
+    fun complete() {
+        owned()
+        if ("'!sending && (state == State.AWAITING_HELP || state == State.ALERTING)) {
+            state = State.MONITORING
+            status = Status.ACKNOWLEDGED
+            record()
+        }
+    }
+}
+EOF' in /home/pdd/nckh27pa
+ succeeded in 0ms:
+codex
+Các test SOS, chống gửi trùng, lỗi sink và bộ nhớ hữu hạn đã qua. Test bổ sung về wall time và truy cập sai thread cũng qua; hai kiểm tra này không có vòng RED riêng, tôi sẽ ghi rõ giới hạn đó. Tôi đang chạy lại bản cuối sau khi chỉnh định dạng mã và chạy demo CLI thật; Hermes/reviewer phiên riêng vẫn là bước bàn giao chưa thực hiện.
+
+exec
+/bin/bash -lc "cat > android/core/README.md <<'EOF'
+# CORE-001 — lõi Kotlin ngoại tuyến
+
+Lõi thử nghiệm, không Android dependency. Chỉ đọc nguồn Android §4.4, §7, §9 và phiếu CORE-001. Không thuật toán phát hiện ngã: bên tích hợp cung cấp "'`suspected()` và `evidenceConfirmed()`.
+
+Chạy từ root repo:
+
+```sh
+./android/core/run-tests.sh
+./android/core/run-tests.sh core.DemoKt
+```
+
+Runner dùng Kotlin 2.3.10 tại `/home/pdd/.local/opt/nckh27pa/android-studio/plugins/Kotlin/kotlinc/bin/kotlinc` và `JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64`. Compile jar local, chạy Java thật, dọn thư mục build tạm; không Gradle/network/thư viện tải thêm. Đường dẫn công cụ là điều kiện môi trường, không tự cài nếu thiếu.
+
+## Hợp đồng tích hợp
+
+- Tạo và gọi mọi API core/sink trên cùng một thread, kể cả snapshot. Sai thread ném `IllegalStateException` trước khi sửa state. Host chịu trách nhiệm serialize callback lên thread đó; đây không phải class đa luồng có lock.
+- Clock cung cấp elapsed milliseconds không giảm, không lấy từ civil/wall time. Khoảng elapsed phải nằm trong miền Long không âm. Fake clock được dùng trong test/demo; chưa có adapter clock Android.
+- `evidenceConfirmed()` chỉ bắt đầu countdown từ SUSPECTED, mặc định 10.000 ms. Callback lặp trong sự kiện không khởi động lại hạn. `riskCleared()` chỉ hủy SUSPECTED.
+- Host phải gọi `tick()` tại hạn hoặc ngay khi tiếp tục chạy. Snapshot chỉ phục vụ hiển thị, không phát side effect. Không có scheduler/thread nền: “tự gửi” nghĩa là tick đến hạn gửi mà không cần phản hồi người dùng; không bảo đảm chạy đúng giờ khi host ngủ hoặc process chết.
+- SAFE trước hạn hủy; SAFE tại/sau hạn xử lý timeout trước nên không xóa cảnh báo. NEED_HELP/SOS gửi ngay từ MONITORING/SUSPECTED/VERIFYING. Trong ALERTING/AWAITING_HELP, SOS tiếp theo bị bỏ qua để tránh spam.
+- Sink đồng bộ: return thành công nghĩa là sink chấp nhận (SENT), không chứng minh người nhận thật đã nhận. Exception thành FAILED, giữ ALERTING, không tự retry vì transport có thể đã nhận trước khi ném lỗi. Fatal JVM Error không được xử lý như lỗi transport thông thường.
+- State ALERTING/SENDING và cờ gửi được đặt trước khi gọi sink. Sink gọi ngược SOS/complete không gửi trùng hoặc đóng sự kiện đang gửi. `complete()` sau SENT hoặc FAILED quay MONITORING/ACKNOWLEDGED; SOS mới có ID mới. ID chỉ tăng trong vòng đời instance, không bền qua restart. ACKNOWLEDGED biểu thị host kết thúc sự kiện, không phải biên nhận transport.
+- Core hiện luôn gửi thông báo chưa xác định vị trí, không chờ GPS. Chưa chọn/lấy vị trí thật hoặc dựng payload liên hệ đầy đủ trong §7. Không có raw phone/contact/location trong event log. `RecordedEvent` chỉ chứa ID/state/status; log bỏ bản cũ khi đầy (mặc định 32). `RecordingSink` cũng hữu hạn, trả bản sao danh sách.
+- Snapshot giữ response/status cuối sau complete, lần suspected/SOS mới bắt đầu sự kiện mới. Các callback phải thuộc sự kiện hiện tại; chưa có token lọc callback cũ xuyên qua complete.
+
+## Bằng chứng và bàn giao
+
+`evidence/01..07-{red,green}.log` là output chạy thật theo các nhóm hành vi: chuyển trạng thái/callback, deadline/thiếu vị trí, SAFE boundary, HELP/SOS/complete, lỗi/reentrancy, config, bounded recording sink. RED 07 là compile failure vì RecordingSink chưa có. RED 05 phát hiện đệ quy gửi lại gây StackOverflow trước khi thêm guard. Hai script `tdd-*.py` lưu các bước lịch sử, **không chạy lại trên source cuối**.
+
+`08-contract-checks.log` kiểm tra wall time và owner thread bổ sung, chỉ GREEN: guard thread và clock injection đã có từ scaffold, vì vậy không tuyên bố TDD RED riêng cho mọi điều kiện con. Bounded event log cũng đã có trong scaffold; vòng 07 thêm TDD cho RecordingSink và kiểm tra cả hai bộ nhớ. Đây là giới hạn so với yêu cầu nghiêm ngặt “RED/GREEN từng hành vi”.
+
+`final-tests.log` và `demo.log` là lần chạy bản cuối. Không dùng agent con, không nới sandbox, không commit. Chưa có lượt Hermes chạy lại hay reviewer phiên riêng; cần thực hiện độc lập trước tích hợp. Chưa xác minh SUR-001 trong phiên này vì giới hạn chỉ đọc các mục được dẫn.
+
+Không coi CORE này là hoàn thành AND-001/APK. Chưa giải quyết sensor, UI, background, persistence, Android permissions hay real transport.
+EOF
+./android/core/run-tests.sh > android/core/evidence/final-tests.log 2>&1; result=$?; cat android/core/evidence/final-tests.log; echo "EXIT $result" >> android/core/evidence/final-tests.log; exit "$result"' in /home/pdd/nckh27pa
+ succeeded in 6704ms:
+PASS suspected, clear, confirmed and duplicate callbacks
+PASS deadline 10s, no response, absent location, one send
+PASS SAFE before deadline cancels; at and after deadline preserves alert
+PASS immediate NEED_HELP and SOS, dedup, completion permits new event
+PASS sink failure stays FAILED; reentrant calls cannot send or complete
+PASS invalid timeout and log capacity rejected
+PASS bounded sink and state history retain latest records; copies isolated
+PASS wall time jumps do not advance injected monotonic deadline
+PASS all public core and recording sink access is owner-thread only
+PASS 9 tests
+
+exec
+/bin/bash -lc './android/core/run-tests.sh core.DemoKt > android/core/evidence/demo.log 2>&1; result=$?; cat android/core/evidence/demo.log; echo "EXIT $result" >> android/core/evidence/demo.log; exit "$result"' in /home/pdd/nckh27pa
+exec
+/bin/bash -lc 'git diff --check; rg --files android/core; ls -l android/core/run-tests.sh; JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 /home/pdd/.local/opt/nckh27pa/android-studio/plugins/Kotlin/kotlinc/bin/kotlinc -version > android/core/evidence/compiler.log 2>&1' in /home/pdd/nckh27pa
+ succeeded in 2318ms:
+ succeeded in 6695ms:
+CORE ONLY: fake monotonic clock and fake recipient; no sensors/UI/real transport
+MONITORING
+SUSPECTED
+VERIFYING: 10000 ms
+ALERTING: fake recipient accepted event 1, NO_RESPONSE; chưa xác định được vị trí
+AWAITING_HELP: SENT
+
+codex
+Đã triển khai trong `android/core/` bằng Kotlin local, không tải Gradle/network, không agent con, không nới sandbox.
+
+- **9 nhóm test PASS, exit 0**; demo chạy thật đủ chuỗi MONITORING → SUSPECTED → VERIFYING → ALERTING → AWAITING_HELP.
+- Có log RED/GREEN cho 7 nhóm triển khai.
+- **Chưa đáp ứng trọn yêu cầu TDD từng hành vi**: wall time, thread ownership và bounded event log được kiểm tra sau scaffold, thiếu RED riêng.
+- Chưa có Hermes/reviewer độc lập; chưa giải quyết APK, background, persistence hoặc transport thật.
+
+Chi tiết và lệnh chạy: [README](/home/pdd/nckh27pa/android/core/README.md). Bằng chứng: [tests](/home/pdd/nckh27pa/android/core/evidence/final-tests.log), [demo](/home/pdd/nckh27pa/android/core/evidence/demo.log).
+tokens used
+47,839
+Đã triển khai trong `android/core/` bằng Kotlin local, không tải Gradle/network, không agent con, không nới sandbox.
+
+- **9 nhóm test PASS, exit 0**; demo chạy thật đủ chuỗi MONITORING → SUSPECTED → VERIFYING → ALERTING → AWAITING_HELP.
+- Có log RED/GREEN cho 7 nhóm triển khai.
+- **Chưa đáp ứng trọn yêu cầu TDD từng hành vi**: wall time, thread ownership và bounded event log được kiểm tra sau scaffold, thiếu RED riêng.
+- Chưa có Hermes/reviewer độc lập; chưa giải quyết APK, background, persistence hoặc transport thật.
+
+Chi tiết và lệnh chạy: [README](/home/pdd/nckh27pa/android/core/README.md). Bằng chứng: [tests](/home/pdd/nckh27pa/android/core/evidence/final-tests.log), [demo](/home/pdd/nckh27pa/android/core/evidence/demo.log).

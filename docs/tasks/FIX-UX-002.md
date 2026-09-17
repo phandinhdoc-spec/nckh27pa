@@ -1,0 +1,3 @@
+# FIX-UX-002 — Xác minh không bị ẩn dưới scroll
+Người Hermes, nguồn Android3.4 và QA runtime AND-002A. Input MainActivity Compose và evidence/android-env/scroll-regression. Scope MainActivity scroll logic và test scripts/evidence. Phụ thuộc appbuild/sensoremulator.
+RED thực: từSettings cuộn sâu; emu sensor acceleration30 trong200ms rồi9.81; lúcverify controls không visible trongXML, sau đóHome trạng tháiSENT chứng minh actualsensor pipeline đã phát sự kiện. Fix LaunchedEffect tab/state scrollTo0. Nghiệm thu lặp đúng injection, VERIFYING+SAFE visible rồi tựSENT nếukhôngtrảlời; đổi tab đặt scroll đúng đầu, noerror.2testattempt/no-progress. Không đổi detector/threshold/quyền hoặc chạy thông báo thật.

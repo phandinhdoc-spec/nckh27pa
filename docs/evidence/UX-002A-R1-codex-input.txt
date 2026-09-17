@@ -1,0 +1,8 @@
+Bạn là primary worker duy nhất cho UX-002A-R1 tại /home/pdd/nckh27pa. AGY Level 1 đã bị headless read_file auto-deny hai lượt; đây là escalation có lý do. Tuân thủ AGENTS.md và docs/tasks/UX-002A-R1.md. Chỉ sửa android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt; không sửa file khác, không agent con, không commit/push, không chạy Gradle trong sandbox.
+
+Áp dụng patch Compose tối thiểu:
+- Trên tab Trang chủ, ngay sau text `BLE: chưa tích hợp • PHONE_ONLY vẫn dùng được`, thêm một Text tiếng Việt nói rõ PHONE_ONLY cần mang điện thoại theo người và để máy xa cơ thể có thể bỏ sót sự kiện.
+- Trong tab Kiểm tra hệ thống, sau dòng áp suất/gia tốc tuyến tính, thêm `Text("Độ cao tương đối m: ${p?.altitudeDeltaM ?: "—"}")`.
+- Trong dòng danh sách chưa tích hợp, bỏ từ `độ cao` nhưng giữ bước chân, vị trí, pin, rung/âm thanh và màn hình khóa.
+
+Giữ mọi hành vi, APIs, semantics, bốn tab và cảnh báo THỬ NGHIỆM. Không tuyên bố độ chính xác. Cuối cùng báo đúng file đã sửa và giới hạn chưa kiểm chứng.

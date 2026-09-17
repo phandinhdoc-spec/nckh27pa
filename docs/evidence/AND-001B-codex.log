@@ -1,0 +1,1374 @@
+OpenAI Codex v0.154.0
+--------
+workdir: /home/pdd/nckh27pa
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: none
+reasoning summaries: none
+session id: 01a0a027-6c72-7b70-b844-401e5c188596
+--------
+user
+Thực hiện docs/tasks/AND-001B.md. Chỉ sửa app/src/, android/README.md và evidence AND-001B. KHÔNG sửa core/ hoặc Gradle vì Hermes quản lý, CORE-002 độc lập. Không network/Gradle sandbox; dựng source UI Compose thực và tests pure Kotlin offline theo phiếu, Hermes sẽ build Gradle host. Đọc vừa đủ mục dẫn nguồn. Không agent con. Hoàn thành source và test, không dừng vì blocker Gradle đã biết.
+codex
+Tôi sẽ đọc phiếu AND-001B và các hướng dẫn liên quan, rồi hoàn thiện UI Compose cùng test Kotlin chạy offline trong đúng phạm vi cho phép.
+
+exec
+/bin/bash -lc "pwd; rg --files -g AGENTS.md -g '*AND-001B*' -g '*README*' -g '*gradle*' -g '*kt' -g '*md' docs/tasks .agents android | head -100" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+/home/pdd/nckh27pa
+android/settings.gradle.kts
+docs/tasks/AND-001B.md
+docs/tasks/CORE-002.md
+docs/tasks/CORE-001.md
+docs/tasks/AND-001.md
+docs/tasks/UX-001.md
+docs/tasks/ENV-002.md
+docs/tasks/REV-CORE-001.md
+android/core/tests/CoreTests.kt
+android/core/README.md
+android/android-plan.md
+android/gradlew
+android/gradle.properties
+android/build.gradle.kts
+android/core/src/RecordingSink.kt
+android/core/src/Demo.kt
+android/core/src/Core.kt
+android/core/evidence/core-002-report.md
+android/gradlew.bat
+android/app/build.gradle.kts
+android/gradle/wrapper/gradle-wrapper.jar
+android/gradle/wrapper/gradle-wrapper.properties
+android/evidence/gradle-download-attempt-2.log
+android/evidence/AND-001-blocked.md
+
+exec
+/bin/bash -lc 'ls -la; find .. -name AGENTS.md -print; cat docs/tasks/AND-001B.md; git status --short' in /home/pdd/nckh27pa
+ succeeded in 4470ms:
+find: ‘../DATA/.DocumentRevisions-V100’: Permission denied
+../.codex/.tmp/plugins/plugins/vercel/skills/react-best-practices/AGENTS.md
+../.codex/.tmp/plugins/plugins/data-analytics/AGENTS.md
+../.codex/.tmp/plugins/plugins/build-web-apps/skills/supabase-best-practices/AGENTS.md
+../.codex/.tmp/plugins/plugins/build-web-apps/skills/react-best-practices/AGENTS.md
+../.codex/.tmp/plugins/plugins/product-design/templates/prototype/AGENTS.md
+../.codex/.tmp/plugins/plugins/product-design/templates/mobile-app/AGENTS.md
+../.codex/.tmp/plugins/plugins/zoom/AGENTS.md
+find: ‘../DATA/.TemporaryItems’: Permission denied
+find: ‘../DATA/.Trashes’: Permission denied
+find: ‘../DATA/Documents/16. BANG DIEM’: Input/output error
+find: ‘../DATA/Documents/17. SKKN’: Input/output error
+find: ‘../DATA/Documents/8. SÁCH’: Input/output error
+find: ‘../DATA/Documents/9. HSG’: Input/output error
+find: ‘../DATA/Documents/EasyEDA-Pro’: Input/output error
+find: ‘../DATA/Documents/Giao an HDTN’: Input/output error
+find: ‘../DATA/Documents/NCKH 2026-2027’: Input/output error
+find: ‘../DATA/Documents/PHIẾU ĐỀ XUẤT’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/_distutils_hack’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/certifi-2026.5.20.dist-info’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/charset_normalizer-3.4.7.dist-info’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/cycler-0.12.1.dist-info’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/dateutil’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/flatbuffers’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/flatbuffers-25.12.19.dist-info’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/gast-0.7.0.dist-info’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/joblib-1.5.3.dist-info’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/libclang-18.1.1.dist-info’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/markdown_it_py-4.2.0.dist-info’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/matplotlib’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/namex’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/opencv_python-4.13.0.92.dist-info’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/protobuf-7.35.0.dist-info’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/pyparsing-3.3.2.dist-info’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/rich’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/scikit_learn-1.8.0.dist-info’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/scipy’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/scipy-1.17.1.dist-info’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/setuptools’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/_api’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/compiler’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/distribute/__pycache__’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/distribute/experimental/rpc/__pycache__’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/distribute/experimental/rpc/proto’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/absl’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/ducc’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/Eigen’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/external’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/google’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/include’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/ml_dtypes’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/tensorflow’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/third_party’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/tsl’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/unsupported’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/xla/client’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/xla/hlo/builder’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/xla/hlo/transforms/collectives’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/xla/hlo/transforms/expanders’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/xla/hlo/transforms/simplifiers’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/xla/service’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/include/xla/stream_executor’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow/xla_aot_runtime_src’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/tensorflow-2.21.0.dist-info’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/urllib3’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/lib/python3.13/site-packages/urllib3-2.7.0.dist-info’: Input/output error
+find: ‘../DATA/Documents/Sang Tao Thanh Thieu Nien/venv/share’: Input/output error
+find: ‘../DATA/Downloads/7. THÁNG 3’: Input/output error
+find: ‘../DATA/Downloads/8. THÁNG 4’: Input/output error
+find: ‘../DATA/Downloads’: Input/output error
+find: ‘../DATA/logseq/graphs’: Input/output error
+find: ‘../DATA/miniconda3/bin’: Input/output error
+find: ‘../DATA/miniconda3/conda-meta’: Input/output error
+find: ‘../DATA/miniconda3/condabin’: Input/output error
+find: ‘../DATA/miniconda3/condarc.d’: Input/output error
+find: ‘../DATA/miniconda3/envs’: Input/output error
+find: ‘../DATA/miniconda3/images’: Input/output error
+find: ‘../DATA/miniconda3/include’: Input/output error
+find: ‘../DATA/miniconda3/lib’: Input/output error
+find: ‘../DATA/miniconda3/libexec’: Input/output error
+find: ‘../DATA/miniconda3/man’: Input/output error
+find: ‘../DATA/miniconda3/pkgs/absl-py-2.3.1-py311hca03da5_0’: Input/output error
+find: ‘../DATA/miniconda3/pkgs/anaconda-anon-usage-0.7.5-pyhb46e38b_100’: Input/output error
+find: ‘../DATA/miniconda3/pkgs/anaconda-auth-0.13.0-py313hca03da5_0’: Input/output error
+find: ‘../DATA/miniconda3/pkgs/anaconda-cli-base-0.8.1-py313hca03da5_0/info’: Input/output error
+find: ‘../DATA/miniconda3/pkgs/anaconda-cli-base-0.8.1-py313hca03da5_0/lib’: Input/output error
+find: ‘../DATA/miniconda3/pkgs/annotated-types-0.6.0-py313hca03da5_1’: Input/output error
+find: ‘../DATA/miniconda3/pkgs/anyio-4.10.0-py313hca03da5_0’: Input/output error
+find: ‘../DATA/miniconda3/pkgs’: Input/output error
+find: ‘../DATA/miniconda3/share’: Input/output error
+find: ‘../DATA/miniconda3/shell’: Input/output error
+find: ‘../DATA/miniconda3/ssl’: Input/output error
+find: ‘../DATA/Movies/1776471671442’: Input/output error
+find: ‘../DATA/Movies/CapCut’: Input/output error
+find: ‘../DATA/Movies/iMovie Theater.theater’: Input/output error
+find: ‘../DATA/Movies/Thư viện iMovie.imovielibrary’: Input/output error
+find: ‘../DATA/Movies/TV/Media.localized/.localized’: Input/output error
+find: ‘../DATA/Movies/TV/Media.localized’: Input/output error
+find: ‘../DATA/Movies/TV/Previous Libraries.localized’: Input/output error
+find: ‘../DATA/Movies/TV/TV Library.tvlibrary’: Input/output error
+find: ‘../DATA/Music/Audio Music Apps’: Input/output error
+find: ‘../DATA/Music/Music’: Input/output error
+find: ‘../DATA/Music/NHẠC CHÀO CỜ’: Input/output error
+find: ‘../DATA/Music/NHẠC CỦA TÔI’: Input/output error
+find: ‘../DATA/My Files/14. THAO GIẢNG CHUYÊN ĐỀ 24-25 K6/1. CHUYÊN ĐỀ’: Input/output error
+find: ‘../DATA/My Files/14. THAO GIẢNG CHUYÊN ĐỀ 24-25 K6/3. KẾ HOẠCH BÀI DẠY VÀ POWERPOINT’: Input/output error
+find: ‘../DATA/My Files/airgreeneye/dataset/inorganic’: Input/output error
+find: ‘../DATA/My Files/airgreeneye/dataset/organic’: Input/output error
+find: ‘../DATA/My Files/airgreeneye/dataset/other’: Input/output error
+find: ‘../DATA/My Files/airgreeneye/dataset/vietnam_fauna_detailed’: Input/output error
+find: ‘../DATA/My Files/airgreeneye/dataset/vietnam_flowers’: Input/output error
+find: ‘../DATA/My Files/airgreeneye/dataset/vietnam_organic_fruits’: Input/output error
+find: ‘../DATA/My Files/airgreeneye/dataset/wooden_objects’: Input/output error
+find: ‘../DATA/My Files/airgreeneye/script’: Input/output error
+find: ‘../DATA/My Files/airgreeneye/venv’: Input/output error
+find: ‘../DATA/My Files/KHTN 7/25-26/CHỦ ĐỀ 6’: Input/output error
+find: ‘../DATA/My Files/KHTN 7/25-26/KTGK’: Input/output error
+find: ‘../DATA/My Files/KHTN 7/25-26/KTTX 1’: Input/output error
+find: ‘../DATA/My Files/KHTN 7/25-26/ON TAP KTCK ’: Input/output error
+find: ‘../DATA/My Files/KHTN 7/7.b1’: Input/output error
+find: ‘../DATA/My Files/KHTN 8/8.b1’: Input/output error
+find: ‘../DATA/My Files/KHTN 8/Poster’: Input/output error
+find: ‘../DATA/My Files/KHTN 9/25-26’: Input/output error
+find: ‘../DATA/My Files/KHTN 9/9.b1’: Input/output error
+find: ‘../DATA/My Files/KHTN 9/Daily’: Input/output error
+find: ‘../DATA/My Files/KHTN 9’: Input/output error
+find: ‘../DATA/My Files/Môn Toán_LỚP 5’: Input/output error
+find: ‘../DATA/My Files/Tập huấn Trí tuệ nhân tạo/Bộ sách Trí tuệ nhân tạo’: Input/output error
+find: ‘../DATA/My Files/Tập huấn Trí tuệ nhân tạo/Nhóm Facebook hỗ trợ Giáo viên dạy học Trí tuệ nhân tạo’: Input/output error
+find: ‘../DATA/My Files/Tập huấn Trí tuệ nhân tạo/Slide các buổi tập huấn’: Input/output error
+find: ‘../DATA/My Files/Tập huấn Trí tuệ nhân tạo/Tài liệu chung/0 Tài liệu chung’: Input/output error
+find: ‘../DATA/My Files/Tập huấn Trí tuệ nhân tạo/Tài liệu THPT (tập huấn Bộ GD)/3 Tài liệu THPT (tập huấn Bộ GD)/KHDG các môn’: Input/output error
+find: ‘../DATA/My Files/Tập huấn Trí tuệ nhân tạo/Văn bản Bộ GD-ĐT’: Input/output error
+find: ‘../DATA/My Files/Xcode/AI’: Input/output error
+find: ‘../DATA/My Files/Xcode/HEIC2PNG/HEIC2PNG/Assets.xcassets’: Input/output error
+find: ‘../DATA/My Files/Xcode/HEIC2PNG/HEIC2PNG’: Input/output error
+find: ‘../DATA/My Files/Xcode/HEIC2PNG/HEIC2PNG.xcodeproj’: Input/output error
+find: ‘../DATA/My Files/Xcode/NotebookLM’: Input/output error
+find: ‘../DATA/Obsidian Data/.obsidian’: Input/output error
+find: ‘../DATA/Obsidian Data/HSG’: Input/output error
+find: ‘../DATA/Obsidian Data/Ngày giờ công’: Input/output error
+find: ‘../DATA/Obsidian Data/TaskNotes/Views’: Input/output error
+find: ‘../DATA/Pictures/ẢNH THẺ’: Input/output error
+find: ‘../DATA/Pictures/CCCD’: Input/output error
+find: ‘../DATA/Pictures/Photo Booth Library’: Input/output error
+find: ‘../DATA/Pictures/Photos Library.photoslibrary’: Input/output error
+find: ‘../DATA/Pictures/TEMP’: Input/output error
+find: ‘../DATA/Public/Drop Box’: Input/output error
+find: ‘../DATA/PycharmProjects/PythonProject’: Input/output error
+find: ‘../DATA/Python/.venv’: Input/output error
+find: ‘../DATA/Python/airgreeneye’: Input/output error
+find: ‘../DATA/Python/airgreeneye copy’: Input/output error
+find: ‘../DATA/Python/YouTube Downloader Pro’: Input/output error
+find: ‘../DATA/Python/YTD’: Input/output error
+find: ‘../DATA/Server/.build’: Input/output error
+find: ‘../DATA/Server/.vscode’: Input/output error
+find: ‘../DATA/Server/Bai du thi’: Input/output error
+find: ‘../DATA/Server/Docs’: Input/output error
+find: ‘../DATA/Server/Pi 2’: Input/output error
+find: ‘../DATA/Server/Sources’: Input/output error
+find: ‘../DATA/Server/Tests’: Input/output error
+find: ‘../DATA/Server/wavpi’: Input/output error
+find: ‘../DATA/Server copy/.build’: Input/output error
+find: ‘../DATA/Server copy/Docs’: Input/output error
+find: ‘../DATA/Server copy/Pi’: Input/output error
+find: ‘../DATA/Server copy/Pi16’: Input/output error
+find: ‘../DATA/Server copy/Sources’: Input/output error
+find: ‘../DATA/STTTN/newvenv/bin’: Input/output error
+find: ‘../DATA/STTTN/newvenv/include’: Input/output error
+find: ‘../DATA/STTTN/newvenv/lib’: Input/output error
+find: ‘../DATA/STTTN/offline_image_dataset_project/.venv’: Input/output error
+find: ‘../DATA/STTTN/offline_image_dataset_project/__pycache__’: Input/output error
+find: ‘../DATA/STTTN/offline_image_dataset_project’: Input/output error
+find: ‘../DATA/STTTN/V11/dataset/áo của nam’: Input/output error
+find: ‘../DATA/STTTN/V11/dataset/ấm siêu tốc’: Input/output error
+find: ‘../DATA/STTTN/V11/dataset’: Input/output error
+find: ‘../DATA/STTTN/V11/dataset_ready’: Input/output error
+find: ‘../DATA/STTTN/venv/bin’: Input/output error
+find: ‘../DATA/STTTN/venv/include’: Input/output error
+find: ‘../DATA/STTTN/venv/lib’: Input/output error
+find: ‘../DATA/TEMP/fonts’: Input/output error
+find: ‘../DATA/TEMP/IN’: Input/output error
+find: ‘../DATA/TEMP/KIEM TRA HO SO TO CUOI NAM’: Input/output error
+find: ‘../DATA/TEMP/speechcheck’: Input/output error
+find: ‘../DATA/TEMP/SYLL VK’: Input/output error
+find: ‘../DATA/TEMP/untitled folder’: Input/output error
+find: ‘../DATA/TEMP/yolo/venv/include’: Input/output error
+find: ‘../DATA/TEMP/yolo/venv/lib’: Input/output error
+find: ‘../DATA/TypstLib/local’: Input/output error
+find: ‘../DATA/venv/bin’: Input/output error
+find: ‘../DATA/venv/include’: Input/output error
+find: ‘../DATA/venv/lib’: Input/output error
+../.hermes/hermes-agent/cron/AGENTS.md
+../.hermes/hermes-agent/AGENTS.md
+../.hermes/hermes-agent/plugins/AGENTS.md
+../.hermes/hermes-agent/skills/AGENTS.md
+../.hermes/hermes-agent/tui_gateway/AGENTS.md
+../.hermes/hermes-agent/agent/AGENTS.md
+../.hermes/hermes-agent/gateway/AGENTS.md
+../.hermes/hermes-agent/apps/desktop/src/AGENTS.md
+../.hermes/hermes-agent/apps/desktop/AGENTS.md
+../.hermes/hermes-agent/hermes_cli/AGENTS.md
+../.hermes/hermes-agent/tools/AGENTS.md
+../.hermes/hermes-agent/web/AGENTS.md
+# AND-001B — Android PHONE_ONLY demo có source thực
+Mục tiêu: app Compose 4 tab chạy được: nhận gia tốc điện thoại + replay mẫu mô phỏng → xử lý chuỗi → core countdown → UI/test sink. Không chỉ checklist.
+Nguồn: Android §3,4.2–4.5,7,10,11 phase1; chỉ thị tiếp tục. Người: Codex gpt-6-astra đã gọi được. Hermes build bằng terminal host, không nới sandbox.
+Đọc: phiếu, android/core/src, README; android-plan chỉ §3,4.4,4.5.1–4.5.2,11; android/app/build.gradle.kts. Không đọc toàn repo. API: tái dùng core.AlertCore, không sửa core. Gói PhoneSensorPacket chính xác tên theo plan; collector thật SensorManager accelerometer và optional gyro/rotation/pressure/linear accel; unsupported/stale=null. Bắt đầu nhỏ, ghi rõ cảm biến/bước/vị trí nào chưa tích hợp.
+Phạm vi sửa: android/app/src/, android/README.md, android/evidence/AND-001B-*; không build.gradle, core, docs, hai kế hoạch. Hermes quản lý Gradle + dependency, không agent con/build Gradle/network trong sandbox. Tối đa2 triển khai đồng thời, không sửa tệp chung.
+Phụ thuộc: CORE-001/002 cùng API ổn định; ENV-002 cung cấp wrapper/dependencies. Bàn giao source app/tests, README chạy, đơn vị/unit và demo notes; TDD logic mới qua compiler offline rồi Hermes JUnit build.
+Nghiệm thu:
+- MainActivity Compose và 4 tab Trang chủ/Sự kiện/Người thân/Cài đặt có nội dung thật, hiển thị banner THỬ NGHIỆM không gửi ngoài, source PHONE_ONLY/giả phân biệt, cảm biến unavailable không ghi an toàn, BLE chưa tích hợp không chặn PHONE_ONLY; font/scroll/nhãn rõ.
+- PhoneSensorCollector thật m/s², gyro rad/s→Dps, pressure hPa→Pa; phone optional fields null khi thiếu; đăng ký/unregister lifecycle, độ mới dữ liệu; không map zero vào sensor thiếu. No bogus on-body certainty; confidence UNKNOWN khi chưa có thuật toán.
+- Pipeline detection DEMO riêng nhiều mẫu: va đập rồi yên trong cửa sổ có thời gian; không một sample gọi là ngã, replay tự cấp dữ liệu vào cùng logic. Không tuyên bố detector chính xác. tick Handler monotonic trên main thread, tiếp tục countdown qua pause nếu process sống; lifecycle hạn chế ghi rõ, không nói foreground service khi chưa có.
+- SOS UI giữ2giây, NEED_HELP ngay/SAFE deadline core; event history bounded; sink fake tại chỗ, tuyệt đối không SMS/CALL_PHONE/INTERNET hoặc Intent gọi thật. Đang gửi/thất bại/đã nhận giả phân biệt.
+- Có thể kiểm demo no-response trên emulator: nút 'Chạy dữ liệu mô phỏng', đếm10s, tự chuyển đã gửi THỬ NGHIỆM; test sink lỗi toggle; hoàn tất sự kiện và thử lại. SAFE trước hạn và SOS2s phải thao tác được.
+- Không location permission ở lát này: ghi chưa lấy vị trí; không chờ GPS. Màn người thân chỉ người nhận mô phỏng không danh bạ thật.
+- Tests JUnit pure pipeline/normalization/replay với sample times và invalid/NaN/stale nếu có; test-first cho source mới, riêng core existing là regression. Có thể thêm offline harness Kotlin trong evidence để xem RED/GREEN; không bịa build/test output.
+Cách kiểm: Hermes ./gradlew --no-daemon --max-workers=2 testDebugUnitTest assembleDebug và emulator một máy. Agent chạy pure tests offline nếu khả thi. Sau2 lỗi không tiến triển dừng hướng đó, bàn giao source đã viết cho Hermes; không dừng toàn task chỉ vì Gradle sandbox không mạng đã biết. Chưa nghiệm thu phần nền/phần cứng/độ chính xác.
+?? .gitignore
+?? android/
+?? docs/
+?? esp/
+?? setup-nckh27pa-26.04.sh
+
+exec
+/bin/bash -lc "sed -n '71,152p' android/android-plan.md; sed -n '209,277p' android/android-plan.md; sed -n '764,773p' android/android-plan.md; ls -la .agents .codex; cat android/core/run-tests.sh" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+## 3. Thiết kế frontend Android
+
+Frontend phải tạo cảm giác **gọn gàng, yên tâm và dễ thao tác**, không giống một bảng điều khiển kỹ thuật. Người lớn tuổi chỉ cần nhìn thấy trạng thái hiện tại và một nút cầu cứu lớn; thông số chuyên sâu được đặt ở màn hình dành cho người chăm sóc.
+
+### 3.1. Phong cách giao diện
+
+- Một màn hình chỉ có một nhiệm vụ chính.
+- Chữ lớn, tương phản cao, khoảng cách nút rộng.
+- Không dùng quá nhiều màu; màu thể hiện đúng ý nghĩa:
+  - Xanh lá: an toàn, hoạt động bình thường.
+  - Vàng/cam: cần chú ý.
+  - Đỏ: nguy hiểm hoặc đang gửi cảnh báo.
+  - Xám: chưa kết nối hoặc chưa có dữ liệu.
+- Trạng thái luôn có cả **màu + biểu tượng + chữ**, không chỉ dựa vào màu.
+- Nút quan trọng đủ lớn để bấm bằng một tay.
+- Hạn chế nhập liệu; ưu tiên lựa chọn, công tắc và giá trị mặc định hợp lý.
+- Hỗ trợ cỡ chữ hệ thống, chế độ sáng/tối và TalkBack.
+
+### 3.2. Thanh điều hướng
+
+Ứng dụng chỉ cần bốn mục chính:
+
+1. **Trang chủ** – trạng thái an toàn, kết nối, pin và nút SOS.
+2. **Sự kiện** – lịch sử cảnh báo và kết quả xác minh.
+3. **Người thân** – danh sách người nhận cảnh báo, thứ tự ưu tiên.
+4. **Cài đặt** – thiết bị, quyền, ngưỡng và kiểm tra hệ thống.
+
+### 3.3. Màn hình Trang chủ
+
+Các thành phần theo thứ tự từ trên xuống:
+
+- Thẻ trạng thái lớn: **An toàn / Cần chú ý / Đang xác minh / Đang cảnh báo**.
+- Tên thiết bị đeo và trạng thái BLE.
+- Nguồn đang giám sát: **Điện thoại**, **ESP32** hoặc **Cả hai**.
+- Trạng thái cảm biến điện thoại và cảnh báo “Điện thoại có thể đang đặt trên bàn” khi dữ liệu cho thấy máy không đi cùng người dùng.
+- Pin thiết bị đeo, trạng thái đang sạc và pin điện thoại.
+- Dòng thông tin ngắn: “Dữ liệu mới nhất cách đây 2 giây”.
+- Nút đỏ **SOS – GIỮ 2 GIÂY** để tránh chạm nhầm.
+- Nút **Kiểm tra hệ thống** nhỏ hơn để thử rung, âm thanh, vị trí và liên lạc.
+
+Không đưa biểu đồ gia tốc liên tục lên Trang chủ. Biểu đồ chỉ xuất hiện trong chế độ kiểm thử dành cho giáo viên/học sinh nghiên cứu.
+
+### 3.4. Màn hình xác minh nguy cơ
+
+Khi phát hiện dấu hiệu đáng ngờ, ứng dụng mở giao diện toàn màn hình ngay cả khi máy đang khóa, nếu Android và quyền hệ thống cho phép:
+
+- Tiêu đề lớn: **Bạn có ổn không?**
+- Đếm ngược rõ ràng, mặc định 10 giây nhưng cho phép cấu hình trong thử nghiệm.
+- Âm báo, rung và đọc bằng giọng nói.
+- Hai nút lớn:
+  - **TÔI VẪN ỔN** – hủy cảnh báo và ghi nhận báo động giả.
+  - **CẦN GIÚP ĐỠ** – gửi cảnh báo ngay, không chờ hết thời gian.
+- Có thể nhận lệnh hủy từ nút vật lý trên thiết bị đeo nếu đã thiết kế nút xác nhận.
+
+### 3.5. Màn hình cảnh báo đã gửi
+
+- Hiển thị người đã được liên hệ và kênh liên hệ.
+- Hiển thị bản đồ/vị trí gần nhất cùng thời điểm lấy vị trí.
+- Có nút gọi số khẩn cấp và gọi người thân ưu tiên.
+- Có nút **Tôi đã được hỗ trợ** để kết thúc sự kiện nhưng không xóa nhật ký.
+
+### 3.6. Màn hình Sự kiện
+
+Mỗi sự kiện hiển thị ngắn gọn:
+
+- Thời gian.
+- Loại: té ngã, mất thăng bằng, SOS, mất kết nối hoặc pin yếu.
+- Mức tin cậy/nguy cơ: thấp, vừa, cao.
+- Kết quả: người dùng an toàn, đã gửi cảnh báo, người thân xác nhận hoặc chưa rõ.
+
+Khi mở chi tiết mới hiển thị biểu đồ, dữ liệu cảm biến, vị trí và lý do thuật toán đưa ra quyết định.
+
+### 3.7. Màn hình cấu hình thiết bị
+
+- Quét và ghép nối ESP32.
+- Hiển thị mã thiết bị để tránh ghép nhầm.
+- Kiểm tra luồng dữ liệu theo thời gian thực.
+- Kiểm tra nút SOS, pin, rung/còi và cảm biến.
+- Không cho người dùng phổ thông sửa trực tiếp UUID hoặc địa chỉ API; đặt các mục này trong **Chế độ nhà phát triển**.
+
+---
+
+### 4.4. Máy trạng thái phát hiện
+
+| Trạng thái | Ý nghĩa | Điều kiện chuyển chính |
+|---|---|---|
+| `MONITORING` | Theo dõi bình thường | Có dấu hiệu bất thường → `SUSPECTED` |
+| `SUSPECTED` | Thu thập thêm dữ liệu vài giây | Hết nguy cơ → `MONITORING`; đủ bằng chứng → `VERIFYING` |
+| `VERIFYING` | Hỏi người dùng và đếm ngược | Người dùng báo ổn → `MONITORING`; cần giúp/hết giờ → `ALERTING` |
+| `ALERTING` | Đang gửi cảnh báo | Đã gửi → `AWAITING_HELP` |
+| `AWAITING_HELP` | Chờ xác nhận đã được hỗ trợ | Kết thúc sự kiện → `MONITORING` |
+
+Nút SOS được phép chuyển trực tiếp từ mọi trạng thái sang `ALERTING`.
+
+---
+
+## 4.5. Android trực tiếp đo bằng cảm biến điện thoại
+
+### 4.5.1. Cảm biến và thông số sử dụng
+
+| Cảm biến/API Android | Biến chính | Thông số suy ra | Vai trò |
+|---|---|---|---|
+| Gia tốc kế `TYPE_ACCELEROMETER` | `accelXMs2`, `accelYMs2`, `accelZMs2` | Gia tốc tổng hợp, giảm tải, va đập, mức bất động | Nguồn chính để phát hiện chuyển động bất thường |
+| Gia tốc tuyến tính `TYPE_LINEAR_ACCELERATION` | `linearAccelXMs2`, `linearAccelYMs2`, `linearAccelZMs2` | Chuyển động sau khi đã loại gần đúng trọng lực | Bổ sung; không phải điện thoại nào cũng có cảm biến ảo ổn định |
+| Con quay `TYPE_GYROSCOPE` | `gyroXDps`, `gyroYDps`, `gyroZDps` | Tốc độ xoay và đổi tư thế nhanh | Phân biệt đặt máy, xoay người và ngã |
+| Vectơ xoay `TYPE_ROTATION_VECTOR` | `pitchDeg`, `rollDeg`, `yawDeg` | Hướng và tư thế của điện thoại | Đánh giá thay đổi tư thế trước/sau sự kiện |
+| Khí áp kế `TYPE_PRESSURE` | `pressurePa`, `altitudeDeltaM` | Thay đổi độ cao tương đối | Hỗ trợ ước lượng xuống thấp; không dùng một mình để kết luận ngã |
+| Bộ đếm/phát hiện bước | `stepCount`, `stepDetected` | Đang đi lại hay đã dừng | Bổ sung ngữ cảnh hoạt động |
+| GNSS/vị trí mạng | `latitude`, `longitude`, `locationAccuracyM`, `speedMps` | Vị trí, tốc độ di chuyển ngoài trời | Gửi vị trí và bổ sung ngữ cảnh; không đủ nhanh để đo quãng rơi |
+
+Từ kế không phải nguồn bắt buộc để phát hiện ngã vì dễ bị nhiễu bởi kim loại và môi trường trong nhà. Cảm biến tiệm cận chỉ nên hỗ trợ nhận biết điện thoại trong túi hoặc sát cơ thể trên một số thiết bị; không coi đây là bằng chứng chắc chắn.
+
+### 4.5.2. Gói dữ liệu cảm biến điện thoại
+
+```kotlin
+data class PhoneSensorPacket(
+    val timestampNs: Long,
+    val wallClockTimestampMs: Long,
+
+    val accelXMs2: Float,
+    val accelYMs2: Float,
+    val accelZMs2: Float,
+    val linearAccelXMs2: Float?,
+    val linearAccelYMs2: Float?,
+    val linearAccelZMs2: Float?,
+    val gyroXDps: Float?,
+    val gyroYDps: Float?,
+    val gyroZDps: Float?,
+    val pitchDeg: Float?,
+    val rollDeg: Float?,
+    val yawDeg: Float?,
+    val pressurePa: Float?,
+    val altitudeDeltaM: Float?,
+    val stepCount: Long?,
+    val stepDetected: Boolean?,
+
+    val phoneMotionState: String,
+    val phonePlacementConfidence: Int,
+    val sensorQuality: Int
+)
+```
+
+Quy ước:
+
+- `timestampNs` lấy từ đồng hồ đơn điệu của sự kiện cảm biến để tính khoảng thời gian chính xác.
+- `wallClockTimestampMs` dùng để ghép với nhật ký và gói ESP32.
+- Trường không được phần cứng hỗ trợ phải là `null`, không được tự điền `0`.
+- `phoneMotionState`: `MOVING_WITH_USER`, `POSSIBLY_ON_BODY`, `POSSIBLY_STATIONARY`, `UNKNOWN`.
+- `phonePlacementConfidence`: độ tin cậy 0–100 rằng điện thoại đang mang theo người.
+- `sensorQuality`: chất lượng tổng thể 0–100, xét độ trễ, cảm biến bị thiếu và mẫu bị mất.
+
+## 11. Lộ trình triển khai Android
+
+### Giai đoạn 1 – Ứng dụng khung
+
+- Dựng giao diện bốn mục.
+- Tích hợp gia tốc kế, con quay, vectơ xoay, khí áp kế và vị trí có sẵn trên điện thoại.
+- Tạo `PhoneSensorPacket`, bộ đệm và màn hình kiểm tra cảm biến điện thoại.
+- Tạo dữ liệu giả và hoàn thiện máy trạng thái.
+- Mô phỏng đếm ngược, SOS và nhật ký sự kiện.
+
+.agents:
+total 4
+dr-xr-xr-x 2 pdd pdd   40 Sep 14 20:42 .
+drwxrwxr-x 9 pdd pdd 4096 Sep 14 20:42 ..
+
+.codex:
+total 4
+dr-xr-xr-x 2 pdd pdd   40 Sep 14 20:42 .
+drwxrwxr-x 9 pdd pdd 4096 Sep 14 20:42 ..
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")"
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+KOTLINC=/home/pdd/.local/opt/nckh27pa/android-studio/plugins/Kotlin/kotlinc/bin/kotlinc
+build=$(mktemp -d)
+trap 'rm -rf "$build"' EXIT
+"$KOTLINC" src/*.kt tests/*.kt -include-runtime -d "$build/core.jar"
+"$JAVA_HOME/bin/java" -cp "$build/core.jar" "${1:-core.CoreTestsKt}"
+
+codex
+Core có API phù hợp và app hiện chưa có source. Tôi sẽ dùng chung pipeline cho cảm biến thật và replay, tách rõ nguồn dữ liệu; viết test trước cho chuẩn hóa, cửa sổ va đập–yên và luồng countdown. JUnit đã có sẵn trên máy nên có thể chạy offline bằng Kotlin compiler, không gọi Gradle.
+
+exec
+/bin/bash -lc "mkdir -p android/app/src/main/java/vn/nckh27pa/fallsafe android/app/src/test/java/vn/nckh27pa/fallsafe android/evidence
+cat > android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt <<'EOF'
+package vn.nckh27pa.fallsafe
+
+import core.*
+import org.junit.Assert.*
+import org.junit.Test
+
+class DemoTests {
+    @Test fun normalizationAndMissingValues() {
+        val n = PhoneNormalizer()
+        assertNull(n.packet(0, 0))
+        n.update(SensorKind.ACCEL, 0, floatArrayOf(0f, 0f, 9.81f))
+        var p = n.packet(0, 123)"'!!
+        assertNull(p.gyroXDps)
+        assertEquals("UNKNOWN", p.phoneMotionState)
+        assertEquals(0, p.phonePlacementConfidence)
+        assertEquals(123L, p.wallClockTimestampMs)
+        n.update(SensorKind.GYRO, 0, floatArrayOf(Math.PI.toFloat(), 0f, 0f))
+        n.update(SensorKind.PRESSURE, 0, floatArrayOf(1013.25f))
+        p = n.packet(0, 0)!!
+        assertEquals(180f, p.gyroXDps!!, 0.001f)
+        assertEquals(101325f, p.pressurePa!!, 0.1f)
+        assertNull(p.stepCount)
+        assertNull(p.altitudeDeltaM)
+        n.update(SensorKind.ACCEL, 600_000_000, floatArrayOf(0f, 0f, 9.81f))
+        assertNull(n.packet(600_000_000, 0)!!.pressurePa)
+        assertNull(n.packet(1_200_000_000, 0))
+    }
+    @Test fun invalidAndFutureSamplesNeverBecomeMeasurements() {
+        val n = PhoneNormalizer()
+        n.update(SensorKind.ACCEL, 10, floatArrayOf(Float.NaN, 0f, 0f))
+        assertNull(n.packet(10, 0))
+        n.update(SensorKind.ACCEL, 20, floatArrayOf(0f, 0f, 9.81f))
+        assertNull(n.packet(19, 0))
+        n.update(SensorKind.GYRO, 20, floatArrayOf(Float.POSITIVE_INFINITY, 0f, 0f))
+        assertNull(n.packet(20, 0)!!.gyroXDps)
+        n.update(SensorKind.ACCEL, 21, floatArrayOf(1f))
+        assertNull(n.packet(21, 0))
+    }
+    @Test fun detectorNeedsContinuousTimedEvidence() {
+        val d = DemoDetector()
+        assertFalse(d.accept(sample(0, 30f)))
+        assertFalse(d.accept(sample(100, 9.81f)))
+        assertFalse(d.accept(sample(2000, 9.81f))) // gap cannot prove quiet
+        assertFalse(d.accept(sample(2100, 9.81f)))
+        d.reset()
+        assertFalse(d.accept(sample(0, 30f)))
+        assertFalse(d.accept(sample(100, 9.81f)))
+        assertFalse(d.accept(sample(100, 9.81f))) // duplicate resets
+        assertFalse(d.accept(sample(200, 9.81f)))
+        d.reset()
+        repeat(30) { assertFalse(d.accept(sample(it * 100L, 9.81f))) }
+        assertFalse(d.accept(sample(4000, Float.NaN)))
+    }
+    @Test fun replayUsesSamePipelineAndDeadline() {
+        var now = 0L
+        val sink = LocalDemoSink()
+        val session = DemoSession(MonotonicClock { now }, sink)
+        val replay = DemoReplay(0)
+        assertTrue(replay.due(0).isNotEmpty())
+        // Fresh replay: consume each sample exactly once at its scheduled time.
+        val r = DemoReplay(0)
+        for (t in 0L..1600L step 100) {
+            now = t
+            r.due(t).forEach { session.accept(it) }
+        }
+        assertTrue(r.finished)
+        assertTrue(r.due(5000).isEmpty())
+        assertEquals(State.VERIFYING, session.snapshot().state)
+        val remaining = session.snapshot().remainingMs!!
+        now += remaining - 1
+        session.tick()
+        assertEquals(Status.COUNTDOWN, session.snapshot().status)
+        now++
+        session.tick()
+        assertEquals(Response.NO_RESPONSE, session.snapshot().response)
+        assertEquals(Status.SENT, session.snapshot().status)
+        assertEquals(1, sink.alerts().size)
+        session.tick()
+        assertEquals(1, sink.alerts().size)
+    }
+    @Test fun safeFailureCompleteAndBoundedHistory() {
+        var now = 0L
+        val sink = LocalDemoSink()
+        val s = DemoSession(MonotonicClock { now }, sink)
+        DemoReplay(0).due(1600).forEach { s.accept(it) }
+        s.safe()
+        now = 20000
+        s.tick()
+        assertTrue(sink.alerts().isEmpty())
+        sink.fail = true
+        s.needHelp()
+        assertEquals(Status.FAILED, s.snapshot().status)
+        s.complete()
+        sink.fail = false
+        repeat(40) { s.needHelp(); s.complete() }
+        assertEquals(32, sink.alerts().size)
+        assertTrue(s.events().size <= 32)
+        assertEquals(Status.ACKNOWLEDGED, s.snapshot().status)
+    }
+    @Test fun sosRequiresTwoSecondsAndCancels() {
+        val h = SosHold()
+        h.start(100)
+        assertFalse(h.ready(2099))
+        assertTrue(h.ready(2100))
+        assertFalse(h.ready(2200))
+        h.start(3000)
+        h.cancel()
+        assertFalse(h.ready(6000))
+    }
+    private fun sample(ms: Long, z: Float) = PhoneSensorPacket(
+        timestampNs = ms * 1_000_000, wallClockTimestampMs = 0,
+        accelXMs2 = 0f, accelYMs2 = 0f, accelZMs2 = z
+    )
+}
+EOF
+cat > android/evidence/AND-001B-test.sh <<'"'EOF'
+#"'!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+compiler=/home/pdd/.local/opt/nckh27pa/android-studio/plugins/Kotlin/kotlinc/bin/kotlinc
+libs="$PWD/.tools/gradle-8.13/lib"
+build_dir=$(mktemp -d /tmp/and-001b.XXXXXX)
+trap '"'rm -rf \""'$build_dir"'"' EXIT
+\""'$compiler" android/core/src/*.kt android/app/src/main/java/vn/nckh27pa/fallsafe/DemoLogic.kt android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt -cp "$libs/junit-4.13.2.jar" -include-runtime -d "$build_dir/tests.jar"
+"$JAVA_HOME/bin/java" -cp "$build_dir/tests.jar:$libs/junit-4.13.2.jar:$libs/hamcrest-core-1.3.jar" org.junit.runner.JUnitCore vn.nckh27pa.fallsafe.DemoTests
+EOF
+bash android/evidence/AND-001B-test.sh > android/evidence/AND-001B-red.log 2>&1; cat android/evidence/AND-001B-red.log' in /home/pdd/nckh27pa
+ succeeded in 5039ms:
+error: source file or directory not found: android/app/src/main/java/vn/nckh27pa/fallsafe/DemoLogic.kt
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:9:17: error: unresolved reference 'PhoneNormalizer'.
+        val n = PhoneNormalizer()
+                ^^^^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:11:18: error: unresolved reference 'SensorKind'.
+        n.update(SensorKind.ACCEL, 0, floatArrayOf(0f, 0f, 9.81f))
+                 ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:13:22: error: unresolved reference 'gyroXDps'.
+        assertNull(p.gyroXDps)
+                     ^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:14:35: error: unresolved reference 'phoneMotionState'.
+        assertEquals("UNKNOWN", p.phoneMotionState)
+                                  ^^^^^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:15:27: error: unresolved reference 'phonePlacementConfidence'.
+        assertEquals(0, p.phonePlacementConfidence)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:16:30: error: unresolved reference 'wallClockTimestampMs'.
+        assertEquals(123L, p.wallClockTimestampMs)
+                             ^^^^^^^^^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:17:18: error: unresolved reference 'SensorKind'.
+        n.update(SensorKind.GYRO, 0, floatArrayOf(Math.PI.toFloat(), 0f, 0f))
+                 ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:18:18: error: unresolved reference 'SensorKind'.
+        n.update(SensorKind.PRESSURE, 0, floatArrayOf(1013.25f))
+                 ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:20:30: error: unresolved reference 'gyroXDps'.
+        assertEquals(180f, p.gyroXDps!!, 0.001f)
+                             ^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:21:33: error: unresolved reference 'pressurePa'.
+        assertEquals(101325f, p.pressurePa!!, 0.1f)
+                                ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:22:22: error: unresolved reference 'stepCount'.
+        assertNull(p.stepCount)
+                     ^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:23:22: error: unresolved reference 'altitudeDeltaM'.
+        assertNull(p.altitudeDeltaM)
+                     ^^^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:24:18: error: unresolved reference 'SensorKind'.
+        n.update(SensorKind.ACCEL, 600_000_000, floatArrayOf(0f, 0f, 9.81f))
+                 ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:25:47: error: unresolved reference 'pressurePa'.
+        assertNull(n.packet(600_000_000, 0)!!.pressurePa)
+                                              ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:29:17: error: unresolved reference 'PhoneNormalizer'.
+        val n = PhoneNormalizer()
+                ^^^^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:30:18: error: unresolved reference 'SensorKind'.
+        n.update(SensorKind.ACCEL, 10, floatArrayOf(Float.NaN, 0f, 0f))
+                 ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:32:18: error: unresolved reference 'SensorKind'.
+        n.update(SensorKind.ACCEL, 20, floatArrayOf(0f, 0f, 9.81f))
+                 ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:34:18: error: unresolved reference 'SensorKind'.
+        n.update(SensorKind.GYRO, 20, floatArrayOf(Float.POSITIVE_INFINITY, 0f, 0f))
+                 ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:35:38: error: unresolved reference 'gyroXDps'.
+        assertNull(n.packet(20, 0)!!.gyroXDps)
+                                     ^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:36:18: error: unresolved reference 'SensorKind'.
+        n.update(SensorKind.ACCEL, 21, floatArrayOf(1f))
+                 ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:40:17: error: unresolved reference 'DemoDetector'.
+        val d = DemoDetector()
+                ^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:56:20: error: unresolved reference 'LocalDemoSink'.
+        val sink = LocalDemoSink()
+                   ^^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:57:23: error: unresolved reference 'DemoSession'.
+        val session = DemoSession(MonotonicClock { now }, sink)
+                      ^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:58:22: error: unresolved reference 'DemoReplay'.
+        val replay = DemoReplay(0)
+                     ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:61:17: error: unresolved reference 'DemoReplay'.
+        val r = DemoReplay(0)
+                ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:64:47: error: unresolved reference 'it'.
+            r.due(t).forEach { session.accept(it) }
+                                              ^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:83:20: error: unresolved reference 'LocalDemoSink'.
+        val sink = LocalDemoSink()
+                   ^^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:84:17: error: unresolved reference 'DemoSession'.
+        val s = DemoSession(MonotonicClock { now }, sink)
+                ^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:85:9: error: unresolved reference 'DemoReplay'.
+        DemoReplay(0).due(1600).forEach { s.accept(it) }
+        ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:85:52: error: unresolved reference 'it'.
+        DemoReplay(0).due(1600).forEach { s.accept(it) }
+                                                   ^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:101:17: error: unresolved reference 'SosHold'.
+        val h = SosHold()
+                ^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:110:46: error: unresolved reference 'PhoneSensorPacket'.
+    private fun sample(ms: Long, z: Float) = PhoneSensorPacket(
+                                             ^^^^^^^^^^^^^^^^^
+
+exec
+/bin/bash -lc "cat > android/app/src/main/java/vn/nckh27pa/fallsafe/DemoLogic.kt <<'EOF'
+package vn.nckh27pa.fallsafe
+
+import core.*
+import kotlin.math.abs
+import kotlin.math.sqrt
+
+/** Names/types follow plan §4.5.2. Confidence 0 + UNKNOWN means unestimated. */
+data class PhoneSensorPacket(
+    val timestampNs: Long, val wallClockTimestampMs: Long,
+    val accelXMs2: Float, val accelYMs2: Float, val accelZMs2: Float,
+    val linearAccelXMs2: Float? = null, val linearAccelYMs2: Float? = null,
+    val linearAccelZMs2: Float? = null,
+    val gyroXDps: Float? = null, val gyroYDps: Float? = null, val gyroZDps: Float? = null,
+    val pitchDeg: Float? = null, val rollDeg: Float? = null, val yawDeg: Float? = null,
+    val pressurePa: Float? = null, val altitudeDeltaM: Float? = null,
+    val stepCount: Long? = null, val stepDetected: Boolean? = null,
+    val phoneMotionState: String = \"UNKNOWN\", val phonePlacementConfidence: Int = 0,
+    val sensorQuality: Int = 0
+)
+enum class SensorKind { ACCEL, LINEAR, GYRO, ORIENTATION, PRESSURE }
+class PhoneNormalizer {
+    private data class Reading(val ns: Long, val values: List<Float>)
+    private val readings = mutableMapOf<SensorKind, Reading>()
+    fun clear() = readings.clear()
+    fun update(kind: SensorKind, ns: Long, values: FloatArray) {
+        val count = if (kind == SensorKind.PRESSURE) 1 else 3
+        if (ns < 0 || values.size < count || values.take(count).any { "'!it.isFinite() } ||
+            (kind == SensorKind.PRESSURE && values[0] <= 0f)) {
+            readings.remove(kind); return
+        }
+        if (ns < (readings[kind]?.ns ?: -1)) return
+        val scale = when (kind) {
+            SensorKind.GYRO -> (180.0 / Math.PI).toFloat()
+            SensorKind.PRESSURE -> 100f
+            else -> 1f
+        }
+        val converted = values.take(count).map { it * scale }
+        if (converted.any { !it.isFinite() }) { readings.remove(kind); return }
+        readings[kind] = Reading(ns, converted)
+    }
+    fun packet(nowNs: Long, wallMs: Long): PhoneSensorPacket? {
+        fun fresh(kind: SensorKind) = readings[kind]?.takeIf {
+            nowNs >= it.ns && nowNs - it.ns <= 500_000_000
+        }
+        val a = fresh(SensorKind.ACCEL) ?: return null
+        val l = fresh(SensorKind.LINEAR)?.values
+        val g = fresh(SensorKind.GYRO)?.values
+        val o = fresh(SensorKind.ORIENTATION)?.values
+        return PhoneSensorPacket(a.ns, wallMs, a.values[0], a.values[1], a.values[2],
+            l?.get(0), l?.get(1), l?.get(2), g?.get(0), g?.get(1), g?.get(2),
+            o?.get(0), o?.get(1), o?.get(2), fresh(SensorKind.PRESSURE)?.values?.get(0))
+    }
+}
+
+/** DEMO only: impact >=25 m/s², then >=1 s quiet at 9.81±1 within 3 s.
+ * At least 6 quiet samples; gaps >250 ms, invalid or reversed times break evidence.
+ * These illustrative thresholds are not a validated fall detector.
+ */
+class DemoDetector {
+    private var last: Long? = null
+    private var impact: Long? = null
+    private var quiet: Long? = null
+    private var count = 0
+    fun reset() { last = null; impact = null; quiet = null; count = 0 }
+    fun accept(p: PhoneSensorPacket): Boolean {
+        val t = p.timestampNs
+        val a = listOf(p.accelXMs2, p.accelYMs2, p.accelZMs2)
+        if (t < 0 || a.any { !it.isFinite() }) { reset(); return false }
+        val previous = last
+        if (previous != null && (t <= previous || t - previous > 250_000_000)) {
+            reset(); last = t; return false
+        }
+        last = t
+        val magnitude = sqrt(a.sumOf { it.toDouble() * it.toDouble() })
+        if (magnitude >= 25) { impact = t; quiet = null; count = 0; return false }
+        val hit = impact ?: return false
+        if (t - hit > 3_000_000_000L) { impact = null; quiet = null; count = 0; return false }
+        if (abs(magnitude - 9.81) > 1) { quiet = null; count = 0; return false }
+        if (quiet == null) quiet = t
+        count++
+        if (count >= 6 && t - quiet!! >= 1_000_000_000) { reset(); return true }
+        return false
+    }
+}
+class DemoReplay(private val startMs: Long) {
+    private var index = 0
+    val finished get() = index > 16
+    fun due(nowMs: Long): List<PhoneSensorPacket> {
+        val result = mutableListOf<PhoneSensorPacket>()
+        while (!finished && nowMs >= startMs && nowMs - startMs >= index * 100L) {
+            result += PhoneSensorPacket((startMs + index * 100L) * 1_000_000, 0,
+                0f, 0f, if (index == 2) 30f else 9.81f)
+            index++
+        }
+        return result
+    }
+}
+class LocalDemoSink : AlertSink {
+    var fail = false
+    private val received = ArrayDeque<Alert>()
+    override fun send(alert: Alert) {
+        if (fail) error("Lỗi mô phỏng")
+        received.addLast(alert)
+        while (received.size > 32) received.removeFirst()
+    }
+    fun alerts() = received.toList()
+}
+class DemoSession(clock: MonotonicClock, val sink: LocalDemoSink = LocalDemoSink()) {
+    private val core = AlertCore(clock, sink)
+    private val detector = DemoDetector()
+    fun resetDetection() = detector.reset()
+    fun accept(packet: PhoneSensorPacket) {
+        if (core.snapshot().state == State.MONITORING && detector.accept(packet)) {
+            core.suspected(); core.evidenceConfirmed()
+        }
+    }
+    fun snapshot() = core.snapshot()
+    fun events() = core.events()
+    fun tick() = core.tick()
+    fun safe() { core.safe(); detector.reset() }
+    fun needHelp() { core.needHelp(); detector.reset() }
+    fun complete() { core.complete(); detector.reset() }
+}
+class SosHold {
+    private var started: Long? = null
+    fun start(nowMs: Long) { started = nowMs }
+    fun cancel() { started = null }
+    fun ready(nowMs: Long): Boolean {
+        val start = started ?: return false
+        if (nowMs >= start && nowMs - start >= 2000) { cancel(); return true }
+        return false
+    }
+}
+EOF
+bash android/evidence/AND-001B-test.sh > android/evidence/AND-001B-green.log 2>&1; cat android/evidence/AND-001B-green.log' in /home/pdd/nckh27pa
+ succeeded in 7310ms:
+JUnit version 4.13.2
+......
+Time: 0.034
+
+OK (6 tests)
+
+
+codex
+Sáu test đầu đã PASS offline; log RED ghi nhận lúc chưa có implementation. Pipeline yêu cầu chuỗi mẫu yên liên tục sau va đập, loại bằng chứng bị ngắt quãng; replay đã đi qua cùng logic đến countdown và gửi giả. Tôi đang nối SensorManager, vòng tick main thread và bốn tab Compose.
+
+exec
+/bin/bash -lc "cat > android/app/src/main/java/vn/nckh27pa/fallsafe/PhoneSensorCollector.kt <<'EOF'
+package vn.nckh27pa.fallsafe
+
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
+
+/** Activity starts/stops collection; all callbacks are confined to main looper. */
+class PhoneSensorCollector(context: Context, private val onPacket: (PhoneSensorPacket) -> Unit) : SensorEventListener {
+    private val manager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    private val normalizer = PhoneNormalizer()
+    private val kinds = mapOf(
+        Sensor.TYPE_ACCELEROMETER to SensorKind.ACCEL,
+        Sensor.TYPE_LINEAR_ACCELERATION to SensorKind.LINEAR,
+        Sensor.TYPE_GYROSCOPE to SensorKind.GYRO,
+        Sensor.TYPE_ROTATION_VECTOR to SensorKind.ORIENTATION,
+        Sensor.TYPE_PRESSURE to SensorKind.PRESSURE
+    )
+    var activeSensors: Set<SensorKind> = emptySet(); private set
+    private var running = false
+    fun start() {
+        stop()
+        running = true
+        activeSensors = kinds.mapNotNull { (type, kind) ->
+            val sensor = manager.getDefaultSensor(type) ?: return@mapNotNull null
+            val registered = try {
+                manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME, Handler(Looper.getMainLooper()))
+            } catch (_: SecurityException) { false }
+            if (registered) kind else null
+        }.toSet()
+    }
+    fun stop() {
+        running = false
+        manager.unregisterListener(this)
+        normalizer.clear()
+        activeSensors = emptySet()
+    }
+    fun latest(): PhoneSensorPacket? = normalizer.packet(SystemClock.elapsedRealtimeNanos(), System.currentTimeMillis())
+    override fun onSensorChanged(event: SensorEvent) {
+        if ("'!running) return
+        val kind = kinds[event.sensor.type] ?: return
+        if (kind == SensorKind.ORIENTATION) {
+            if (event.values.size < 3 || event.values.any { !it.isFinite() }) {
+                normalizer.update(kind, event.timestamp, floatArrayOf(Float.NaN)); return
+            }
+            val rotation = FloatArray(9)
+            val orientation = FloatArray(3)
+            SensorManager.getRotationMatrixFromVector(rotation, event.values)
+            SensorManager.getOrientation(rotation, orientation)
+            normalizer.update(kind, event.timestamp, floatArrayOf(
+                Math.toDegrees(orientation[1].toDouble()).toFloat(),
+                Math.toDegrees(orientation[2].toDouble()).toFloat(),
+                Math.toDegrees(orientation[0].toDouble()).toFloat()
+            ))
+        } else normalizer.update(kind, event.timestamp, event.values)
+        if (kind == SensorKind.ACCEL) latest()?.let(onPacket)
+    }
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+}
+EOF
+cat > android/app/src/main/AndroidManifest.xml <<'"'EOF'
+<?xml version=\"1.0\" encoding=\"utf-8\"?>
+<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\">
+    <uses-feature android:name=\"android.hardware.sensor.accelerometer\" android:required=\"false\" />
+    <application android:name=\".DemoApplication\" android:label=\"FallSafe THỬ NGHIỆM\"
+        android:allowBackup=\"false\" android:supportsRtl=\"true\"
+        android:theme=\"@android:style/Theme.Material.Light.NoActionBar\">
+        <activity android:name=\".MainActivity\" android:exported=\"true\">
+            <intent-filter>
+                <action android:name=\"android.intent.action.MAIN\" />
+                <category android:name=\"android.intent.category.LAUNCHER\" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+EOF
+cat > android/app/src/main/java/vn/nckh27pa/fallsafe/DemoApplication.kt <<'EOF'
+package vn.nckh27pa.fallsafe
+
+import android.app.Application
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import core.MonotonicClock
+import core.State
+
+/** Process-scoped session survives Activity recreation. No foreground service. */
+class DemoApplication : Application() {
+    lateinit var controller: DemoController; private set
+    override fun onCreate() { super.onCreate(); controller = DemoController() }
+}
+class DemoController {
+    val session = DemoSession(MonotonicClock { SystemClock.elapsedRealtime() })
+    var snapshot by mutableStateOf(session.snapshot()); private set
+    var events by mutableStateOf(session.events()); private set
+    var source by mutableStateOf(\"PHONE_ONLY • cảm biến thật\"); private set
+    var packet by mutableStateOf<PhoneSensorPacket?>(null); private set
+    var replaying by mutableStateOf(false); private set
+    var fail by mutableStateOf(false); private set
+    private var replay: DemoReplay? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private val tick = object : Runnable {
+        override fun run() {
+            val now = SystemClock.elapsedRealtime()
+            replay?.let { r ->
+                r.due(now).forEach { packet = it; session.accept(it) }
+                if (r.finished) { replay = null; replaying = false }
+            }
+            session.tick()
+            refresh()
+            if (replay "'!= null || snapshot.state == State.VERIFYING) handler.postDelayed(this, 50)
+        }
+    }
+    fun refresh() { snapshot = session.snapshot(); events = session.events() }
+    private fun schedule() { handler.removeCallbacks(tick); handler.post(tick) }
+    fun acceptPhone(p: PhoneSensorPacket) {
+        if (!source.startsWith("PHONE_ONLY")) return
+        packet = p
+        session.accept(p)
+        refresh()
+        if (snapshot.state == State.VERIFYING) schedule()
+    }
+    fun displayPhone(p: PhoneSensorPacket?) {
+        if (source.startsWith("PHONE_ONLY")) packet = p
+    }
+    fun runReplay() {
+        if (snapshot.state != State.MONITORING || replaying) return
+        source = "MÔ PHỎNG • dữ liệu giả"
+        session.resetDetection()
+        packet = null
+        replay = DemoReplay(SystemClock.elapsedRealtime())
+        replaying = true
+        schedule()
+    }
+    fun usePhone() {
+        if (snapshot.state != State.MONITORING) return
+        replay = null; replaying = false; packet = null
+        source = "PHONE_ONLY • cảm biến thật"
+        session.resetDetection()
+    }
+    fun safe() { session.safe(); refresh() }
+    fun help() { session.needHelp(); refresh() }
+    fun complete() { replay = null; replaying = false; session.complete(); refresh() }
+    fun setFailure(value: Boolean) { fail = value; session.sink.fail = value }
+    fun resumed() { session.tick(); refresh(); schedule() }
+}
+EOF
+cat > android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt <<'"'EOF'
+package vn.nckh27pa.fallsafe
+
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import core.State
+import core.Status
+
+class MainActivity : ComponentActivity() {
+    private lateinit var collector: PhoneSensorCollector
+    private val controller get() = (application as DemoApplication).controller
+    private val handler = Handler(Looper.getMainLooper())
+    private var sensorSummary by mutableStateOf(\"Chưa thu cảm biến\")
+    private val poll = object : Runnable {
+        override fun run() {
+            controller.displayPhone(collector.latest())
+            handler.postDelayed(this, 250)
+        }
+    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        collector = PhoneSensorCollector(this, controller::acceptPhone)
+        setContent {
+            MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
+                DemoScreen(controller, sensorSummary)
+            }
+        }
+    }
+    override fun onResume() {
+        super.onResume()
+        collector.start()
+        sensorSummary = collector.activeSensors.joinToString().ifEmpty { \"Không có cảm biến khả dụng\" }
+        controller.resumed()
+        handler.post(poll)
+    }
+    override fun onPause() {
+        collector.stop()
+        handler.removeCallbacks(poll)
+        controller.displayPhone(null)
+        controller.session.resetDetection()
+        super.onPause()
+    }
+}
+
+@Composable
+private fun DemoScreen(c: DemoController, sensorSummary: String) {
+    var tab by rememberSaveable { mutableIntStateOf(0) }
+    val tabs = listOf(\"Trang chủ\", \"Sự kiện\", \"Người thân\", \"Cài đặt\")
+    Scaffold(bottomBar = {
+        NavigationBar {
+            tabs.forEachIndexed { i, title ->
+                NavigationBarItem(selected = tab == i, onClick = { tab = i },
+                    icon = { Text(listOf(\"⌂\", \"≡\", \"♡\", \"⚙\")[i]) }, label = { Text(title) })
+            }
+        }
+    }) { inset ->
+        Column(Modifier.fillMaxSize().padding(inset).verticalScroll(rememberScrollState())
+            .padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text(\"THỬ NGHIỆM — không gửi ra ngoài\", fontSize = 22.sp,
+                color = MaterialTheme.colorScheme.error)
+            Text(c.source, style = MaterialTheme.typography.titleMedium)
+            // Verification remains accessible from every tab, with no blocking modal.
+            if (c.snapshot.state == State.VERIFYING) {
+                Text(\""'! Bạn có ổn không?", style = MaterialTheme.typography.headlineMedium)
+                Text("Còn ${((c.snapshot.remainingMs ?: 0) + 999) / 1000} giây",
+                    fontSize = 32.sp, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+                Action("TÔI VẪN ỔN", c::safe)
+                Action("CẦN GIÚP ĐỠ", c::help)
+            }
+            when (tab) {
+                0 -> {
+                    Text(stateLabel(c), style = MaterialTheme.typography.headlineSmall)
+                    Text("BLE: chưa tích hợp • PHONE_ONLY vẫn dùng được")
+                    Text(if (c.packet == null) "! Thiếu hoặc cũ dữ liệu; không thể đánh giá nguy cơ."
+                        else "Có mẫu gia tốc • chưa thể kết luận an toàn.")
+                    Text("Mang theo người: UNKNOWN — chưa có thuật toán xác định.")
+                    Text("Vị trí: chưa lấy vị trí; không chờ GPS.")
+                    SosButton(c::help)
+                    Action("Chạy dữ liệu mô phỏng", c::runReplay,
+                        c.snapshot.state == State.MONITORING && !c.replaying)
+                    if (c.replaying) Text("Đang cấp chuỗi va đập rồi yên mô phỏng…")
+                    Action("Dùng cảm biến điện thoại", c::usePhone, c.snapshot.state == State.MONITORING)
+                    if (c.snapshot.state == State.ALERTING || c.snapshot.state == State.AWAITING_HELP) {
+                        Text("Người nhận: Người thân mô phỏng 1 • kênh: bộ nhớ tại máy")
+                        Text(if (c.snapshot.status == Status.SENT) "Đã nhận GIẢ tại sink; không phải người thật xác nhận."
+                            else "Gửi GIẢ thất bại; không tự gửi lại.")
+                        Action("Hoàn tất sự kiện để thử lại", c::complete)
+                    }
+                }
+                1 -> {
+                    Text("Sự kiện thử nghiệm", style = MaterialTheme.typography.headlineSmall)
+                    Text("32 chuyển trạng thái gần nhất trong phiên; ID không lưu qua khởi động lại. Độ tin cậy: chưa đánh giá.")
+                    if (c.events.isEmpty()) Text("Chưa có sự kiện.")
+                    c.events.asReversed().forEach {
+                        Text("#${it.eventId} • ${it.state}'"\\n"'${statusLabel(it.status)}")
+                    }
+                }
+                2 -> {
+                    Text("Người thân mô phỏng", style = MaterialTheme.typography.headlineSmall)
+                    Text("Ưu tiên 1 • Người thân mô phỏng 1'"\\nKênh nhận: bộ nhớ tại máy; không số điện thoại, không danh bạ thật.\")
+                    Text(\"Sink đã nhận "'${c.session.sink.alerts().size} cảnh báo giả (tối đa 32).")
+                    Text("Không SMS, cuộc gọi hoặc liên lạc mạng.")
+                }
+                3 -> {
+                    Text("Kiểm tra hệ thống", style = MaterialTheme.typography.headlineSmall)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("Giả lập lỗi gửi", Modifier.weight(1f), fontSize = 20.sp)
+                        Switch(c.fail, c::setFailure, Modifier.semantics { contentDescription = "Giả lập lỗi gửi" })
+                    }
+                    Text("Đã đăng ký: $sensorSummary")
+                    val p = c.packet
+                    Text("Gia tốc m/s²: ${p?.let { "${it.accelXMs2}, ${it.accelYMs2}, ${it.accelZMs2}" } ?: "không có / quá 500 ms"}")
+                    Text("Gyro °/s: ${p?.gyroXDps ?: "—"}, ${p?.gyroYDps ?: "—"}, ${p?.gyroZDps ?: "—"}")
+                    Text("Pitch/roll/yaw °: ${p?.pitchDeg ?: "—"}, ${p?.rollDeg ?: "—"}, ${p?.yawDeg ?: "—"}")
+                    Text("Áp suất Pa: ${p?.pressurePa ?: "—"}; gia tốc tuyến tính: ${p?.linearAccelXMs2 ?: "—"}, ${p?.linearAccelYMs2 ?: "—"}, ${p?.linearAccelZMs2 ?: "—"}")
+                    Text("— = thiếu/cũ dữ liệu. Chất lượng chưa chấm điểm (0). Bước chân, độ cao, vị trí, pin, rung/âm thanh và màn hình khóa chưa tích hợp.")
+                    Text("Luật DEMO: va đập ≥25 m/s² rồi yên ≥1 giây trong cửa sổ 3 giây; chưa kiểm chứng độ chính xác phát hiện ngã.")
+                    Text("Thu cảm biến khi màn hình app hoạt động. Countdown tiếp tục khi tạm rời app nếu process còn sống; máy ngủ có thể trễ. Không có foreground service, không phục hồi sau process chết.")
+                }
+            }
+        }
+    }
+}
+@Composable
+private fun Action(label: String, action: () -> Unit, enabled: Boolean = true) {
+    Button(onClick = action, enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+        Text(label, fontSize = 20.sp)
+    }
+}
+@Composable
+private fun SosButton(onSos: () -> Unit) {
+    val currentAction by rememberUpdatedState(onSos)
+    val hold = remember { SosHold() }
+    val handler = remember { Handler(Looper.getMainLooper()) }
+    var holding by remember { mutableStateOf(false) }
+    var accessibleArmed by remember { mutableStateOf(false) }
+    val fire = remember { Runnable {
+        if (hold.ready(SystemClock.elapsedRealtime())) {
+            holding = false; accessibleArmed = false; currentAction()
+        }
+    } }
+    DisposableEffect(Unit) {
+        onDispose { handler.removeCallbacks(fire); hold.cancel() }
+    }
+    Box(Modifier.fillMaxWidth().heightIn(min = 80.dp)
+        .background(MaterialTheme.colorScheme.errorContainer)
+        .semantics {
+            role = Role.Button
+            contentDescription = "SOS giữ 2 giây. Với TalkBack, kích hoạt để bắt đầu, kích hoạt lần nữa để hủy."
+            onClick {
+                if (accessibleArmed) { hold.cancel(); handler.removeCallbacks(fire); accessibleArmed = false; holding = false }
+                else { accessibleArmed = true; holding = true; hold.start(SystemClock.elapsedRealtime()); handler.postDelayed(fire, 2000) }
+                true
+            }
+        }
+        .pointerInput(Unit) {
+            detectTapGestures(onPress = {
+                holding = true
+                hold.start(SystemClock.elapsedRealtime())
+                handler.postDelayed(fire, 2000)
+                try { tryAwaitRelease() } finally {
+                    handler.removeCallbacks(fire); hold.cancel(); holding = false
+                }
+            })
+        }.padding(20.dp)) {
+        Text(if (holding) "Đang giữ SOS…" else "SOS — GIỮ 2 GIÂY", fontSize = 24.sp,
+            color = MaterialTheme.colorScheme.onErrorContainer)
+    }
+}
+private fun statusLabel(status: Status): String = when (status) {
+    Status.NOT_REQUIRED -> "Chưa yêu cầu gửi"
+    Status.COUNTDOWN -> "Đang đếm ngược"
+    Status.SENDING -> "Đang gửi GIẢ"
+    Status.SENT -> "Đã gửi THỬ NGHIỆM"
+    Status.FAILED -> "Gửi GIẢ thất bại"
+    Status.ACKNOWLEDGED -> "Đã hoàn tất tại máy (không phải biên nhận)"
+}
+private fun stateLabel(c: DemoController): String = when (c.snapshot.state) {
+    State.MONITORING -> if (c.snapshot.status == Status.ACKNOWLEDGED) "✓ Đã hoàn tất sự kiện" else "○ Theo dõi thử nghiệm"
+    State.SUSPECTED -> "! Cần chú ý"
+    State.VERIFYING -> "! Đang xác minh"
+    State.ALERTING, State.AWAITING_HELP -> statusLabel(c.snapshot.status)
+}
+EOF' in /home/pdd/nckh27pa
+ succeeded in 0ms:
+codex
+Source đã có đủ bốn tab, collector cảm biến thật và replay tự chạy. Countdown nằm ở cấp process để không mất khi Activity tái tạo; thu cảm biến dừng khi pause. Tôi đang rà soát SOS khi rời app, các nhãn trạng thái gửi giả và bổ sung test biên trước khi ghi bàn giao cho Hermes.
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+p='android/app/src/main/java/vn/nckh27pa/fallsafe/DemoApplication.kt'
+s=open(p).read().replace('val session = DemoSession', 'var foreground by mutableStateOf(false)\\n    val session = DemoSession').replace('fun help() {', 'fun sos() { if (foreground) help() }\\n    fun help() {')
+open(p,'w').write(s)
+p='android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt'
+s=open(p).read().replace('collector.start()','controller.foreground = true\\n        collector.start()').replace('collector.stop()','controller.foreground = false\\n        collector.stop()').replace('SosButton(c::help)','if (c.foreground) SosButton(c::sos)')
+open(p,'w').write(s)
+p='android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt'
+s=open(p).read().replace('    private fun sample', '''    @Test fun optionalNormalizationAndFreshnessBoundary() {
+        val n = PhoneNormalizer()
+        n.update(SensorKind.ACCEL, 0, floatArrayOf(1f, 2f, 3f))
+        n.update(SensorKind.LINEAR, 0, floatArrayOf(4f, 5f, 6f))
+        n.update(SensorKind.ORIENTATION, 0, floatArrayOf(10f, 20f, 30f))
+        val p = n.packet(500_000_000, 0)"'!!
+        assertEquals(6f, p.linearAccelZMs2!!, 0f)
+        assertEquals(10f, p.pitchDeg!!, 0f)
+        assertEquals(30f, p.yawDeg!!, 0f)
+        assertNull(n.packet(500_000_001, 0))
+        n.clear()
+        assertNull(n.packet(0, 0))
+    }
+    @Test fun motionAndExpiredWindowCannotConfirm() {
+        val d = DemoDetector()
+        assertFalse(d.accept(sample(0, 30f)))
+        for (t in 100L..4000L step 100) {
+            assertFalse(d.accept(sample(t, if (t < 3000) 15f else 9.81f)))
+        }
+        d.reset()
+        assertFalse(d.accept(sample(0, 30f)))
+        for (t in 100L..1000L step 100) assertFalse(d.accept(sample(t, 9.81f)))
+        assertFalse(d.accept(sample(1050, Float.NaN)))
+        for (t in 1100L..2200L step 100) assertFalse(d.accept(sample(t, 9.81f)))
+    }
+    @Test fun helpDuringCountdownAndSafeAtDeadline() {
+        var now = 0L
+        val s = DemoSession(MonotonicClock { now })
+        DemoReplay(0).due(1600).forEach(s::accept)
+        s.needHelp()
+        assertEquals(Response.NEED_HELP, s.snapshot().response)
+        assertEquals(1, s.sink.alerts().size)
+        s.complete()
+        DemoReplay(2000).due(3600).forEach(s::accept)
+        now = 10000
+        s.safe()
+        assertEquals(Response.NO_RESPONSE, s.snapshot().response)
+        assertEquals(Status.SENT, s.snapshot().status)
+        assertEquals(2, s.sink.alerts().size)
+    }
+    private fun sample'"''')
+open(p,'w').write(s)
+PY
+bash android/evidence/AND-001B-test.sh > android/evidence/AND-001B-final-tests.log 2>&1; cat android/evidence/AND-001B-final-tests.log" in /home/pdd/nckh27pa
+ succeeded in 7446ms:
+JUnit version 4.13.2
+.........
+Time: 0.035
+
+OK (9 tests)
+
+
+exec
+/bin/bash -lc "cat > android/README.md <<'EOF'
+# Android PHONE_ONLY — AND-001B
+
+Source demo Compose ở "'`app/src/main`, 4 tab Trang chủ / Sự kiện / Người thân / Cài đặt. Tất cả cảnh báo chỉ đến sink bộ nhớ tại máy. Manifest không yêu cầu quyền SMS, gọi điện, mạng, danh bạ hoặc vị trí. BLE chưa tích hợp và không chặn PHONE_ONLY.
+
+## Chạy test offline
+
+Từ root repo:
+
+```sh
+bash android/evidence/AND-001B-test.sh
+```
+
+Runner gọi Kotlin compiler có sẵn tại `/home/pdd/.local/opt/nckh27pa/android-studio/plugins/Kotlin/kotlinc/bin/kotlinc`, Java 21 và hai jar JUnit/Hamcrest có sẵn trong `.tools/gradle-8.13/lib`. Chỉ đọc jar, không chạy Gradle hoặc tải mạng. Output jar trong `/tmp`, tự dọn. Cùng `DemoTests.kt` được Gradle nhận qua source set test mặc định. Đã chạy thật 9 test JUnit PASS; không có test Android/Compose trong runner này.
+
+Hermes build trên host, từ thư mục `android`:
+
+```sh
+./gradlew --no-daemon --max-workers=2 testDebugUnitTest assembleDebug
+```
+
+Gradle/dependency/core do Hermes quản lý; AND-001B không sửa chúng. Chưa chạy Gradle/APK/emulator trong sandbox; host cần xác minh compile Compose và thao tác thiết bị.
+
+## Demo trên emulator / máy thật
+
+1. Mở app: banner THỬ NGHIỆM, nguồn PHONE_ONLY. Thiếu accelerometer vẫn vào app và chạy replay được; không hiển thị “an toàn” khi thiếu dữ liệu.
+2. Bấm **Chạy dữ liệu mô phỏng**. Nguồn đổi sang MÔ PHỎNG; 17 mẫu cách nhau 100 ms chạy qua cùng detector như cảm biến thật. Sau khoảng 1,3 giây xuất hiện câu hỏi và countdown 10 giây. Không phản hồi: tự chuyển **Đã gửi THỬ NGHIỆM**, sink đã nhận GIẢ.
+3. Bấm **Hoàn tất sự kiện để thử lại**, chạy replay và chọn **TÔI VẪN ỔN** trước hạn. Không có alert mới. SAFE tại/sau hạn không hủy timeout của core.
+4. Chạy lại; **CẦN GIÚP ĐỠ** gửi ngay. Hoặc giữ vùng **SOS — GIỮ 2 GIÂY** khi không có countdown: thả sớm hoặc kéo hủy không gửi; đủ 2 giây gửi một lần. Với TalkBack, kích hoạt để bắt đầu 2 giây, kích hoạt lần nữa để hủy. Rời Activity không cho SOS đang giữ gửi.
+5. Hoàn tất, vào Cài đặt bật **Giả lập lỗi gửi**. Chạy replay và chờ: **Gửi GIẢ thất bại**; không tự retry. Hoàn tất, tắt lỗi, thử lại được với ID mới.
+6. Xem Sự kiện: tối đa 32 chuyển trạng thái; có **Đang gửi GIẢ** trước **Đã gửi THỬ NGHIỆM** hoặc **Gửi GIẢ thất bại**. Sink đồng bộ nên SENDING chỉ tồn tại tức thời, được giữ trong nhật ký, không tạo độ trễ giả. ACKNOWLEDGED là hoàn tất tại máy, không phải người thân xác nhận.
+7. Khi countdown, chuyển tab/rời app/quay lại hoặc xoay máy: phiên cấp Application giữ countdown nếu process sống. Tick ở main Handler dùng elapsedRealtime; pause không hủy tick. Máy ngủ có thể trì hoãn callback; resume gọi tick ngay. Đây chưa phải bảo đảm chạy nền.
+8. Bấm **Dùng cảm biến điện thoại** khi MONITORING để đổi lại PHONE_ONLY; reset detector để không trộn nguồn. Xem các giá trị cảm biến tại Cài đặt. Thử cỡ chữ lớn, cuộn, dark mode và TalkBack trên host.
+
+## Thiết kế và giới hạn
+
+- `PhoneSensorCollector`: SensorManager accelerometer m/s²; linear acceleration m/s²; gyro rad/s → °/s; rotation vector → pitch/roll/yaw độ; pressure hPa → Pa. Đăng ký ở onResume, unregister/xóa cache ở onPause, callback main looper. Thiếu sensor hoặc đăng ký thất bại không tạo giá trị 0. Thiếu accelerometer thì toàn packet null vì schema yêu cầu ba trục non-null.
+- `PhoneNormalizer`: giữ bản sao giá trị; bỏ NaN/Infinity/thiếu trục; reject dữ liệu tương lai khi đọc, bỏ packet sau 500 ms. Optional quá 500 ms là null. Không đo bước, vị trí, độ cao tương đối; các trường tương ứng null. `phoneMotionState=UNKNOWN`, confidence=0 nghĩa chưa ước lượng, không khẳng định máy mang theo người; sensorQuality=0 chưa được chấm điểm.
+- `DemoDetector`: va đập ≥25 m/s² rồi độ lớn gia tốc 9.81±1 m/s² trong ≥1 giây, ít nhất 6 mẫu, hoàn tất trong 3 giây. Gap >250 ms, thời gian lặp/lùi hoặc dữ liệu invalid làm mất bằng chứng. Một mẫu không kích hoạt cảnh báo. Các ngưỡng chỉ phục vụ demo, có thể nhầm đặt/rơi điện thoại với ngã; chưa đánh giá độ chính xác.
+- Không foreground service, wake lock, persistence hoặc phục hồi process chết. Cảm biến chỉ thu khi Activity resumed; countdown/replay đã khởi động tiếp tục trong process, không phụ thuộc UI. Không bảo đảm giờ chạy khi hệ điều hành ngủ/giết process. Không có overlay màn hình khóa, rung/âm thanh, pin, BLE, vị trí, bước chân hay liên lạc thật.
+- Nhật ký chuyển trạng thái và sink đều tối đa 32 bản ghi RAM. ID trong phiên; chưa lưu thời gian lịch/nguồn từng sự kiện, biểu đồ hoặc dữ liệu raw lịch sử. Nguồn hiển thị ở đầu màn hình là nguồn hiện tại. Không có danh bạ thật hay thông tin cá nhân.
+
+Bằng chứng: `evidence/AND-001B-report.md`, các log RED/GREEN/final và runner. Nghiệm thu source/pure logic hoàn tất; build host, UI emulator, phần cứng, nền và độ chính xác còn cần xác minh.
+EOF
+cat > android/evidence/AND-001B-report.md <<'"'EOF'
+# AND-001B — bàn giao source và pure tests
+
+Ngày 2026-09-14. Không agent con, không network, không chạy Gradle. Chỉ ghi "'`android/app/src/`, `android/README.md`, `android/evidence/AND-001B-*`. Không sửa core hoặc Gradle; CORE-002 độc lập.
+
+## Source hoàn thành
+
+- AndroidManifest không permissions, launcher MainActivity, Application giữ phiên.
+- MainActivity Compose bốn tab có nội dung và tương tác: banner thử nghiệm, nguồn thật/giả, trạng thái thiếu dữ liệu, countdown/SAFE/HELP, SOS giữ 2 giây và hủy khi rời Activity, replay, hoàn tất/thử lại, công tắc sink lỗi, người nhận giả, nhật ký bounded, thông số sensor. Câu hỏi xác minh hiển thị ở mọi tab.
+- PhoneSensorCollector thật và normalizer pure: đúng tên/schema PhoneSensorPacket; timestamp sensor monotonic; chuẩn hóa gyro/pressure, optional null, freshness 500 ms, không giả sensor bằng zero. Bước/độ cao/vị trí chưa tích hợp; trạng thái mang theo người UNKNOWN, confidence/quality 0 chưa đánh giá.
+- Detector DEMO nhiều mẫu có cửa sổ thời gian; replay có lịch mẫu và tiêu thụ một lần, cùng đường accept → AlertCore. Clock elapsedRealtime, Handler main; tick tiếp tục qua pause nếu process sống, resume tick bắt kịp. Không hứa foreground service hoặc persistence.
+- Sink synchronous tại máy: SENT không đồng nghĩa người thật nhận. SENDING có trong lịch sử vì chuyển trạng thái tức thời; FAILED riêng, ACKNOWLEDGED chỉ hoàn tất tại máy.
+
+## Kiểm chứng thật
+
+Lệnh: `bash android/evidence/AND-001B-test.sh` (từ root).
+
+- `AND-001B-red.log`: compiler thất bại trước khi thêm DemoLogic.kt, 6 test đầu đã viết. Đây là RED do thiếu implementation, không phải RED hành vi trên scaffold.
+- `AND-001B-green.log`: JUnit 4.13.2, **OK (6 tests)** sau implementation.
+- `AND-001B-final-tests.log`: **OK (9 tests)**, thêm 3 test biên sau triển khai; không tuyên bố test-first cho 3 test bổ sung hoặc adapter Android/Compose.
+- Suite test normalization/unit conversions/missing/NaN/Infinity/stale/future/short arrays, detector một mẫu/gap/duplicate/quiet/window/invalid, replay/countdown/no-response/idempotence, SAFE trước/tại hạn, HELP, sink fail/complete/retry/bounded, SOS 1999/2000 ms/cancel. Phần dùng core là integration/regression API hiện có; không viết lại core.
+- `AND-001B-static-checks.log`: parse manifest, kiểm tra không có permissions, rà đường gọi ngoài và số test; không thay thế Android build.
+
+## Bàn giao host
+
+Hermes chạy `./gradlew --no-daemon --max-workers=2 testDebugUnitTest assembleDebug` trong android, rồi kịch bản emulator trong README. Chưa có kết quả Android compiler, APK, UI/TalkBack, phần cứng hoặc background thực tế; không bịa output. Không dừng task source vì blocker Gradle sandbox đã biết.
+
+Giới hạn bổ sung: log chỉ lưu ID/state/status, chưa thời gian/nguồn từng sự kiện; không pin/rung/âm báo/khóa màn hình. Các ngưỡng demo chưa được kiểm chứng lâm sàng hay độ chính xác. Đã đọc các mục plan được phiếu chỉ định, core API/README và app Gradle; lệnh tìm AGENTS ban đầu vô tình quét tên ngoài workspace (permission errors), không đọc nội dung các tài liệu đó, sau đó giới hạn lại workspace.
+EOF
+python3 - <<'"'PY' > android/evidence/AND-001B-static-checks.log
+import pathlib, xml.etree.ElementTree as ET
+root=pathlib.Path('android/app/src')
+m=ET.parse(root/'main/AndroidManifest.xml').getroot()
+assert not m.findall('uses-permission')
+print('PASS manifest XML; no uses-permission')
+files=list(root.rglob('*.kt'))
+for p in files:
+    s=p.read_text()
+    for prohibited in ['ACTION_CALL', 'ACTION_SENDTO', 'SmsManager', 'java.net.', 'android.telephony.']:
+        assert prohibited not in s, (p, prohibited)
+print('PASS no external transport API in Kotlin source')
+print('JUnit tests:', (root/'test/java/vn/nckh27pa/fallsafe/DemoTests.kt').read_text().count('@Test'))
+print('Kotlin files:', len(files))
+PY
+cat android/evidence/AND-001B-static-checks.log
+ git diff --check" in /home/pdd/nckh27pa
+ succeeded in 0ms:
+PASS manifest XML; no uses-permission
+PASS no external transport API in Kotlin source
+JUnit tests: 9
+Kotlin files: 5
+
+codex
+Đã hoàn thành source AND-001B: UI Compose 4 tab, cảm biến thật, replay, countdown, SOS giữ 2 giây và sink giả.
+
+- **9 test JUnit pure Kotlin PASS offline**, có log RED/GREEN.
+- Chỉ sửa phạm vi cho phép; không sửa core/Gradle, không network hay agent con.
+- Build Compose/APK và emulator bàn giao Hermes chạy host.
+
+Hướng dẫn và bằng chứng: [README](/home/pdd/nckh27pa/android/README.md), [báo cáo AND-001B](/home/pdd/nckh27pa/android/evidence/AND-001B-report.md).
+tokens used
+53,023
+Đã hoàn thành source AND-001B: UI Compose 4 tab, cảm biến thật, replay, countdown, SOS giữ 2 giây và sink giả.
+
+- **9 test JUnit pure Kotlin PASS offline**, có log RED/GREEN.
+- Chỉ sửa phạm vi cho phép; không sửa core/Gradle, không network hay agent con.
+- Build Compose/APK và emulator bàn giao Hermes chạy host.
+
+Hướng dẫn và bằng chứng: [README](/home/pdd/nckh27pa/android/README.md), [báo cáo AND-001B](/home/pdd/nckh27pa/android/evidence/AND-001B-report.md).

@@ -1,0 +1,205 @@
+REV-AND-002A second independent review, INLINE ONLY NO TOOLS. Tối đa350từ tiếng Việt PASS/FAIL concrete bugs. Previous reviewer correctly found lost collector on asynchronous failed FGS start and100ms stop race; now ownership callback only after success/destroycleanup. Review actual updated code. Other previous claims need check source: resetDetection resets ONLY DemoDetector, NOT AlertCore; pause noResponse persists (tests); fixed10s countdown in DemoSession, not configurable >10s in this demo so wake clamp max11s matches current scope. STOP during active event intentionally disabled by ticket (OS task manager still can stop), not bug. Failure messages must survive unsuccessful onCreate destroy. No body sensors, FGS health highsampling permission per official docs, denied notification must explicit. Analyze lifecycle permissions as well.
+
+FILE MonitoringService.kt
+package vn.nckh27pa.fallsafe
+
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.os.Build
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
+import android.os.PowerManager
+import core.State
+
+/** Explicitly user-started demo monitoring; no boot receiver or hidden restart. */
+class MonitoringService : Service() {
+    private val controller get() = (application as DemoApplication).controller
+    private lateinit var collector: PhoneSensorCollector
+    private lateinit var wake: PowerManager.WakeLock
+    private var protectedEvent: Long? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private val poll = object : Runnable {
+        override fun run() {
+            controller.displayPhone(collector.latest())
+            controller.session.tick()
+            controller.refresh()
+            handler.postDelayed(this, 250)
+        }
+    }
+    override fun onCreate() {
+        super.onCreate()
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(NotificationChannel("monitor", "Giám sát thử nghiệm", NotificationManager.IMPORTANCE_LOW))
+        val open = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val notification = Notification.Builder(this, "monitor")
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle("FallSafe — GIÁM SÁT THỬ NGHIỆM")
+            .setContentText("Đọc cảm biến điện thoại; không liên hệ người thật. Mở app để dừng.")
+            .setContentIntent(open).setOngoing(true).build()
+        try {
+            if (Build.VERSION.SDK_INT >= 34) startForeground(27, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH)
+            else startForeground(27, notification)
+        } catch (_: RuntimeException) {
+            controller.backgroundMessage = "Không thể bật giám sát nền; kiểm tra quyền/hệ thống."
+            stopSelf(); return
+        }
+        wake = getSystemService(PowerManager::class.java).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "nckh27pa:verification")
+        wake.setReferenceCounted(false)
+        collector = PhoneSensorCollector(this, controller::acceptPhone)
+        controller.backgroundMonitoring = true
+        controller.onMonitoringChanged?.invoke()
+        controller.backgroundMessage = if (manager.areNotificationsEnabled()) "Giám sát nền thử đang bật; có thông báo hệ thống."
+            else "Giám sát nền đang bật, nhưng quyền/kênh thông báo bị tắt; xem mục ứng dụng đang chạy của Android."
+        controller.onStateChanged = ::protectVerification
+        collector.start()
+        controller.backgroundSensors = collector.activeSensors.joinToString()
+        protectVerification()
+        handler.post(poll)
+    }
+    private fun protectVerification() {
+        val state = controller.snapshot
+        if (state.state == State.VERIFYING) {
+            if (protectedEvent != state.eventId) {
+                protectedEvent = state.eventId
+                wake.acquire(((state.remainingMs ?: 0).coerceIn(0, 10000) + 1000))
+            }
+        } else {
+            protectedEvent = null
+            if (wake.isHeld) wake.release()
+        }
+    }
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_NOT_STICKY
+    override fun onBind(intent: Intent?): IBinder? = null
+    override fun onDestroy() {
+        handler.removeCallbacks(poll)
+        if (::collector.isInitialized) {
+            controller.onStateChanged = null
+            collector.stop()
+            if (::wake.isInitialized && wake.isHeld) wake.release()
+            controller.backgroundMonitoring = false
+            controller.backgroundSensors = ""
+            controller.backgroundMessage = "Giám sát nền đã dừng; mở app để thu cảm biến."
+            controller.displayPhone(null)
+            controller.session.resetDetection()
+            // Notify after cleanup; never rely on a fixed delay for handoff.
+            controller.onMonitoringChanged?.invoke()
+        }
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        super.onDestroy()
+    }
+}
+
+FILE MainActivity.kt
+package vn.nckh27pa.fallsafe
+
+import android.os.Bundle
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import core.State
+import core.Status
+
+class MainActivity : ComponentActivity() {
+    private lateinit var collector: PhoneSensorCollector
+    private lateinit var ownership: SensorOwnership
+    private val controller get() = (application as DemoApplication).controller
+    private val handler = Handler(Looper.getMainLooper())
+    private var sensorSummary by mutableStateOf("Chưa thu cảm biến")
+    private val poll = object : Runnable {
+        override fun run() {
+            if (!controller.backgroundMonitoring) controller.displayPhone(collector.latest())
+            handler.postDelayed(this, 250)
+        }
+    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        collector = PhoneSensorCollector(this, controller::acceptPhone)
+        ownership = SensorOwnership({ collector.start() }, { collector.stop() })
+        setContent {
+            MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
+                DemoScreen(controller, sensorSummary, ::startBackground, ::stopBackground)
+            }
+        }
+    }
+    override fun onResume() {
+        super.onResume()
+        controller.foreground = true
+        controller.onMonitoringChanged = { ownership.update(controller.foreground, controller.backgroundMonitoring) }
+        ownership.update(true, controller.backgroundMonitoring)
+        sensorSummary = if (controller.backgroundMonitoring) controller.backgroundSensors else collector.activeSensors.joinToString().ifEmpty { "Không có cảm biến khả dụng" }
+        controller.resumed()
+        handler.post(poll)
+    }
+    private fun startBackground() {
+        if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 27)
+        } else beginMonitoring()
+    }
+    private fun beginMonitoring() {
+        try { startForegroundService(Intent(this, MonitoringService::class.java)) }
+        catch (_: RuntimeException) {
+            controller.backgroundMessage = "Hệ thống từ chối giám sát nền; vẫn thu khi mở app."
+            ownership.update(controller.foreground, controller.backgroundMonitoring)
+        }
+    }
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 27 && controller.foreground) beginMonitoring()
+    }
+    private fun stopBackground() {
+        if (controller.snapshot.state != State.MONITORING) return
+        stopService(Intent(this, MonitoringService::class.java))
+    }
+    override fun onPause() {
+        controller.foreground = false
+        controller.onMonitoringChanged = null
+        ownership.update(false, controller.backgroundMonitoring)
+        handler.removeCallbacks(poll)
+        controller.paused()
+        super.onPause()
+    }
+}
+
+
+FILE SensorOwnership.kt
+package vn.nckh27pa.fallsafe
+
+class SensorOwnership(private val startLocal: () -> Unit, private val stopLocal: () -> Unit) {
+    private var localActive = false
+    fun update(foreground: Boolean, serviceActive: Boolean) {
+        val wanted = foreground && !serviceActive
+        if (wanted == localActive) return
+        localActive = wanted
+        if (wanted) startLocal() else stopLocal()
+    }
+}
+
+DemoSession: private val core=AlertCore(clock,sink) [default10s]; private val detector=DemoDetector(); fun resetDetection() = detector.reset(); fun tick()=core.tick().
+
+Controller refresh: snapshot=session.snapshot();events=session.events();onStateChanged?.invoke(). paused: input.paused(backgroundMonitoring);refresh(). Adapter paused: if(phoneOnly()&&!backgroundMonitoring){display(null);session.resetDetection()} . onMonitoringChanged assigned only when Activity foreground, cleared onPause; no changes to core clock or state.

@@ -1,0 +1,41 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {randomUUID} from 'node:crypto';
+import {setup,contact} from './helpers.js';
+const base='/users/u1/contacts';
+test('contacts CRUD preserves primary, last-contact and SOS invariants',async t=>{
+ const a=await setup(t);
+ assert.deepEqual((await a.request(base)).data,{userId:'u1',contacts:[]});
+ const r=await a.request(base,'POST',contact);assert.equal(r.status,201);
+ const c=r.data.contact;assert.equal(c.isPrimary,true);assert.equal(c.phone,'0901234567');
+ assert.equal((await a.request(`${base}/${c.id}`,'DELETE')).error.code,'CANNOT_DELETE_LAST_CONTACT');
+ const d=(await a.request(base,'POST',{...contact,name:'Hung',phone:'+84 (98) 765-43.21'})).data.contact;
+ assert.equal(d.isPrimary,false);assert.equal(d.phone,'+84987654321');
+ assert.equal((await a.request(`${base}/${d.id}`,'PUT',{...contact,name:'Updated',isPrimary:true})).data.contact.name,'Updated');
+ let list=(await a.request(base)).data.contacts;assert.equal(list.find(x=>x.id===c.id).isPrimary,false);
+ await a.request(`${base}/${d.id}`,'PUT',{...contact,isPrimary:false});
+ assert.equal((await a.request(base)).data.contacts.find(x=>x.id===d.id).isPrimary,true);
+ assert.equal((await a.request(`${base}/${c.id}/primary`,'POST')).data.primaryContactId,c.id);
+ assert.equal((await a.request(`${base}/${c.id}/toggle-sos`,'POST')).data.receiveSos,false);
+ assert.equal((await a.request(`${base}/${c.id}/toggle-sos`,'POST')).data.receiveSos,true);
+ assert.equal((await a.request(`${base}/${c.id}`,'DELETE')).data.remainingCount,1);
+ list=(await a.request(base)).data.contacts;assert.equal(list[0].id,d.id);assert.equal(list[0].isPrimary,true);
+});
+test('contact UUID retries and all mutations stay scoped to user',async t=>{
+ const a=await setup(t),id=randomUUID();
+ await a.request(base,'POST',{...contact,id});
+ const retry=await a.request(base,'POST',{...contact,id,name:'ignored'});
+ assert.equal(retry.status,200);assert.equal(retry.data.contact.name,contact.name);
+ const other='/users/u2/contacts';assert.deepEqual((await a.request(other)).data.contacts,[]);
+ for(const [method,suffix,body] of [['PUT','',contact],['DELETE',''],['POST','/primary'],['POST','/toggle-sos']]) assert.equal((await a.request(`${other}/${id}${suffix}`,method,body)).status,404);
+ await a.request(other,'POST',{...contact,id,name:'Different user'});
+ assert.equal((await a.request(base)).data.contacts[0].name,'Mai');
+ assert.equal((await a.request(other)).data.contacts[0].name,'Different user');
+});
+test('contact validation rejects invalid VN phones, UUIDs and fields',async t=>{
+ const a=await setup(t);
+ for(const phone of ['0123456789','123','+12025550123','09012345678']) assert.equal((await a.request(base,'POST',{...contact,phone})).error.code,'INVALID_PHONE_NUMBER');
+ for(const patch of [{id:'bad'},{name:''},{name:'a'.repeat(101)},{receiveSos:1},{relationship:null},{isPrimary:'true'}]) assert.equal((await a.request(base,'POST',{...contact,...patch})).error.code,'VALIDATION_ERROR');
+ assert.equal((await a.request(`${base}/bad`,'DELETE')).status,400);
+ assert.deepEqual((await a.request(base)).data.contacts,[]);
+});
