@@ -1,0 +1,57 @@
+[
+  {
+    "name": "first-run",
+    "passed": true,
+    "elapsedSeconds": 12.12
+  },
+  {
+    "name": "permission-center",
+    "passed": true,
+    "elapsedSeconds": 103.85
+  },
+  {
+    "name": "request-deny",
+    "passed": true,
+    "elapsedSeconds": 57.25
+  },
+  {
+    "name": "permanent-denial",
+    "passed": true,
+    "elapsedSeconds": 122.7
+  },
+  {
+    "name": "grant-on-resume",
+    "passed": true,
+    "elapsedSeconds": 80.51
+  },
+  {
+    "name": "approximate-only",
+    "passed": true,
+    "elapsedSeconds": 39.94
+  },
+  {
+    "name": "sos-degradation",
+    "passed": true,
+    "elapsedSeconds": 58.88
+  },
+  {
+    "name": "gps-off",
+    "passed": true,
+    "elapsedSeconds": 47.0
+  },
+  {
+    "name": "maps-intents",
+    "passed": true,
+    "elapsedSeconds": 2.82
+  },
+  {
+    "name": "maps-opens-google-maps",
+    "passed": true,
+    "elapsedSeconds": 46.47
+  },
+  {
+    "name": "maps-fallback-browser",
+    "passed": true,
+    "elapsedSeconds": 47.46
+  }
+]

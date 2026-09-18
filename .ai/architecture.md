@@ -87,9 +87,14 @@ Hệ thống hỗ trợ phát hiện té ngã, choáng váng và kích hoạt c�
    - One Gson snapshot is committed synchronously to SharedPreferences `fallsafe_detection_profiles_v1_<userId>` under `profiles_snapshot_json`; corrupt, empty, invalid, or multi-active data recovers to one active `Bảng 1` using initial experimental values.
    - Save updates one existing profile; Save As creates a new inactive profile; activation is explicit; the active or sole remaining profile cannot be deleted. Detection remains local and offline.
    - Calibration UI is reachable only from `Cài đặt → Phát hiện té ngã → Hiệu chỉnh thử nghiệm`; selected/draft and active profile state are distinct, and realtime display is throttled to approximately 4 Hz.
-6. **Packet Decoder (`Esp32PacketDecoder.kt`)**:
+6. **Android SOS permission flow (`permissions/`, `location/LocationResolution.kt`, `PermissionCenterSection.kt`)**:
+   - Three independent runtime capabilities: `CALLING` (`CALL_PHONE`), `MESSAGING` (`SEND_SMS`; `READ_PHONE_STATE` only adds a multi-SIM degradation note), `LOCATION` (foreground fine/coarse). `ACCESS_BACKGROUND_LOCATION` is never requested.
+   - Display states `GRANTED | CAN_REQUEST | NEEDS_SETTINGS` derive from the attempt store plus `shouldShowRequestPermissionRationale`; a permanent denial never re-loops the system dialog and opens App Settings only from a separate explicit action. Location precision (`PRECISE|APPROXIMATE|NONE`) is surfaced, and approximate-only is a working state.
+   - No permission is requested at startup. The first-run explanation appears once in non-emergency states (SAFE and DEVICE_DISCONNECTED, so it also works in PHONE_ONLY mode) and never gates the SOS hold-to-fire action; a modal system dialog appears only after an explicit tap, one capability at a time (Vị trí → SMS → Điện thoại).
+   - `EmergencyCoordinator` produces a persisted per-step `SosDispatchReport` (`LOCATION`, `SMS`, `VOICE_CALL`, `MAP_LINK` each with its own status) driven by an injected `CapabilitySnapshot`, so SOS degradation is unit-testable without Android. Map opening resolves Google Maps → generic `geo:` → https maps URL in a browser. Full contract, matrix and manual test steps: `docs/permission-flow.md` (decision D07).
+7. **Packet Decoder (`Esp32PacketDecoder.kt`)**:
    - Strict JSON streaming parser for `Esp32SensorPacket` (max 4096 bytes, strict numeric ranges, reject duplicate keys/nested objects).
-7. **ESP32 Local Alert (`esp/core/local_alert.{h,cpp}`)**:
+8. **ESP32 Local Alert (`esp/core/local_alert.{h,cpp}`)**:
    - C++17 state machine tracking alert deadline, buzzer output, sensor health, and BLE connection status.
 
 ## 6. Data Flow & Call Chains
@@ -142,6 +147,13 @@ Hệ thống hỗ trợ phát hiện té ngã, choáng váng và kích hoạt c�
   ```bash
   ./android/core/run-tests.sh
   ```
+- **Android Emulator Permission/SOS Flow Check** (emulator only, refuses physical devices):
+  ```bash
+  adb uninstall vn.nckh27pa.fallsafe && adb install android/app/build/outputs/apk/debug/app-debug.apk
+  python3 android/scripts/permission-dialog-acceptance.py   # real system dialogs on a clean install
+  python3 android/scripts/permission-flow-check.py          # permission center, SOS degradation, maps
+  ```
+  Evidence: `docs/evidence/permission-dialog/` and `docs/evidence/permission-flow/`.
 - **ESP32 Core Host Tests**:
   ```bash
   ./esp/core/run-tests.sh
@@ -158,7 +170,11 @@ Hệ thống hỗ trợ phát hiện té ngã, choáng váng và kích hoạt c�
 - `android/app/src/main/java/vn/nckh27pa/fallsafe/MainActivity.kt`: Compose UI hosting and background service orchestration.
 - `android/app/src/main/java/vn/nckh27pa/fallsafe/FallDetectionProfiles.kt`: Validated config/profile model, repository contract, Gson snapshot persistence, numbering and active-profile invariants.
 - `android/app/src/main/java/vn/nckh27pa/fallsafe/FallDetectionCalibrationScreen.kt`: Research-only profile editor and throttled detector observation panel.
-- `android/app/src/main/java/vn/nckh27pa/fallsafe/HomeScreen.kt`: High-contrast elderly-friendly UI, center action button, 5 states.
+- `android/app/src/main/java/vn/nckh27pa/fallsafe/permissions/CapabilityAccess.kt`: capability states, request/settings policy, first-run setup ordering, SOS readiness.
+- `android/app/src/main/java/vn/nckh27pa/fallsafe/PermissionCenterSection.kt`: Compose "QUYỀN ỨNG DỤNG" section plus pure label helpers for tests.
+- `android/app/src/main/java/vn/nckh27pa/fallsafe/HomeScreen.kt`: High-contrast elderly-friendly UI, center action button, 5 states, first-run permission explanation, per-step SOS report dialog.
+- `android/scripts/permission-flow-check.py`: emulator-only end-to-end permission/SOS degradation harness.
+- `docs/permission-flow.md`: permission contract, fail-safe matrix, automated and manual test procedures.
 - `android/app/src/main/java/vn/nckh27pa/fallsafe/ContactData.kt`: EmergencyContact models, validator, and repository.
 - `android/app/src/main/java/vn/nckh27pa/fallsafe/ContactsScreen.kt`: Full CRUD UI for emergency contacts.
 - `android/app/src/main/java/vn/nckh27pa/fallsafe/protocol/Esp32PacketDecoder.kt`: JSON protocol parser for ESP32 packets.
@@ -178,6 +194,6 @@ Hệ thống hỗ trợ phát hiện té ngã, choáng váng và kích hoạt c�
   - D06: Android fall detection profiles are local-first SharedPreferences snapshots. Exactly one profile is active; editing or Save As never activates implicitly; local detection does not depend on `/api/v1` or connectivity. Defaults are initial experimental values, not validated medical thresholds.
 - **Identified Gaps (Frontend vs Backend/ESP32)**:
   1. **External Voice Provider**: Twilio-compatible adapter and authenticated callbacks are implemented and mock-tested, but there is no account, outbound number, public HTTPS callback or permitted test number. No real call or recorded Vietnamese speech has been verified.
-  2. **Android Field Verification**: Runtime location/SMS/call permissions, multi-SIM selection, carrier delivery reports, Google Maps/browser fallback, lock-screen behavior and FGS/device-specific background limits require a permitted physical-device test.
+  2. **Android Field Verification**: Permission center, request/denied/permanent-denial, App Settings round trip, grant-on-resume, approximate-only location, location-service-off degradation, Google Maps opens/absent fallback and crash-free SOS degradation are verified on the project emulator (see `docs/evidence/permission-flow/`). Still unverified on a physical device: OEM permission dialogs, multi-SIM selection, carrier SMS delivery reports, real SIM calls, outdoor GPS fix time, lock-screen behaviour and device-specific FGS/background limits.
   3. **ESP32 BLE Transport**: Giao thức framing phân mảnh nhị phân (IF-003) mới chỉ ở mức lab prototype trên host, chưa được phê duyệt tích hợp vào BLE GATT stack thật trên ESP32 hay Android.
   4. **Event & Status Decoders**: Android mới chỉ triển khai `Esp32PacketDecoder.decodeSensor`; chưa có parser cho `Esp32DeviceStatus`, `Esp32EventPacket`, hay `Esp32CommandAck`.

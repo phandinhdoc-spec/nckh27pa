@@ -9,3 +9,8 @@ Không xem lab proposal là quyết định đã duyệt. Chưa bật BLE thật
    Chưa yêu cầu cung cấp số điện thoại qua chat lúc này. Hermes đề xuất tiếp tục fake sink cho tới khi chủ dự án chọn SMS/cuộc gọi/kênh thông báo phù hợp và xác nhận người thử, giới hạn quyền Android. Không tự mua dịch vụ/SIM/backend hoặc phát hành.
 
 Android hiện đủ demo foreground + thử FGS trên emulator, chưa là bản đầu đầy đủ theo Android§12. Persist/Room, location/bước/pin/âm-rung, BLE/fusion và nghiên cứu còn backlog, không bị đánh dấu hoàn thành. Các hạng mục nghiệm thu thực địa và giao thức tích hợp phụ thuộc những chốt trên; không lách bằng bo giả, tọa độ giả trình bày như thật, hoặc người nhận thật chưa được phép.
+
+4. SOS có được phép TỰ ĐỘNG gọi SIM khi adapter thoại backend chưa cấu hình?
+   Hiện tại (D03/D07) bước gọi tự động của SOS là adapter thoại backend; gọi SIM vẫn là thao tác thủ công có kiểm tra `CALL_PHONE` và báo trung thực khi thiếu quyền. Nếu chủ dự án muốn SOS tự gọi SIM khi máy chủ không cấu hình, cần một quyết định mới (mặc định bật/tắt, thứ tự gọi, giới hạn số lần, tương tác với đếm ngược 10 giây) trước khi triển khai. Không tự thêm auto-dial trong lúc chờ.
+5. Kiểm thử thực địa quyền/SOS trên điện thoại thật có SIM và GPS?
+   Emulator đã xác minh permission center, luồng xin/từ chối/từ chối vĩnh viễn, mở App Settings, cấp lại quyền, vị trí gần đúng, mở Google Maps có/không cài, và suy giảm SOS không crash. Còn phải thử trên thiết bị thật: hộp thoại quyền theo nhà sản xuất, đa SIM và biên nhận SMS thật, cuộc gọi SIM thật, GPS ngoài trời, hạn chế FGS khi khoá màn hình, và người nhận thử được chủ dự án cho phép (xem docs/permission-flow.md §Manual test).

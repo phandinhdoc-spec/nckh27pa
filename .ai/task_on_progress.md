@@ -1,67 +1,95 @@
 # Current Task
 
 ## Goal
-Sửa và hoàn thiện Android Vị trí/Gửi vị trí/Gọi người thân/Thiết bị, điều phối SOS tự động dùng backend hiện có, SMS SIM có biên nhận thật và adapter cuộc gọi thoại backend có DTMF/callback/idempotency; giữ nguyên UI trung tâm, contacts và profile ngưỡng hiện có.
+Hoàn thiện toàn bộ hệ thống quyền Android phục vụ SOS (điện thoại, SMS, định vị, mở bản đồ), Permission
+Center trong Cài đặt, luồng xin quyền lần đầu và suy giảm từng bước của SOS — tích hợp vào kiến trúc hiện
+có, không viết lại ứng dụng.
 
 ## Status
-IN_PROGRESS — permission and optional-AI completion started on the existing local SOS implementation. Existing uncommitted changes remain protected.
+IN_PROGRESS — xác minh hộp thoại quyền hệ thống trên thiết bị (T5). Phần permission flow/Permission
+Center/fail-safe SOS đã xong và được kiểm chứng; T5 bổ sung bảo đảm "không thao tác nào im lặng".
+Việc còn lại: cài APK mới trên thiết bị thật của chủ dự án và chạy lại checklist §6 `docs/permission-flow.md`.
 
-## Existing Working Tree
-Các thay đổi Android profile/calibration từ task trước đang uncommitted và phải được giữ nguyên. Không revert hoặc ghi đè.
+## T5 — Hộp thoại quyền hệ thống (báo cáo của chủ dự án: "vẫn không hiện")
+- Kiểm tra 3 lớp bằng `rg`: (1) manifest có đủ `ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION`,
+  `SEND_SMS`, `CALL_PHONE`; (2) UI có nút `CẤP QUYỀN` trong `PermissionCenterSection` và nút
+  `TIẾP TỤC CẤP QUYỀN` trong hộp thoại lần đầu; (3) trigger gọi API hệ thống thật qua
+  `registerForActivityResult(ActivityResultContracts.RequestPermission/RequestMultiplePermissions)` trong
+  `MainActivity.launchCapabilityRequest`.
+- Trên APK cài sạch (uninstall → install): **cả ba hộp thoại hệ thống thật đều hiện**
+  (`REQUEST_PERMISSIONS` → `com.google.android.permissioncontroller/...GrantPermissionsActivity`):
+  Vị trí ("access this device's location?"), Điện thoại ("make and manage phone calls?"),
+  SMS ("send and view SMS messages?"). Bằng chứng: `docs/evidence/permission-dialog/`.
+- Lỗi thật tìm thấy và đã sửa (T5): UI bỏ qua `PermissionRequestResult` nên khi trạng thái là
+  `NEEDS_SETTINGS` (Android không cho hỏi lại) thì bấm nút **không có gì xảy ra**. Nay hiện đúng câu
+  "Quyền này đang bị tắt. Hãy bật trong Cài đặt." kèm nút `MỞ CÀI ĐẶT ỨNG DỤNG`.
+- Nguyên nhân phụ rất có thể gặp ở phía người dùng: bản APK cũ. Cả hai bản trước đều là
+  `versionCode=1` / `versionName=0.1-demo` nên không phân biệt được. Đã tăng lên
+  `versionCode=3` / `versionName=0.3-permission`.
+- Bộ kiểm thử cài sạch: `python3 android/scripts/permission-dialog-acceptance.py`
+  (bắt buộc `adb uninstall` trước khi `adb install`).
 
-## Discovery Findings
-- Handler sai nằm tại `HomeScreen.kt:506-517`: ô VỊ TRÍ gắn `showCallConfirmDialog`; dialog chỉ báo gọi demo. Chưa có Android location/SMS/call implementation hay quyền tương ứng.
-- Countdown thật ở `AlertCore`/`DemoController`; timeout 10 giây đi qua cùng SOS state và `SyncCoordinator` ghi EVENT/SOS bền vững. Core ID nội bộ không bền nhưng `SyncOutbox` hiện giữ thao tác API; backend đã idempotent theo `eventId` và unique outbox event.
-- Backend Node/SQLite có contacts, watchdog, SOS outbox, ACK/resolve; chỉ ghi `RECORDED`, chưa có SMS/call provider/worker/callback. Không được báo đã gọi/gửi ngoài.
-- Android contacts có `receiveSos` và `isPrimary` nhưng chưa có thứ tự ưu tiên riêng; cần contract ưu tiên ổn định.
-- ESP32 v1 chưa cung cấp tọa độ GNSS; BMP390 chỉ là áp suất. Device status backend có pin/kết nối thật khi heartbeat tồn tại; UI hiện đang dùng giá trị giả `deviceConnected=true`, `batteryStatus="Pin tốt"`.
-- API Android không cho bơm audio vào uplink cuộc gọi SIM; TTS cục bộ không chứng minh người nhận nghe. Cuộc gọi có lời nói/DTMF phải qua adapter thoại backend. SMS SIM có `sentIntent`/`deliveryIntent`; multi-SIM phải chọn subscription hợp lệ.
-- Twilio được chọn làm adapter mẫu có thể tắt: Voice API có trạng thái busy/no-answer/failed/completed, Gather DTMF và Play; Việt Nam có outbound nhưng không có số voice nội địa, giá công khai hiện tại khoảng USD 0.1777/phút mobile và 0.1947/phút local. Chưa có tài khoản/khóa/số gọi đi nên chỉ mock/sandbox.
-- Android target 36: location nền cần permission/FGS type location và phải được thiết lập khi Activity đang hiển thị; background FGS start bị hạn chế. Không đợi tới SOS mới xin quyền.
+## Kết quả theo yêu cầu
 
-## Contract Decisions To Freeze
-- Mở rộng duy nhất `docs/api-contract.md`; không tạo REST contract cạnh tranh.
-- Một `eventId` bền vững là khóa idempotency cho EVENT/SOS/SMS/call/callback; cancel trước timeout chặn mọi dispatch chưa bắt đầu.
-- Location gồm lat/lon hợp lệ (không 0,0), accuracy/timestamp/source `PHONE|ESP32_GNSS`; freshness được ghi rõ. Không gọi reverse geocode trên critical path.
-- Manual share dùng nội dung trung tính và người nhận được chọn; emergency message có tên người dùng, nghi ngã/cần hỗ trợ, event time, tọa độ/link/fix time/accuracy/source hoặc cảnh báo chưa có vị trí. Late location supplement tối đa một lần/event.
-- Trạng thái SMS tách `QUEUED/SENDING/SENT/DELIVERED/FAILED`; SENT không phải đọc. Call tách provider states và `acknowledged`; completed/voicemail không phải ACK.
-- Android SIM SMS/call là fallback; SIM call không tuyên bố phát lời. Backend voice adapter mặc định disabled, secrets chỉ env, callback xác thực, số lượt/liên hệ/timeout hữu hạn.
-- DTMF 1 dừng mở rộng sang liên hệ mới nhưng không tự cúp cuộc gọi đang kết nối; lời nói tiếp tục lặp có giới hạn tới khi cuộc gọi kết thúc/provider timeout.
+### Permission flow
+- Ba khả năng độc lập: Vị trí (fine/coarse foreground), SMS (`SEND_SMS`), Điện thoại (`CALL_PHONE`).
+  `READ_PHONE_STATE` chỉ còn phục vụ đa SIM và không chặn SMS khi thiếu.
+- `NEEDS_SETTINGS` khi đã từ chối vĩnh viễn (`wasAttempted && !shouldShowRequestPermissionRationale`):
+  không lặp lại hộp thoại hệ thống, chỉ mở App Settings bằng một thao tác riêng.
+- Trạng thái đọc lại từ Android trong `onResume`; cấp lại quyền trong App Settings được phản ánh ngay.
+- Chỉ cấp approximate vẫn là trạng thái dùng được và được hiển thị riêng.
 
-## Planned Ownership
-- Codex Sol: `docs/api-contract.md`, backend provider/dispatch/callback/migrations/tests, Android non-UI location/SMS/emergency/device logic, manifest/MainActivity/controller wiring and tests. Không sửa `HomeScreen.kt`/Compose layout.
-- AGY Gemini: `HomeScreen.kt` và UI file mới nếu cần, chỉ dùng interface Codex đã chốt; không sửa backend/domain/manifest/MainActivity.
-- Hermes: contract review, integration, independent review, tests/build/APK/docs.
+### First-run & Permission Center
+- Hộp thoại giải thích hiện một lần ở trạng thái không khẩn cấp (SAFE **và** MẤT KẾT NỐI THIẾT BỊ, tức là
+  dùng được cả ở chế độ PHONE_ONLY), tự ẩn khi chuyển sang đếm ngược/SOS, không chặn nút SOS.
+- `Cài đặt → QUYỀN ỨNG DỤNG`: 📍 Vị trí / 📞 Điện thoại / 💬 SMS với nhãn "Đã cấp", "Đã cấp (vị trí gần
+  đúng)", "Chưa cấp", "Bị từ chối — cần mở Cài đặt ứng dụng" và nút `CẤP QUYỀN` / `MỞ CÀI ĐẶT ỨNG DỤNG`;
+  không hiển thị tên hằng quyền, chữ ≥16sp, nút ≥56dp.
 
-## Files Inspected
-- `.ai/architecture.md`, `.ai/task_on_progress.md`, `android/android-plan.md`
-- `docs/interface-contract.md` command/ACK sections
-- `android/.../protocol/Esp32PacketDecoder.kt`
-- `android/.../api/ApiService.kt`
-- `android/.../PhoneSensorCollector.kt`, `FallDetectionProfiles.kt`
-- `android/app/src/main/AndroidManifest.xml`
-- `esp/core/local_alert.h`, `esp/core/README.md`
-- `esp/esp32-plan.md` sensor, pressure, protocol and HTTP sections
+### Fail-safe SOS
+- `SosDispatchReport` bốn bước độc lập (Vị trí, Tin nhắn, Cuộc gọi trợ giúp, Liên kết bản đồ) được lưu theo
+  sự kiện và hiển thị trong hộp thoại "Tiến trình gửi SOS".
+- Thiếu bất kỳ quyền nào cũng không crash và không bỏ im lặng: mỗi bước có trạng thái + lý do thật
+  (ví dụ "Chưa cho phép gọi điện; không thể tự động gọi").
+- Không có vị trí (chưa cấp / GPS tắt / quá hạn 8 giây / tọa độ sai) → tin nhắn ghi "Chưa xác định được vị
+  trí.", không có tọa độ giả, các bước khác vẫn chạy.
+- Không có Google Maps → mở bằng trình duyệt với cùng link; có Maps → mở đúng Google Maps.
 
-## Tests/Commands Run
-- `cd backend && npm test`: PASS — 46/46 Node tests, including dispatch idempotency, callback signature validation, DTMF acknowledgement, round-robin retry, SMS transport status and late callback ordering.
-- `cd android && JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew testDebugUnitTest --no-daemon`: PASS.
-- `cd android && JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew assembleDebug --no-daemon`: PASS.
-- `git diff --check`: PASS.
-- Debug artifact verified: `android/app/build/outputs/apk/debug/app-debug.apk`.
+### Định vị nền (đã đánh giá, KHÔNG thêm gì)
+- Ứng dụng không lấy vị trí nền ngoài FGS `health|location` đã có; FGS này chỉ bật khi đã có quyền vị trí
+  và Activity đang hiển thị. Vì vậy **không** xin `ACCESS_BACKGROUND_LOCATION`. Nếu sau này cần vị trí nền
+  liên tục phải xin quyết định mới.
+
+## Kiểm thử đã chạy (bằng chứng thật)
+- `cd android && JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew testDebugUnitTest --rerun-tasks --no-daemon`:
+  147 test, 0 lỗi (28 test mới cho quyền/SOS: `CapabilityHardeningTest`, `SosDispatchReportTest`,
+  `LocationIntentAndProviderTest`, `PermissionCenterUiTest`).
+- `./gradlew assembleDebug --no-daemon`: PASS → `android/app/build/outputs/apk/debug/app-debug.apk`.
+- `cd backend && npm test`: 55/55 PASS (không đổi backend).
+- Emulator NCKH27PA (API 36, x86_64): `python3 android/scripts/permission-flow-check.py` — 11/11 check PASS,
+  bằng chứng ở `docs/evidence/permission-flow/` (results.json + dump UI + trạng thái quyền).
+  Đã xác minh trên APK thật: luồng xin quyền, từ chối một lần, từ chối hai lần (Don't ask again) →
+  mở App Settings → quay lại ứng dụng, cấp lại quyền trong Settings, vị trí gần đúng, tắt dịch vụ vị trí,
+  SOS không quyền không crash có báo cáo từng bước, mở Google Maps, và fallback trình duyệt khi Maps bị tắt.
+- Bằng chứng SOS thật trên emulator: `Trạng thái SOS: Vị trí: Thành công • Tin nhắn: Không khả dụng •
+  Cuộc gọi trợ giúp: Chưa cấp quyền • Liên kết bản đồ: Bỏ qua` khi thiếu `CALL_PHONE`.
+- `git diff --check`: sạch. Không commit.
 
 ## Problems/Blockers
-- Không có Twilio account SID/auth token/số gọi đi/public HTTPS callback; adapter voice chỉ được kiểm thử fake/mock, mặc định disabled, không gọi số thật.
-- Không có thiết bị Android/SIM/GPS hoặc emulator vận hành trong môi trường này; quyền, khóa màn hình, multi-SIM, carrier SMS delivery, Maps intent fallback và FGS background chỉ được unit/build-test.
-- ESP32 v1 chưa cung cấp GNSS; BMP390 không được dùng như nguồn tọa độ. Thiết bị UI giữ UNKNOWN/stale khi backend chưa có heartbeat ESP thật.
-- Giữ nguyên toàn bộ thay đổi profile/ESP config đang uncommitted từ task trước; không revert/ghi đè.
+- Không có điện thoại thật/SIM/GPS: hộp thoại quyền theo hãng máy, đa SIM + biên nhận SMS thật, cuộc gọi
+  SIM thật, thời gian bắt fix ngoài trời, hành vi FGS khi khoá màn hình chưa được kiểm chứng.
+- Adapter thoại backend vẫn chưa có tài khoản/số gọi đi/public callback → bước "Cuộc gọi trợ giúp" tự động
+  vẫn chỉ báo "Không khả dụng"; muốn SOS tự gọi SIM thì cần quyết định mới (`docs/next-gate.md` §4).
+- Trên emulator, sự kiện SOS đầu tiên khi chưa từng có fix sẽ hết hạn 8 giây và đi vào nhánh "không có vị
+  trí" (đúng thiết kế D03); cần xác nhận lại trên thiết bị thật.
 
 ## Next Action
-T1 (OWNER: Codex Sol; FILES: Android non-Compose permission/location/emergency wiring, MainActivity, manifest if needed, API/backend AI contract and tests; GOAL: replace startup permission spam with explicit, safe permission orchestration and add optional AI consent/abstraction; RESULT: pending; NEXT_ACTION: review handoff). T2 (OWNER: AGY Gemini; FILES: MainActivity Settings Compose-only UI and focused UI tests; GOAL: elderly-friendly permissions and AI consent/settings UI using the frozen T1 interface; RESULT: blocked on T1 interface; NEXT_ACTION: dispatch after T1 acceptance). Hermes owns contract review, integration, final tests/build, architecture and nhật ký updates.
+1. Kiểm thử thủ công theo `docs/permission-flow.md` §6 trên điện thoại thật có SIM (chờ chủ dự án cấp phép
+   thiết bị/số người nhận thử).
+2. Chủ dự án chốt `docs/next-gate.md` §4 (auto-dial SIM) và §5 (phạm vi kiểm thử thực địa).
+3. Chỉ commit/push khi chủ dự án yêu cầu.
 
-## Permission & AI Contract (2026-09-17)
-- Android runtime permissions are independent capabilities: `CALL_PHONE`, `SEND_SMS`, and foreground `ACCESS_FINE_LOCATION`/`ACCESS_COARSE_LOCATION`. No background-location permission is requested in this task. `READ_PHONE_STATE` remains only if the existing multi-SIM implementation requires it.
-- No runtime permission is requested in `onCreate`. The user taps an explained, named SOS setup action; Android requests only the selected ungranted capability. A permanently denied capability opens App Settings only from a new explicit user tap.
-- Permission state exposed to Compose must be refreshed on resume and distinguish granted, can request, and needs Settings. SOS remains best-effort: SMS, SIM call, location and backend/AI failures are isolated.
-- Location acquisition must have a bounded timeout and optional last-known fallback; missing/timed-out GPS still dispatches its factual SMS warning.
-- AI is opt-in persisted consent, not an Android permission. Android sends the minimum text-only request to a `/api/v1` backend endpoint only while enabled; no contacts, SMS history, call history or precise location is sent by default. Backend holds provider keys exclusively in environment variables and exposes a provider abstraction with disabled/unavailable results. AI is never invoked by or required for SOS/countdown/location/SMS/call.
+## Lịch sử phân công phiên này
+- T2 — Codex Sol: logic quyền/location/SMS/call/maps + báo cáo từng bước + test (`.ai/T2-codex-sos-permissions.md`, DONE).
+- T3 — AGY Gemini (`gemini-3.8-flash-medium`): Permission Center + hộp thoại lần đầu + phản hồi SOS (`.ai/T3-agy-permission-ui.md`, DONE, có 1 defect được trả lại và sửa).
+- Hermes: chốt contract, review, chạy Gradle/emulator, tài liệu.

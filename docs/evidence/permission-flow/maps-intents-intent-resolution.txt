@@ -1,0 +1,16 @@
+GOOGLE_MAPS_ENABLED geo: -> 1 activities found:
+  Activity #0:
+    priority=0 preferredOrder=0 match=0x208000 specificIndex=-1 isDefault=true
+    com.google.android.apps.maps/com.google.android.maps.MapsActivity
+GOOGLE_MAPS_ENABLED maps-url -> 2 activities found:
+  Activity #0:
+    priority=0 preferredOrder=0 match=0x508000 specificIndex=-1 isDefault=true
+    com.google.android.apps.maps/com.google.android.maps.MapsActivity
+  Activity #1:
+    priority=0 preferredOrder=0 match=0x208000 specificIndex=-1 isDefault=true
+    com.android.chrome/com.google.android.apps.chrome.IntentDispatcher
+GOOGLE_MAPS_DISABLED geo: -> No activities found
+GOOGLE_MAPS_DISABLED maps-url -> 1 activities found:
+  Activity #0:
+    priority=0 preferredOrder=0 match=0x208000 specificIndex=-1 isDefault=true
+    com.android.chrome/com.google.android.apps.chrome.IntentDispatcher

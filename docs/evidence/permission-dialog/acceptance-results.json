@@ -1,0 +1,37 @@
+[
+  {
+    "name": "clean-state",
+    "passed": true,
+    "elapsedSeconds": 0.04
+  },
+  {
+    "name": "first-run-location-dialog",
+    "passed": true,
+    "elapsedSeconds": 17.75
+  },
+  {
+    "name": "center-phone-dialog",
+    "passed": true,
+    "elapsedSeconds": 24.73
+  },
+  {
+    "name": "center-sms-dialog",
+    "passed": true,
+    "elapsedSeconds": 15.18
+  },
+  {
+    "name": "deny-once",
+    "passed": true,
+    "elapsedSeconds": 32.6
+  },
+  {
+    "name": "deny-twice-and-settings",
+    "passed": true,
+    "elapsedSeconds": 74.36
+  },
+  {
+    "name": "resume-refresh",
+    "passed": true,
+    "elapsedSeconds": 16.06
+  }
+]
