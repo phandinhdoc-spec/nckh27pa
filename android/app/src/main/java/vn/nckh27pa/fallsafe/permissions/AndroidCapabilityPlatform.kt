@@ -18,15 +18,30 @@ class SharedPreferencesCapabilityAttemptStore(context: Context) : CapabilityAtte
     }
 }
 
+class SharedPreferencesPermissionSetupStore(context: Context) : PermissionSetupStore {
+    private val preferences = context.getSharedPreferences("fallsafe_permission_setup", Context.MODE_PRIVATE)
+    override var seen: Boolean
+        get() = preferences.getBoolean("seen", false)
+        set(value) { preferences.edit().putBoolean("seen", value).apply() }
+}
+
 class AndroidCapabilityPlatform(
     private val activity: Activity,
     private val launchRequest: (Capability) -> Unit
 ) : CapabilityPlatform {
     override fun isGranted(capability: Capability): Boolean = when (capability) {
         Capability.CALLING -> granted(Manifest.permission.CALL_PHONE)
-        Capability.MESSAGING -> granted(Manifest.permission.SEND_SMS) && granted(Manifest.permission.READ_PHONE_STATE)
+        Capability.MESSAGING -> granted(Manifest.permission.SEND_SMS)
         Capability.LOCATION -> granted(Manifest.permission.ACCESS_FINE_LOCATION) || granted(Manifest.permission.ACCESS_COARSE_LOCATION)
     }
+
+    override fun locationPrecision(): LocationPrecision = when {
+        granted(Manifest.permission.ACCESS_FINE_LOCATION) -> LocationPrecision.PRECISE
+        granted(Manifest.permission.ACCESS_COARSE_LOCATION) -> LocationPrecision.APPROXIMATE
+        else -> LocationPrecision.NONE
+    }
+
+    override fun hasPhoneStateAccess() = granted(Manifest.permission.READ_PHONE_STATE)
 
     override fun shouldShowRationale(capability: Capability): Boolean = permissions(capability)
         .filterNot(::granted)
@@ -46,7 +61,7 @@ class AndroidCapabilityPlatform(
 
     private fun permissions(capability: Capability): List<String> = when (capability) {
         Capability.CALLING -> listOf(Manifest.permission.CALL_PHONE)
-        Capability.MESSAGING -> listOf(Manifest.permission.SEND_SMS, Manifest.permission.READ_PHONE_STATE)
+        Capability.MESSAGING -> listOf(Manifest.permission.SEND_SMS)
         Capability.LOCATION -> listOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
     }
 }

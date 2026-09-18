@@ -94,11 +94,13 @@ class SyncCoordinator(
         }
     }
     fun remoteEventId(): String = transitions.eventId(controller.snapshot.eventId)
-    fun requestVoice(eventId:String) {
+    fun requestVoice(eventId:String):vn.nckh27pa.fallsafe.emergency.VoiceDispatchStatus {
         val fix=emergencyLocation?.locationState?.fix
         val location=fix?.let{LocationPayload(it.latitude,it.longitude,it.accuracyM,it.fixTimeMs)}
         outbox.enqueue(SyncOperation("$eventId:${OperationKind.SOS}",OperationKind.SOS,action=ActionRequest(eventId,config.deviceId,config.userId,wallMs(),"MANUAL_APP_BUTTON","NEED_HELP",location=location,displayName=displayName())))
         if(started)ensureRunning()
+        return if(outbox.durable)vn.nckh27pa.fallsafe.emergency.VoiceDispatchStatus.CONFIGURED
+        else vn.nckh27pa.fallsafe.emergency.VoiceDispatchStatus.UNAVAILABLE
     }
     fun reportTransportState(state:vn.nckh27pa.fallsafe.emergency.SmsDispatchState){
         if(state.status !in listOf(vn.nckh27pa.fallsafe.emergency.SmsDeliveryStatus.SENT,vn.nckh27pa.fallsafe.emergency.SmsDeliveryStatus.DELIVERED,vn.nckh27pa.fallsafe.emergency.SmsDeliveryStatus.FAILED))return

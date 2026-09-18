@@ -27,6 +27,7 @@ class AndroidEmergencyLocationController(
     private val displayName: () -> String = { DEFAULT_USER_DISPLAY_NAME }
 ) : EmergencyLocationController {
     @Volatile override var locationState: LocationState = LocationState(); private set
+    @Volatile override var lastMapOpenReason:String?=null; private set
     private val manager=context.getSystemService(LocationManager::class.java)
     private val confirmations=mutableMapOf<String,Pair<EmergencyContact,LocationFix>>()
     private val executor=Executor { command -> android.os.Handler(context.mainLooper).post(command) }
@@ -49,11 +50,19 @@ class AndroidEmergencyLocationController(
             cancelActiveRequest()
             publish(resolution)
         }
+        val hasFine=ContextCompat.checkSelfPermission(context,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED
         val provider=try {
-            when {
-                manager.isProviderEnabled(LocationManager.GPS_PROVIDER)->LocationManager.GPS_PROVIDER
-                manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)->LocationManager.NETWORK_PROVIDER
-                else->null
+            val fusedEnabled=manager.allProviders.contains(FUSED_PROVIDER)&&manager.isProviderEnabled(FUSED_PROVIDER)
+            when(LocationProviderSelector.choose(
+                hasFine=hasFine,
+                gpsEnabled=manager.isProviderEnabled(LocationManager.GPS_PROVIDER),
+                networkEnabled=manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER),
+                fusedEnabled=fusedEnabled
+            )) {
+                LocationProvider.GPS->LocationManager.GPS_PROVIDER
+                LocationProvider.NETWORK->LocationManager.NETWORK_PROVIDER
+                LocationProvider.FUSED->FUSED_PROVIDER
+                null->null
             }
         } catch (_:RuntimeException) { null }
         if(provider==null){attempt.fail(LocationFailureCause.PROVIDER_DISABLED);return}
@@ -96,7 +105,9 @@ class AndroidEmergencyLocationController(
         }
     }
     private fun lastKnownFix():LocationFix? = try {
-        manager.allProviders.mapNotNull { provider ->
+        val hasFine=ContextCompat.checkSelfPermission(context,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED
+        val permittedProviders=if(hasFine)manager.allProviders else manager.allProviders.filter{it==LocationManager.NETWORK_PROVIDER||it==FUSED_PROVIDER}
+        permittedProviders.mapNotNull { provider ->
             try {
                 manager.getLastKnownLocation(provider)?.let { location ->
                     LocationFix.validated(location.latitude,location.longitude,location.accuracy.takeIf{it.isFinite()&&it>=0},location.time,LocationSource.PHONE)
@@ -124,9 +135,26 @@ class AndroidEmergencyLocationController(
     private fun update(fix:LocationFix){locationState=LocationState(fix,fix.freshness(nowMs()),null,if(fix.freshness(nowMs())==LocationFreshness.FRESH)"Đã có vị trí mới." else "Vị trí đã cũ.",if(fix.freshness(nowMs())==LocationFreshness.STALE)"Chờ GPS cập nhật ở nơi thoáng." else null);onFix(fix)}
     override fun acceptEsp32Gnss(fix:LocationFix){if(fix.source==LocationSource.ESP32_GNSS)update(fix)}
     override fun openMyLocation():Boolean {
-        val fix=locationState.fix?:return false
-        val geo=Intent(Intent.ACTION_VIEW,Uri.parse("geo:${fix.latitude},${fix.longitude}?q=${fix.latitude},${fix.longitude}")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        return try{context.startActivity(geo);true}catch(_:ActivityNotFoundException){try{context.startActivity(Intent(Intent.ACTION_VIEW,Uri.parse(fix.mapsUrl)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));true}catch(_:ActivityNotFoundException){false}}
+        val fix=locationState.fix?:run{lastMapOpenReason="Chưa có vị trí để mở bản đồ.";return false}
+        var failure:String?=null
+        val geoUri=Uri.parse("geo:${fix.latitude},${fix.longitude}?q=${fix.latitude},${fix.longitude}")
+        val resolver=MapLaunchResolver(
+            launcher=MapTargetLauncher { target ->
+                val intent=when(target) {
+                    MapTarget.GOOGLE_MAPS->Intent(Intent.ACTION_VIEW,geoUri).setPackage(GOOGLE_MAPS_PACKAGE)
+                    MapTarget.GENERIC_MAPS->Intent(Intent.ACTION_VIEW,geoUri)
+                    MapTarget.BROWSER->Intent(Intent.ACTION_VIEW,Uri.parse(fix.mapsUrl))
+                }.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                try{context.startActivity(intent);true}
+                catch(_:ActivityNotFoundException){failure="Không có ứng dụng phù hợp để mở bản đồ.";false}
+                catch(_:SecurityException){failure="Hệ thống từ chối mở bản đồ.";false}
+                catch(_:RuntimeException){failure="Không thể mở bản đồ lúc này.";false}
+            },
+            failureReason={failure}
+        )
+        val result=resolver.open(fix.latitude,fix.longitude,fix.mapsUrl)
+        lastMapOpenReason=result.reason
+        return result.opened
     }
     override fun requestManualShare(contactId:String):ManualShareConfirmation? {
         val contact=contacts().firstOrNull{it.id==contactId}?:return null;val fix=locationState.fix?:return null
@@ -135,7 +163,14 @@ class AndroidEmergencyLocationController(
     }
     override fun confirmManualShare(token:String):SmsDispatchState {
         val pair=confirmations.remove(token)?:return SmsDispatchState("manual", "", SmsDeliveryStatus.FAILED,"Xác nhận không hợp lệ hoặc đã dùng")
-        val event="manual-${UUID.randomUUID()}";return sms.send(SmsRequest(event,pair.first.id,pair.first.phone,EmergencyMessageFormatter.manualLocation(displayName(),pair.second)))
+        val event="manual-${UUID.randomUUID()}"
+        return try{sms.send(SmsRequest(event,pair.first.id,pair.first.phone,EmergencyMessageFormatter.manualLocation(displayName(),pair.second)))}
+        catch(_:SecurityException){SmsDispatchState(event,pair.first.id,SmsDeliveryStatus.FAILED,EmergencyFailureMessages.messagingPermissionMissing)}
+        catch(_:RuntimeException){SmsDispatchState(event,pair.first.id,SmsDeliveryStatus.FAILED,"Không thể gửi vị trí lúc này.")}
     }
-    private companion object { const val CURRENT_FIX_TIMEOUT_MS=8_000L }
+    private companion object {
+        const val CURRENT_FIX_TIMEOUT_MS=8_000L
+        const val FUSED_PROVIDER="fused"
+        const val GOOGLE_MAPS_PACKAGE="com.google.android.apps.maps"
+    }
 }

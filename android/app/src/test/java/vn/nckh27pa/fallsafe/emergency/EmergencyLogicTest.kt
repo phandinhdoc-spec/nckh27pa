@@ -139,6 +139,6 @@ class EmergencyLogicTest {
     }
     private class RecordingBackendGateway : EmergencyBackendGateway {
         val events=mutableListOf<String>()
-        override fun startVoice(eventId: String) { events+=eventId }
+        override fun startVoice(eventId: String):VoiceDispatchStatus { events+=eventId;return VoiceDispatchStatus.STARTED }
     }
 }

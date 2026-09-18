@@ -66,14 +66,19 @@ class DemoApplication : Application() {
         val profileRepo = GsonFallDetectionProfileRepository(
             SharedPreferencesFallDetectionProfileStorage(this)
         )
-        controller = DemoController(contactRepository = contactRepo, profileRepository = profileRepo)
+        controller = DemoController(
+            contactRepository = contactRepo,
+            profileRepository = profileRepo,
+            permissionSetupStore = vn.nckh27pa.fallsafe.permissions.SharedPreferencesPermissionSetupStore(this)
+        )
         smsGateway = vn.nckh27pa.fallsafe.emergency.AndroidSmsManagerGateway(this)
         val displayNameSettings = vn.nckh27pa.fallsafe.emergency.UserDisplayNameSettings(this)
         val identity = vn.nckh27pa.fallsafe.emergency.SharedPrefsEventIdentityStore(this)
         emergencyCoordinator = vn.nckh27pa.fallsafe.emergency.EmergencyCoordinator(
             smsGateway,
             vn.nckh27pa.fallsafe.emergency.EmergencyBackendGateway { eventId -> sync.requestVoice(eventId) },
-            vn.nckh27pa.fallsafe.emergency.SharedPrefsEmergencyStore(this)
+            vn.nckh27pa.fallsafe.emergency.SharedPrefsEmergencyStore(this),
+            capabilities = { controller.capabilitySnapshot() }
         )
         locationController = vn.nckh27pa.fallsafe.location.AndroidEmergencyLocationController(
             this, { controller.contacts }, smsGateway,
@@ -81,6 +86,7 @@ class DemoApplication : Application() {
             displayName = { displayNameSettings.value }
         )
         controller.emergencyCoordinator = emergencyCoordinator
+        controller.emergencyEventIdentityStore = identity
         controller.emergencyLocationController = locationController
         controller.deviceDetailsStore = deviceDetails
         controller.displayNameSettings = displayNameSettings
@@ -117,7 +123,9 @@ class DemoController(
     clock: MonotonicClock = MonotonicClock { SystemClock.elapsedRealtime() },
     val profileRepository: FallDetectionProfileRepository = GsonFallDetectionProfileRepository(
         InMemoryFallDetectionProfileStorage()
-    )
+    ),
+    private val permissionSetupStore: vn.nckh27pa.fallsafe.permissions.PermissionSetupStore =
+        vn.nckh27pa.fallsafe.permissions.MemoryPermissionSetupStore()
 ) {
     private var optionalAi = vn.nckh27pa.fallsafe.ai.OptionalAiAssistant(
         vn.nckh27pa.fallsafe.ai.MemoryAiPreferenceStore(),
@@ -140,6 +148,14 @@ class DemoController(
         get() = capabilityDisplay(vn.nckh27pa.fallsafe.permissions.Capability.MESSAGING)
     val locationCapability: vn.nckh27pa.fallsafe.permissions.CapabilityDisplay
         get() = capabilityDisplay(vn.nckh27pa.fallsafe.permissions.Capability.LOCATION)
+    val permissionSetupSeen: Boolean get() = permissionSetupStore.seen
+    val permissionSetupExplanation: String get() = vn.nckh27pa.fallsafe.permissions.PERMISSION_SETUP_EXPLANATION
+    fun markPermissionSetupSeen() { permissionSetupStore.seen = true; capabilityRevision++ }
+    fun nextPermissionSetupStep(): vn.nckh27pa.fallsafe.permissions.Capability? = listOf(
+        vn.nckh27pa.fallsafe.permissions.Capability.LOCATION,
+        vn.nckh27pa.fallsafe.permissions.Capability.MESSAGING,
+        vn.nckh27pa.fallsafe.permissions.Capability.CALLING
+    ).firstOrNull { capabilityDisplay(it).state != vn.nckh27pa.fallsafe.permissions.CapabilityDisplayState.GRANTED }
     fun requestCallingPermission(explanationAcknowledged: Boolean) = capabilityAccess.request(
         vn.nckh27pa.fallsafe.permissions.Capability.CALLING, explanationAcknowledged
     )
@@ -164,15 +180,23 @@ class DemoController(
         capabilityRevision++
         onStateChanged?.invoke()
     }
+    fun capabilitySnapshot(): vn.nckh27pa.fallsafe.permissions.CapabilitySnapshot = capabilityAccess.snapshot()
     private fun capabilityDisplay(capability: vn.nckh27pa.fallsafe.permissions.Capability): vn.nckh27pa.fallsafe.permissions.CapabilityDisplay {
         capabilityRevision
         return capabilityAccess.display(capability)
     }
     internal var emergencyCoordinator: vn.nckh27pa.fallsafe.emergency.EmergencyCoordinator? = null
+    internal var emergencyEventIdentityStore: vn.nckh27pa.fallsafe.emergency.EventIdentityStore? = null
     internal var emergencyLocationController: vn.nckh27pa.fallsafe.emergency.EmergencyLocationController? = null
     internal var deviceDetailsStore: vn.nckh27pa.fallsafe.device.DeviceDetailsStore? = null
     internal var displayNameSettings: vn.nckh27pa.fallsafe.emergency.UserDisplayNameSettings? = null
     internal var simCallGateway: vn.nckh27pa.fallsafe.emergency.SimCallGateway? = null
+    val latestSosDispatchReport: vn.nckh27pa.fallsafe.emergency.SosDispatchReport?
+        get() {
+            val localEventId=snapshot.eventId.takeIf{it>0}?:return null
+            val eventId=emergencyEventIdentityStore?.id(localEventId)?:return null
+            return emergencyCoordinator?.report(eventId)
+        }
     val userDisplayName: String get() = displayNameSettings?.value ?: vn.nckh27pa.fallsafe.emergency.DEFAULT_USER_DISPLAY_NAME
     fun setUserDisplayName(value: String) { displayNameSettings?.value = value }
     val emergencyDeviceDetails: vn.nckh27pa.fallsafe.device.DeviceDetails get() = deviceDetailsStore?.value ?: vn.nckh27pa.fallsafe.device.DeviceDetails.Unknown

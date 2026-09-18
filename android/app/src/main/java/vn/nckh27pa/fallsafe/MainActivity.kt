@@ -99,7 +99,7 @@ class MainActivity : ComponentActivity() {
             vn.nckh27pa.fallsafe.permissions.Capability.CALLING ->
                 callingPermissionRequest.launch(Manifest.permission.CALL_PHONE)
             vn.nckh27pa.fallsafe.permissions.Capability.MESSAGING ->
-                messagingPermissionRequest.launch(arrayOf(Manifest.permission.SEND_SMS, Manifest.permission.READ_PHONE_STATE))
+                messagingPermissionRequest.launch(arrayOf(Manifest.permission.SEND_SMS))
             vn.nckh27pa.fallsafe.permissions.Capability.LOCATION ->
                 locationPermissionRequest.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
         }
@@ -304,6 +304,8 @@ private fun SettingsScreen(
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Text("CÀI ĐẶT & KIỂM TRA HỆ THỐNG", fontSize = 22.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+
+        PermissionCenterSection(controller = c)
 
         // Section: Emergency Contact Management
         Card(

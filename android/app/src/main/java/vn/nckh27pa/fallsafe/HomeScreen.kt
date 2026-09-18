@@ -50,6 +50,7 @@ import androidx.compose.ui.zIndex
 import vn.nckh27pa.fallsafe.device.DeviceDetails
 import vn.nckh27pa.fallsafe.device.DeviceValueSource
 import vn.nckh27pa.fallsafe.emergency.*
+import vn.nckh27pa.fallsafe.permissions.Capability
 
 // High-contrast, WCAG AAA compliant color scheme for elderly readability
 val SafeGreen = Color(0xFF1B5E20)
@@ -72,6 +73,36 @@ val DisconnectedGrayBorder = Color(0xFFB0BEC5)
 val ContactBlue = Color(0xFF0D47A1)
 val ContactBlueContainer = Color(0xFFE3F2FD)
 val ContactBlueBorder = Color(0xFF90CAF9)
+
+const val FIRST_RUN_EXPLANATION_TITLE = "Cho phép ứng dụng hoạt động khi khẩn cấp"
+const val FIRST_RUN_EXPLANATION_BODY =
+    "Để gửi cảnh báo khi phát hiện té ngã, ứng dụng cần quyền định vị, gửi tin nhắn và gọi người thân."
+const val FIRST_RUN_CONTINUE_BUTTON = "TIẾP TỤC CẤP QUYỀN"
+const val FIRST_RUN_LATER_BUTTON = "ĐỂ SAU"
+
+internal fun shouldShowFirstRunExplanation(
+    status: MainScreenStatus,
+    permissionSetupSeen: Boolean,
+    hasUngrantedCapability: Boolean
+): Boolean = (status == MainScreenStatus.SAFE || status == MainScreenStatus.DEVICE_DISCONNECTED) &&
+    !permissionSetupSeen &&
+    hasUngrantedCapability
+
+internal fun resolveSosStepStatusLabel(status: SosStepStatus): String = when (status) {
+    SosStepStatus.SUCCESS -> "Thành công"
+    SosStepStatus.PARTIAL -> "Một phần"
+    SosStepStatus.PERMISSION_MISSING -> "Chưa cấp quyền"
+    SosStepStatus.UNAVAILABLE -> "Không khả dụng"
+    SosStepStatus.FAILED -> "Thất bại"
+    SosStepStatus.SKIPPED -> "Bỏ qua"
+}
+
+internal fun resolveSosDispatchSummaryText(report: SosDispatchReport?, fallbackMessage: String): String {
+    if (report == null || report.steps.isEmpty()) return fallbackMessage
+    return report.steps.joinToString(" • ") { result ->
+        "${result.step.vietnameseLabel}: ${resolveSosStepStatusLabel(result.status)}"
+    }
+}
 
 internal fun resolveLocationCardStatus(loc: LocationState): String = when {
     loc.fix == null -> "Chưa có vị trí"
@@ -133,6 +164,8 @@ fun HomeScreen(
     var showCallContactsDialog by remember { mutableStateOf(false) }
     var simCallResult by remember { mutableStateOf<SimCallResult?>(null) }
     var showDeviceDetailsDialog by remember { mutableStateOf(false) }
+    var showSosReportDialog by remember { mutableStateOf(false) }
+    var settingsDialogCapability by remember { mutableStateOf<Capability?>(null) }
 
     // Vibration manager
     val vibrator = remember(context) {
@@ -309,14 +342,25 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    val landscapeReport = controller.latestSosDispatchReport
+                    val landscapeStatusText = if (status == MainScreenStatus.SOS_SENT) {
+                        resolveSosDispatchSummaryText(landscapeReport, controller.sosDeliveryMessage)
+                    } else "$protectIcon $protectText"
+
                     Card(
                         colors = CardDefaults.cardColors(containerColor = protectBg),
                         border = BorderStroke(1.dp, protectBorder),
                         shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.padding(bottom = 2.dp)
+                        modifier = Modifier
+                            .padding(bottom = 2.dp)
+                            .then(
+                                if (status == MainScreenStatus.SOS_SENT && landscapeReport != null) {
+                                    Modifier.clickable { showSosReportDialog = true }
+                                } else Modifier
+                            )
                     ) {
                         Text(
-                            text = if (status == MainScreenStatus.SOS_SENT) controller.sosDeliveryMessage else "$protectIcon $protectText",
+                            text = landscapeStatusText,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = protectColor,
@@ -408,6 +452,8 @@ fun HomeScreen(
                     protectBorder = protectBorder,
                     status = status,
                     sosDeliveryMessage = controller.sosDeliveryMessage,
+                    dispatchReport = controller.latestSosDispatchReport,
+                    onOpenReport = { showSosReportDialog = true },
                     onComplete = {
                         controller.complete()
                         controller.safe()
@@ -526,6 +572,8 @@ fun HomeScreen(
                     protectBorder = protectBorder,
                     status = status,
                     sosDeliveryMessage = controller.sosDeliveryMessage,
+                    dispatchReport = controller.latestSosDispatchReport,
+                    onOpenReport = { showSosReportDialog = true },
                     onComplete = {
                         controller.complete()
                         controller.safe()
@@ -1065,6 +1113,204 @@ fun HomeScreen(
             }
         )
     }
+
+    // 5. Kết quả từng bước SOS — Truthful Dispatch Report Dialog
+    if (showSosReportDialog) {
+        val report = controller.latestSosDispatchReport
+        AlertDialog(
+            onDismissRequest = { showSosReportDialog = false },
+            title = {
+                Text(text = "Tiến trình gửi SOS", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 400.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    if (report != null && report.steps.isNotEmpty()) {
+                        report.steps.forEach { stepResult ->
+                            val stepStatusLabel = resolveSosStepStatusLabel(stepResult.status)
+                            val stepContainerColor = when (stepResult.status) {
+                                SosStepStatus.SUCCESS -> SafeGreenContainer
+                                SosStepStatus.PERMISSION_MISSING, SosStepStatus.FAILED -> SosRedContainer
+                                else -> WarningOrangeContainer
+                            }
+                            val stepBorderColor = when (stepResult.status) {
+                                SosStepStatus.SUCCESS -> SafeGreenBorder
+                                SosStepStatus.PERMISSION_MISSING, SosStepStatus.FAILED -> SosRedBorder
+                                else -> WarningOrangeBorder
+                            }
+                            val stepTextColor = when (stepResult.status) {
+                                SosStepStatus.SUCCESS -> SafeGreen
+                                SosStepStatus.PERMISSION_MISSING, SosStepStatus.FAILED -> SosRed
+                                else -> WarningOrange
+                            }
+
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .semantics {
+                                        contentDescription = "${stepResult.step.vietnameseLabel}: $stepStatusLabel. ${stepResult.detail ?: ""}"
+                                    },
+                                colors = CardDefaults.cardColors(containerColor = stepContainerColor),
+                                border = BorderStroke(1.dp, stepBorderColor),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = stepResult.step.vietnameseLabel,
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            text = stepStatusLabel,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = stepTextColor
+                                        )
+                                    }
+                                    if (!stepResult.detail.isNullOrBlank()) {
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            text = stepResult.detail,
+                                            fontSize = 16.sp,
+                                            color = Color(0xFF263238),
+                                            lineHeight = 22.sp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        Text(
+                            text = controller.sosDeliveryMessage,
+                            fontSize = 16.sp
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showSosReportDialog = false },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ContactBlue)
+                ) {
+                    Text(text = "ĐÓNG", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            }
+        )
+    }
+
+    // 6. First-run permission explanation dialog
+    val nextSetupStep = controller.nextPermissionSetupStep()
+    val showFirstRunDialog = shouldShowFirstRunExplanation(
+        status = status,
+        permissionSetupSeen = controller.permissionSetupSeen,
+        hasUngrantedCapability = nextSetupStep != null
+    )
+
+    if (showFirstRunDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                controller.markPermissionSetupSeen()
+            },
+            title = {
+                Text(
+                    text = FIRST_RUN_EXPLANATION_TITLE,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = FIRST_RUN_EXPLANATION_BODY,
+                    fontSize = 16.sp,
+                    lineHeight = 22.sp
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val step = controller.nextPermissionSetupStep()
+                        controller.markPermissionSetupSeen()
+                        if (step != null) {
+                            val requestFn = { ack: Boolean ->
+                                when (step) {
+                                    Capability.LOCATION -> controller.requestLocationPermission(ack)
+                                    Capability.MESSAGING -> controller.requestMessagingPermission(ack)
+                                    Capability.CALLING -> controller.requestCallingPermission(ack)
+                                }
+                            }
+                            val result = requestFn(true)
+                            when (resolveRequestOutcome(result)) {
+                                PermissionFollowUp.NONE -> Unit
+                                PermissionFollowUp.SHOW_SETTINGS_DIALOG -> {
+                                    settingsDialogCapability = step
+                                }
+                                PermissionFollowUp.REQUEST_WITH_EXPLANATION -> {
+                                    val retry = requestFn(true)
+                                    if (resolveRequestOutcome(retry) == PermissionFollowUp.SHOW_SETTINGS_DIALOG) {
+                                        settingsDialogCapability = step
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = SafeGreen)
+                ) {
+                    Text(
+                        text = FIRST_RUN_CONTINUE_BUTTON,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = {
+                        controller.markPermissionSetupSeen()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp)
+                ) {
+                    Text(
+                        text = FIRST_RUN_LATER_BUTTON,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        )
+    }
+
+    settingsDialogCapability?.let { cap ->
+        PermissionSettingsDialog(
+            onOpenSettings = {
+                settingsDialogCapability = null
+                when (cap) {
+                    Capability.LOCATION -> controller.openLocationPermissionSettings()
+                    Capability.CALLING -> controller.openCallingPermissionSettings()
+                    Capability.MESSAGING -> controller.openMessagingPermissionSettings()
+                }
+            },
+            onDismiss = { settingsDialogCapability = null }
+        )
+    }
 }
 
 /**
@@ -1079,14 +1325,33 @@ private fun ProtectiveStatusBanner(
     protectBorder: Color,
     status: MainScreenStatus,
     sosDeliveryMessage: String,
+    dispatchReport: SosDispatchReport? = null,
+    onOpenReport: (() -> Unit)? = null,
     onComplete: () -> Unit
 ) {
+    val bannerText = if (status == MainScreenStatus.SOS_SENT) {
+        resolveSosDispatchSummaryText(dispatchReport, sosDeliveryMessage)
+    } else {
+        "BẢO VỆ: $protectText"
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 4.dp)
+            .then(
+                if (status == MainScreenStatus.SOS_SENT && dispatchReport != null && onOpenReport != null) {
+                    Modifier.clickable(onClick = onOpenReport)
+                } else {
+                    Modifier
+                }
+            )
             .semantics {
-                contentDescription = "Trạng thái bảo vệ: $protectText"
+                contentDescription = if (status == MainScreenStatus.SOS_SENT) {
+                    "Trạng thái SOS: $bannerText. Chạm để xem chi tiết từng bước."
+                } else {
+                    "Trạng thái bảo vệ: $protectText"
+                }
             },
         colors = CardDefaults.cardColors(containerColor = protectBg),
         border = BorderStroke(1.5.dp, protectBorder),
@@ -1106,11 +1371,11 @@ private fun ProtectiveStatusBanner(
             ) {
                 Text(text = protectIcon, fontSize = 16.sp)
                 Text(
-                    text = if (status == MainScreenStatus.SOS_SENT) sosDeliveryMessage else "BẢO VỆ: $protectText",
+                    text = bannerText,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = protectColor,
-                    maxLines = 2,
+                    maxLines = 3,
                     softWrap = true
                 )
             }
@@ -1121,6 +1386,14 @@ private fun ProtectiveStatusBanner(
                     colors = ButtonDefaults.buttonColors(containerColor = SafeGreen)
                 ) {
                     Text("HOÀN TẤT", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            } else if (status == MainScreenStatus.SOS_SENT && dispatchReport != null && onOpenReport != null) {
+                Button(
+                    onClick = onOpenReport,
+                    modifier = Modifier.heightIn(min = 40.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = SosRedDark)
+                ) {
+                    Text("CHI TIẾT", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 }
             }
         }

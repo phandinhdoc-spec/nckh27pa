@@ -3,13 +3,25 @@ package vn.nckh27pa.fallsafe.permissions
 enum class Capability { CALLING, MESSAGING, LOCATION }
 
 enum class CapabilityDisplayState { GRANTED, CAN_REQUEST, NEEDS_SETTINGS }
+enum class LocationPrecision { PRECISE, APPROXIMATE, NONE }
 
 data class CapabilityDisplay(
     val capability: Capability,
     val state: CapabilityDisplayState,
     val reason: String,
-    val remediation: String?
+    val remediation: String?,
+    val locationPrecision: LocationPrecision? = null,
+    val note: String? = null
 )
+
+data class CapabilitySnapshot(
+    val calling: Boolean,
+    val messaging: Boolean,
+    val location: Boolean,
+    val locationPrecision: LocationPrecision = LocationPrecision.NONE
+)
+
+fun interface CapabilitySnapshotProvider { fun snapshot(): CapabilitySnapshot }
 
 enum class PermissionRequestResult {
     GRANTED,
@@ -37,6 +49,9 @@ data class SosReadiness(
 interface CapabilityPlatform {
     fun isGranted(capability: Capability): Boolean
     fun shouldShowRationale(capability: Capability): Boolean
+    fun locationPrecision(): LocationPrecision =
+        if (isGranted(Capability.LOCATION)) LocationPrecision.PRECISE else LocationPrecision.NONE
+    fun hasPhoneStateAccess(): Boolean = true
     fun request(capability: Capability)
     fun openSettings(capability: Capability)
 }
@@ -52,6 +67,15 @@ interface CapabilityAttemptStore {
     fun wasAttempted(capability: Capability): Boolean
     fun markAttempted(capability: Capability)
 }
+
+interface PermissionSetupStore {
+    var seen: Boolean
+}
+
+class MemoryPermissionSetupStore(override var seen: Boolean = false) : PermissionSetupStore
+
+const val PERMISSION_SETUP_EXPLANATION =
+    "Hãy cho phép vị trí, nhắn tin và gọi điện để FallSafe có thể báo người thân khi cần."
 
 class MemoryCapabilityAttemptStore : CapabilityAttemptStore {
     private val attempted = mutableSetOf<Capability>()
@@ -76,7 +100,17 @@ class CapabilityAccessController(
             CapabilityDisplayState.CAN_REQUEST -> copy.requestRemediation
             CapabilityDisplayState.NEEDS_SETTINGS -> copy.settingsRemediation
         }
-        return CapabilityDisplay(capability, state, copy.reason, remediation)
+        val precision = if (capability == Capability.LOCATION) platform.locationPrecision() else null
+        val note = when {
+            capability == Capability.LOCATION && state == CapabilityDisplayState.GRANTED && precision == LocationPrecision.APPROXIMATE ->
+                "Vị trí gần đúng vẫn dùng được; người thân có thể thấy khu vực thay vì điểm chính xác."
+            capability == Capability.LOCATION && state == CapabilityDisplayState.GRANTED && precision == LocationPrecision.PRECISE ->
+                "Vị trí chính xác đã sẵn sàng."
+            capability == Capability.MESSAGING && state == CapabilityDisplayState.GRANTED && !platform.hasPhoneStateAccess() ->
+                "Chưa cho phép kiểm tra SIM; nếu máy có nhiều SIM, ứng dụng cần chọn SIM để gửi."
+            else -> null
+        }
+        return CapabilityDisplay(capability, state, copy.reason, remediation, precision, note)
     }
 
     fun request(capability: Capability, explanationAcknowledged: Boolean): PermissionRequestResult {
@@ -99,6 +133,13 @@ class CapabilityAccessController(
         eligibleContactCount = eligibleContactCount.coerceAtLeast(0)
     )
 
+    fun snapshot(): CapabilitySnapshot = CapabilitySnapshot(
+        calling = platform.isGranted(Capability.CALLING),
+        messaging = platform.isGranted(Capability.MESSAGING),
+        location = platform.isGranted(Capability.LOCATION),
+        locationPrecision = platform.locationPrecision()
+    )
+
     private data class Copy(
         val reason: String,
         val requestRemediation: String,
@@ -110,17 +151,17 @@ class CapabilityAccessController(
             Capability.CALLING to Copy(
                 reason = "Cho phép gọi giúp FallSafe mở cuộc gọi khẩn cấp bạn chủ động chọn.",
                 requestRemediation = "Chọn tiếp tục để Android hỏi quyền gọi điện.",
-                settingsRemediation = "Quyền gọi đã bị từ chối lâu dài. Bạn có thể mở Cài đặt ứng dụng để bật lại."
+                settingsRemediation = "Quyền này đang bị tắt. Hãy bật trong Cài đặt."
             ),
             Capability.MESSAGING to Copy(
                 reason = "Cho phép nhắn tin giúp FallSafe gửi cảnh báo tới người thân và chọn đúng SIM khi cần.",
                 requestRemediation = "Chọn tiếp tục để Android hỏi quyền nhắn tin.",
-                settingsRemediation = "Quyền nhắn tin đã bị từ chối lâu dài. Bạn có thể mở Cài đặt ứng dụng để bật lại."
+                settingsRemediation = "Quyền này đang bị tắt. Hãy bật trong Cài đặt."
             ),
             Capability.LOCATION to Copy(
                 reason = "Cho phép vị trí giúp cảnh báo kèm tọa độ để người thân dễ tìm bạn hơn.",
                 requestRemediation = "Chọn tiếp tục để Android hỏi quyền vị trí khi đang dùng ứng dụng.",
-                settingsRemediation = "Quyền vị trí đã bị từ chối lâu dài. Bạn có thể mở Cài đặt ứng dụng để bật lại."
+                settingsRemediation = "Quyền này đang bị tắt. Hãy bật trong Cài đặt."
             )
         )
     }

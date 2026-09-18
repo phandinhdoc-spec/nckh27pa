@@ -43,22 +43,26 @@ class AndroidSmsManagerGateway(private val context:Context) : EmergencySmsGatewa
         }
         if(!context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING))return fail("Thiết bị không hỗ trợ SMS di động")
         if(ContextCompat.checkSelfPermission(context,Manifest.permission.SEND_SMS)!=PackageManager.PERMISSION_GRANTED)return fail(EmergencyFailureMessages.messagingPermissionMissing)
+        val hasPhoneStateAccess=ContextCompat.checkSelfPermission(context,Manifest.permission.READ_PHONE_STATE)==PackageManager.PERMISSION_GRANTED
         val subscription=try {
             val manager=context.getSystemService(SubscriptionManager::class.java)
-            val active=manager.activeSubscriptionInfoCount
-            if(active>1&&request.subscriptionId==null)return fail("Có nhiều SIM; cần chọn SIM gửi rõ ràng")
-            request.subscriptionId?:SmsManager.getDefaultSmsSubscriptionId().takeIf{it!=SubscriptionManager.INVALID_SUBSCRIPTION_ID}?:return fail("Không có SIM mặc định; hãy chọn SIM gửi")
-        }catch(_:SecurityException){return fail(EmergencyFailureMessages.simAccessMissing)}
-        val manager=if(Build.VERSION.SDK_INT>=31)context.getSystemService(SmsManager::class.java).createForSubscriptionId(subscription) else @Suppress("DEPRECATION") SmsManager.getSmsManagerForSubscriptionId(subscription)
-        val bodies=manager.divideMessage(request.message)
-        if(bodies.isEmpty())return fail("Nội dung SMS trống")
-        val key="${request.eventId}:${request.contactId}";parts[key]=SmsPartAggregation(bodies.size)
-        states[key]=SmsDispatchState(request.eventId,request.contactId,SmsDeliveryStatus.QUEUED)
-        val sent=ArrayList<PendingIntent>(bodies.size);val delivered=ArrayList<PendingIntent>(bodies.size)
-        bodies.indices.forEach{index->sent+=callback(sentAction,request,index);delivered+=callback(deliveredAction,request,index)}
-        states[key]=SmsDispatchState(request.eventId,request.contactId,SmsDeliveryStatus.SENDING)
-        return try{manager.sendMultipartTextMessage(request.phone,null,bodies,sent,delivered);states[key]!!}
-        catch(e:RuntimeException){fail(e.message?:"Không thể xếp hàng SMS")}
+            if(hasPhoneStateAccess&&manager.activeSubscriptionInfoCount>1&&request.subscriptionId==null)return fail("Có nhiều SIM; cần chọn SIM gửi rõ ràng")
+            request.subscriptionId?:SmsManager.getDefaultSmsSubscriptionId().takeIf{it!=SubscriptionManager.INVALID_SUBSCRIPTION_ID}
+        }catch(_:SecurityException){request.subscriptionId}
+        return try {
+            val manager=if(subscription==null) @Suppress("DEPRECATION") SmsManager.getDefault()
+                else if(Build.VERSION.SDK_INT>=31)context.getSystemService(SmsManager::class.java).createForSubscriptionId(subscription)
+                else @Suppress("DEPRECATION") SmsManager.getSmsManagerForSubscriptionId(subscription)
+            val bodies=manager.divideMessage(request.message)
+            if(bodies.isEmpty())return fail("Nội dung SMS trống")
+            val key="${request.eventId}:${request.contactId}";parts[key]=SmsPartAggregation(bodies.size)
+            states[key]=SmsDispatchState(request.eventId,request.contactId,SmsDeliveryStatus.QUEUED)
+            val sent=ArrayList<PendingIntent>(bodies.size);val delivered=ArrayList<PendingIntent>(bodies.size)
+            bodies.indices.forEach{index->sent+=callback(sentAction,request,index);delivered+=callback(deliveredAction,request,index)}
+            states[key]=SmsDispatchState(request.eventId,request.contactId,SmsDeliveryStatus.SENDING)
+            manager.sendMultipartTextMessage(request.phone,null,bodies,sent,delivered);states[key]!!
+        } catch(_:SecurityException) { fail("Hệ thống từ chối gửi SMS") }
+        catch(_:RuntimeException){fail("Không thể xếp hàng SMS")}
     }
     private fun callback(action:String,request:SmsRequest,index:Int):PendingIntent {
         val intent=Intent(action).setPackage(context.packageName)

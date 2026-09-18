@@ -16,8 +16,8 @@ android {
         applicationId = "vn.nckh27pa.fallsafe"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1-demo"
+        versionCode = 3
+        versionName = "0.3-permission"
         buildConfigField("String", "API_BASE_URL", quoted(apiUrl))
         buildConfigField("String", "FALLSAFE_DEVICE_ID", quoted(setting("FALLSAFE_DEVICE_ID", "PHONE-DEFAULT")))
         buildConfigField("String", "FALLSAFE_USER_ID", quoted(setting("FALLSAFE_USER_ID", "user-01")))
