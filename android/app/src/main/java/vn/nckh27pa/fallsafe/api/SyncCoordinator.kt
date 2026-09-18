@@ -11,6 +11,15 @@ import vn.nckh27pa.fallsafe.PhoneSensorPacket
 import java.io.Closeable
 import java.util.UUID
 
+class EventLocationRefreshGate {
+    private var eventId:Long?=null
+    fun shouldRequest(candidate:Long):Boolean {
+        if(candidate<=0||candidate==eventId)return false
+        eventId=candidate
+        return true
+    }
+}
+
 /** Application lifetime, main-thread confined. A single owned job does bounded HTTP work;
  * core callbacks only persist intent. Process lifecycle starts/stops idle polling, while
  * foreground-service monitoring or an active emergency keeps synchronization alive. */
@@ -23,10 +32,14 @@ class SyncCoordinator(
     private val wallMs: () -> Long = System::currentTimeMillis,
     private val elapsedMs: () -> Long = { android.os.SystemClock.elapsedRealtime() },
     private val battery: () -> BatteryReading? = { null },
-    private val heartbeat: (BatteryReading, PhoneSensorPacket?) -> HeartbeatRequest? = { _, _ -> null }
+    private val heartbeat: (BatteryReading, PhoneSensorPacket?) -> HeartbeatRequest? = { _, _ -> null },
+    private val emergency: vn.nckh27pa.fallsafe.emergency.EmergencyCoordinator? = null,
+    private val emergencyLocation: vn.nckh27pa.fallsafe.emergency.EmergencyLocationController? = null,
+    identity: vn.nckh27pa.fallsafe.emergency.EventIdentityStore = vn.nckh27pa.fallsafe.emergency.SessionEventIdentityStore(),
+    private val displayName: () -> String = { "Người dùng FallSafe" }
 ) : DefaultLifecycleObserver, Closeable {
     private val scope = CoroutineScope(SupervisorJob() + dispatcher)
-    private val transitions = TransitionSync(outbox, config)
+    private val transitions = TransitionSync(outbox, config, identity = identity, displayName=displayName)
     private val telemetry = PhoneTelemetry(config, outbox)
     private val cycleMutex = Mutex()
     private var job: Job? = null
@@ -40,12 +53,26 @@ class SyncCoordinator(
     private var nextPoll = 0L
     private var nextHeartbeat = 0L
     private var nextSensor = 0L
+    private var nextDeviceStatus = 0L
     private var lastLocalEvent = 0L
+    private var emergencyDispatchEvent = 0L
+    private val locationRefreshGate=EventLocationRefreshGate()
 
     init {
         controller.onSyncStateChanged = {
             if (!controller.replaying && controller.source.startsWith("PHONE_ONLY")) {
                 transitions.observe(controller.snapshot)
+                val localEvent=controller.snapshot.eventId
+                if(localEvent>0){
+                    val remoteId=transitions.eventId(localEvent)
+                    if(controller.snapshot.state in listOf(State.VERIFYING,State.ALERTING,State.AWAITING_HELP) && locationRefreshGate.shouldRequest(localEvent))
+                        emergencyLocation?.onVerifyingStarted()
+                    if(controller.snapshot.state==State.VERIFYING && emergencyDispatchEvent!=localEvent){
+                        emergencyDispatchEvent=localEvent;emergency?.beginVerifying(remoteId)
+                    }
+                    if(controller.snapshot.state in listOf(State.ALERTING,State.AWAITING_HELP)) emergency?.timeout(remoteId,controller.contacts,displayName(),emergencyLocation?.locationState?.fix)
+                    if(controller.snapshot.state==State.MONITORING && controller.snapshot.response==core.Response.SAFE){emergency?.cancel(remoteId);transitions.clearEventId(localEvent)}
+                }
                 if (lastLocalEvent != controller.snapshot.eventId) {
                     lastLocalEvent = controller.snapshot.eventId
                     controller.caregiverAcknowledged = false
@@ -67,6 +94,19 @@ class SyncCoordinator(
         }
     }
     fun remoteEventId(): String = transitions.eventId(controller.snapshot.eventId)
+    fun requestVoice(eventId:String) {
+        val fix=emergencyLocation?.locationState?.fix
+        val location=fix?.let{LocationPayload(it.latitude,it.longitude,it.accuracyM,it.fixTimeMs)}
+        outbox.enqueue(SyncOperation("$eventId:${OperationKind.SOS}",OperationKind.SOS,action=ActionRequest(eventId,config.deviceId,config.userId,wallMs(),"MANUAL_APP_BUTTON","NEED_HELP",location=location,displayName=displayName())))
+        if(started)ensureRunning()
+    }
+    fun reportTransportState(state:vn.nckh27pa.fallsafe.emergency.SmsDispatchState){
+        if(state.status !in listOf(vn.nckh27pa.fallsafe.emergency.SmsDeliveryStatus.SENT,vn.nckh27pa.fallsafe.emergency.SmsDeliveryStatus.DELIVERED,vn.nckh27pa.fallsafe.emergency.SmsDeliveryStatus.FAILED))return
+        val request=TransportStatusRequest(state.contactId,status=state.status.name,timestampMs=wallMs(),detail=state.detail)
+        val identity="${state.eventId}:SMS:${state.contactId}:${state.status}:${state.detail.hashCode()}"
+        outbox.enqueue(SyncOperation(identity,OperationKind.TRANSPORT_STATUS,contactId=state.eventId,transportStatus=request))
+        if(started)ensureRunning()
+    }
     override fun onStart(owner: LifecycleOwner) { visible = true; resume() }
     override fun onStop(owner: LifecycleOwner) { visible = false }
     fun start() { started = true; ensureRunning() }
@@ -114,6 +154,26 @@ class SyncCoordinator(
                 controller.caregiverAcknowledged = active.value.caregiverAcknowledged == true
             }
         }
+        config.espDeviceId?.let { espId ->
+            if(now>=nextDeviceStatus){
+                nextDeviceStatus=now+30_000
+                when(val result=repository.deviceStatus(espId)){
+                    is ApiResult.Success -> result.value.espDetails(espId)?.let { details ->
+                        controller.deviceDetailsStore?.updateFromBackend(details)
+                        controller.deviceConnected=details.connected==true
+                        controller.batteryStatus=details.batteryPercent?.let { if(details.connected==true)"Pin ESP32: $it%" else "Pin ESP32 báo cáo gần nhất: $it%" }
+                            ?:"Chưa có dữ liệu pin ESP32"
+                    }
+                    is ApiResult.Failure -> {
+                        controller.deviceDetailsStore?.markRefreshFailed(if(result.code=="RESOURCE_NOT_FOUND")"Chưa có heartbeat ESP32" else "Không làm mới được trạng thái ESP32")
+                        if(controller.deviceDetailsStore?.value?.source==vn.nckh27pa.fallsafe.device.DeviceValueSource.UNKNOWN){
+                            controller.deviceConnected=false;controller.batteryStatus="Chưa có dữ liệu pin ESP32"
+                        }
+                    }
+                    ApiResult.Loading -> Unit
+                }
+            }
+        }
         // Safety outbox always drains before best-effort telemetry. Latest sample only,
         // bounded to one per second; stale/offline samples never accumulate unbounded work.
         if (outbox.pending().isEmpty() && (visible || controller.foreground || controller.backgroundMonitoring)) {
@@ -139,6 +199,7 @@ class SyncCoordinator(
             OperationKind.CONTACT_ADD -> repository.addContact(op.userId!!, op.contact!!)
             OperationKind.CONTACT_UPDATE -> repository.updateContact(op.userId!!, op.contact!!)
             OperationKind.CONTACT_DELETE -> repository.deleteContact(op.userId!!, op.contactId!!)
+            OperationKind.TRANSPORT_STATUS -> repository.transportStatus(op.contactId!!,op.transportStatus!!)
         }
         if (op.kind == OperationKind.SOS && result is ApiResult.Success && op.action?.eventId == remoteEventId()) {
             controller.sosDeliveryMessage = "Máy chủ đã ghi nhận SOS; chưa xác nhận gửi ra ngoài."

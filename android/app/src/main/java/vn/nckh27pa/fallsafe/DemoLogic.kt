@@ -14,6 +14,7 @@ data class PhoneSensorPacket(
     val gyroXDps: Float? = null, val gyroYDps: Float? = null, val gyroZDps: Float? = null,
     val pitchDeg: Float? = null, val rollDeg: Float? = null, val yawDeg: Float? = null,
     val pressurePa: Float? = null, val altitudeDeltaM: Float? = null,
+    val pressureWindowDeltaPa: Float? = null,
     val stepCount: Long? = null, val stepDetected: Boolean? = null,
     val phoneMotionState: String = "UNKNOWN", val phonePlacementConfidence: Int = 0,
     val sensorQuality: Int = 0
@@ -73,9 +74,12 @@ class PhoneNormalizer {
                     .takeIf { it.isFinite() }
             }
         }
+        val pressureWindowDelta = pressure?.let { current ->
+            pressureHistory.firstOrNull()?.pressurePa?.let { oldest -> current - oldest }
+        }
         return PhoneSensorPacket(a.ns, wallMs, a.values[0], a.values[1], a.values[2],
             l?.get(0), l?.get(1), l?.get(2), g?.get(0), g?.get(1), g?.get(2),
-            o?.get(0), o?.get(1), o?.get(2), pressure, altitudeDelta)
+            o?.get(0), o?.get(1), o?.get(2), pressure, altitudeDelta, pressureWindowDelta)
     }
 
     private companion object {
@@ -84,34 +88,169 @@ class PhoneNormalizer {
     }
 }
 
-/** DEMO only: impact >=25 m/s², then >=1 s quiet at 9.81±1 within 3 s.
- * At least 6 quiet samples; gaps >250 ms, invalid or reversed times break evidence.
- * These illustrative thresholds are not a validated fall detector.
- */
-class DemoDetector {
+/** Observable phases mirror the demo detector state machine; they are not medical claims. */
+enum class DetectionPhase { NORMAL, IMPACT_DETECTED, POST_IMPACT_STILLNESS, FALL_CONFIRMED }
+
+data class FallDetectionObservation(
+    val accelerationMagnitudeMs2: Double?,
+    val phase: DetectionPhase,
+    val activeProfileId: String,
+    val activeProfileDisplayName: String,
+    val config: FallDetectionConfig,
+    val impactOverThreshold: Boolean,
+    val withinStillness: Boolean,
+    val stillnessProgress: Float,
+    val stillnessSampleCount: Int,
+    val pressureCorroborated: Boolean? = null
+)
+
+/** DEMO detector driven only by the seven active profile parameters. */
+class DemoDetector(
+    private val activeProfileProvider: () -> FallDetectionProfile,
+    private val pressureCapability: () -> Boolean
+) {
+    constructor() : this({ DEFAULT_DETECTION_PROFILE }, { false })
+    constructor(activeProfileProvider: () -> FallDetectionProfile) : this(activeProfileProvider, { false })
     private var last: Long? = null
     private var impact: Long? = null
     private var quiet: Long? = null
     private var count = 0
-    fun reset() { last = null; impact = null; quiet = null; count = 0 }
+    private var observedProfile = activeProfileProvider()
+    private var currentObservation = normalObservation(observedProfile)
+
+    fun reset() {
+        clearEvidence()
+        observedProfile = activeProfileProvider()
+        currentObservation = normalObservation(observedProfile)
+    }
+
+    fun observation(): FallDetectionObservation = currentObservation
+
     fun accept(p: PhoneSensorPacket): Boolean {
+        val profile = activeProfileProvider()
+        if (profile.id != observedProfile.id || profile.config != observedProfile.config) {
+            clearEvidence()
+            observedProfile = profile
+            currentObservation = normalObservation(profile)
+        }
+        val config = profile.config
         val t = p.timestampNs
-        val a = listOf(p.accelXMs2, p.accelYMs2, p.accelZMs2)
-        if (t < 0 || a.any { !it.isFinite() }) { reset(); return false }
+        val acceleration = listOf(p.accelXMs2, p.accelYMs2, p.accelZMs2)
+        if (t < 0 || acceleration.any { !it.isFinite() }) {
+            reset()
+            return false
+        }
+        val magnitude = sqrt(acceleration.sumOf { it.toDouble() * it.toDouble() })
         val previous = last
-        if (previous != null && (t <= previous || t - previous > 250_000_000)) {
-            reset(); last = t; return false
+        val maximumGapNs = config.maximumSampleGapMs * 1_000_000L
+        if (previous != null && (t <= previous || t - previous > maximumGapNs)) {
+            clearEvidence()
+            last = t
+            currentObservation = observationFor(profile, magnitude, DetectionPhase.NORMAL)
+            return false
         }
         last = t
-        val magnitude = sqrt(a.sumOf { it.toDouble() * it.toDouble() })
-        if (magnitude >= 25) { impact = t; quiet = null; count = 0; return false }
-        val hit = impact ?: return false
-        if (t - hit > 3_000_000_000L) { impact = null; quiet = null; count = 0; return false }
-        if (abs(magnitude - 9.81) > 1) { quiet = null; count = 0; return false }
+        val overImpact = magnitude >= config.impactAccelerationMs2
+        if (overImpact) {
+            impact = t
+            quiet = null
+            count = 0
+            currentObservation = observationFor(
+                profile, magnitude, DetectionPhase.IMPACT_DETECTED, impactOverThreshold = true
+            )
+            return false
+        }
+        val hit = impact
+        if (hit == null) {
+            currentObservation = observationFor(profile, magnitude, DetectionPhase.NORMAL)
+            return false
+        }
+        if (t - hit > config.postImpactWindowMs * 1_000_000L) {
+            impact = null
+            quiet = null
+            count = 0
+            currentObservation = observationFor(profile, magnitude, DetectionPhase.NORMAL)
+            return false
+        }
+        val still = abs(magnitude - config.stillnessTargetAccelerationMs2) <= config.stillnessToleranceMs2
+        if (!still) {
+            quiet = null
+            count = 0
+            currentObservation = observationFor(profile, magnitude, DetectionPhase.IMPACT_DETECTED)
+            return false
+        }
         if (quiet == null) quiet = t
         count++
-        if (count >= 6 && t - quiet!! >= 1_000_000_000) { reset(); return true }
-        return false
+        val elapsedNs = t - quiet!!
+        val requiredNs = config.postImpactStillnessDurationMs * 1_000_000L
+        val progress = if (requiredNs == 0L) 1f else (elapsedNs.toDouble() / requiredNs).toFloat().coerceIn(0f, 1f)
+        val confirmed = count >= config.minimumStillnessSamples && elapsedNs >= requiredNs
+        currentObservation = observationFor(
+            profile = profile,
+            magnitude = magnitude,
+            phase = if (confirmed) DetectionPhase.FALL_CONFIRMED else DetectionPhase.POST_IMPACT_STILLNESS,
+            withinStillness = true,
+            progress = progress,
+            samples = count,
+            pressureCorroborated = if (confirmed && config.phonePressureEvidenceEnabled && pressureCapability()) {
+                (p.pressureWindowDeltaPa ?: Float.NEGATIVE_INFINITY) >= config.phonePressureMinimumRisePa
+            } else null
+        )
+        if (confirmed) clearEvidence()
+        return confirmed
+    }
+
+    private fun clearEvidence() {
+        last = null
+        impact = null
+        quiet = null
+        count = 0
+    }
+
+    private fun observationFor(
+        profile: FallDetectionProfile,
+        magnitude: Double,
+        phase: DetectionPhase,
+        impactOverThreshold: Boolean = false,
+        withinStillness: Boolean = false,
+        progress: Float = 0f,
+        samples: Int = 0,
+        pressureCorroborated: Boolean? = null
+    ) = FallDetectionObservation(
+        accelerationMagnitudeMs2 = magnitude,
+        phase = phase,
+        activeProfileId = profile.id,
+        activeProfileDisplayName = profile.displayName,
+        config = profile.config,
+        impactOverThreshold = impactOverThreshold,
+        withinStillness = withinStillness,
+        stillnessProgress = progress,
+        stillnessSampleCount = samples,
+        pressureCorroborated = pressureCorroborated
+    )
+
+    private fun normalObservation(profile: FallDetectionProfile) = FallDetectionObservation(
+        accelerationMagnitudeMs2 = null,
+        phase = DetectionPhase.NORMAL,
+        activeProfileId = profile.id,
+        activeProfileDisplayName = profile.displayName,
+        config = profile.config,
+        impactOverThreshold = false,
+        withinStillness = false,
+        stillnessProgress = 0f,
+        stillnessSampleCount = 0
+    )
+
+    private companion object {
+        val DEFAULT_DETECTION_PROFILE = FallDetectionProfile(
+            id = "experimental-default",
+            displayName = "Bảng mặc định thử nghiệm",
+            profileNumber = 0,
+            createdAt = 0,
+            updatedAt = 0,
+            isActive = true,
+            config = FallDetectionConfig.DEFAULT
+        )
     }
 }
 class DemoReplay(private val startMs: Long) {
@@ -137,10 +276,16 @@ class LocalDemoSink : AlertSink {
     }
     fun alerts() = received.toList()
 }
-class DemoSession(clock: MonotonicClock, val sink: LocalDemoSink = LocalDemoSink()) {
+class DemoSession(
+    clock: MonotonicClock,
+    val sink: LocalDemoSink = LocalDemoSink(),
+    profileRepository: FallDetectionProfileRepository? = null
+) {
     private val core = AlertCore(clock, sink)
-    private val detector = DemoDetector()
+    private val detector = if (profileRepository == null) DemoDetector()
+        else DemoDetector(activeProfileProvider = { profileRepository.activeProfile() })
     fun resetDetection() = detector.reset()
+    fun observation() = detector.observation()
     fun accept(packet: PhoneSensorPacket) {
         if (core.snapshot().state == State.MONITORING && detector.accept(packet)) {
             core.suspected(); core.evidenceConfirmed()

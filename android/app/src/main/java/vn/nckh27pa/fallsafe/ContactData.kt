@@ -14,7 +14,8 @@ data class EmergencyContact(
     val relationship: String,
     val phone: String,
     val receiveSos: Boolean = true,
-    val isPrimary: Boolean = false
+    val isPrimary: Boolean = false,
+    val callPriority: Int = Int.MAX_VALUE
 )
 
 object ContactValidator {

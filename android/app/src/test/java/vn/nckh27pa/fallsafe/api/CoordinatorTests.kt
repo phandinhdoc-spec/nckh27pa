@@ -7,8 +7,24 @@ import okhttp3.mockwebserver.*
 import org.junit.Assert.*
 import org.junit.Test
 import vn.nckh27pa.fallsafe.*
+import vn.nckh27pa.fallsafe.emergency.SmsDeliveryStatus
+import vn.nckh27pa.fallsafe.emergency.SmsDispatchState
 
 class CoordinatorTests {
+    @Test fun terminalSmsCallbackIsDurablyQueuedForAuthenticatedBackendReport() {
+        val store=MemorySyncStore();val outbox=SyncOutbox(store)
+        val controller=DemoController()
+        val server=MockWebServer();server.start()
+        val client=ApiClient(ApiConfig(server.url("/").toString(),"PHONE-DEFAULT","user",null))
+        val coordinator=SyncCoordinator(controller,ApiRepository(client.service),ApiConfig(server.url("/").toString(),"PHONE-DEFAULT","user",null),outbox,dispatcher=Dispatchers.Unconfined,wallMs={42})
+        try {
+            coordinator.reportTransportState(SmsDispatchState("event-1","contact-1",SmsDeliveryStatus.SENT,"network accepted"))
+            val operation=outbox.pending().single()
+            assertEquals(OperationKind.TRANSPORT_STATUS,operation.kind)
+            assertEquals("event-1",operation.contactId)
+            assertEquals("SENT",operation.transportStatus!!.status)
+        } finally {coordinator.close();client.close();server.shutdown()}
+    }
     @Test fun backendAckUpdatesExistingStateAndOfflineNeverStopsCountdown() = runBlocking {
         val server = MockWebServer(); server.start()
         val config = ApiConfig(server.url("/").toString(), "phone", "user")

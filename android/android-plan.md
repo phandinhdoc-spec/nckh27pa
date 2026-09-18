@@ -822,4 +822,88 @@ Phiên bản Android đầu tiên được xem là đạt khi:
 
 Ứng dụng Android vừa là **thiết bị đo độc lập bằng cảm biến của điện thoại**, vừa là trung tâm điều phối dữ liệu từ ESP32. Android đánh giá nhiều dấu hiệu, hợp nhất hai nguồn khi có thể, hỏi lại người dùng và gửi cảnh báo. Thiết kế frontend được giữ gọn, rõ trạng thái và thuận tiện cho người lớn tuổi; phần chuyên sâu được tách riêng cho người chăm sóc và nhóm nghiên cứu. Backend chỉ gồm các mô-đun cần thiết, có luồng dữ liệu một chiều và máy trạng thái dễ kiểm thử.
 
+---
+
+## 14. Hiệu chỉnh ngưỡng thử nghiệm trên Android
+
+Các giá trị dưới đây là **giá trị khởi tạo phục vụ thử nghiệm**, không phải ngưỡng té ngã chuẩn hoặc ngưỡng y tế đã được chứng minh. Chỉ các tham số mà `DemoDetector` hiện thực sự sử dụng mới xuất hiện trong cấu hình.
+
+### 14.1. Bảng tham số `FallDetectionConfig`
+
+| Threshold | Ý nghĩa | Unit | Default | Min | Max | Detection stage |
+|---|---|---:|---:|---:|---:|---|
+| `impactAccelerationMs2` | Độ lớn gia tốc tổng hợp để ghi nhận va chạm | m/s² | 25 | 1 | 100 | Impact detection |
+| `stillnessTargetAccelerationMs2` | Gia tốc tổng hợp mục tiêu khi điện thoại ít chuyển động | m/s² | 9.81 | 0 | 20 | Post-impact stillness |
+| `stillnessToleranceMs2` | Dung sai quanh gia tốc tĩnh mục tiêu | m/s² | 1 | 0.1 | 10 | Post-impact stillness |
+| `postImpactWindowMs` | Cửa sổ tối đa để tìm bằng chứng bất động sau va chạm | ms | 3000 | 500 | 10000 | Post-impact window |
+| `postImpactStillnessDurationMs` | Thời gian bất động liên tục tối thiểu; luôn phải nhỏ hơn hoặc bằng cửa sổ sau va chạm | ms | 1000 | 100 | 10000 | Fall confirmation |
+| `minimumStillnessSamples` | Số mẫu tĩnh tối thiểu trong khoảng bất động | mẫu | 6 | 2 | 100 | Fall confirmation |
+| `maximumSampleGapMs` | Khoảng cách tối đa giữa hai mẫu; vượt quá sẽ xóa bằng chứng đang dở | ms | 250 | 10 | 2000 | Input continuity |
+
+Validation từ chối `NaN`, vô cực, số âm, số ngoài min/max, thời gian bất hợp lệ và `postImpactStillnessDurationMs > postImpactWindowMs`. Dữ liệu snapshot hỏng không được đưa vào Detection Engine.
+
+### 14.2. Profile và persistence
+
+`FallDetectionProfile` gồm `id`, `displayName`, `profileNumber`, `createdAt`, `updatedAt`, `isActive` và `config`. ID ổn định cho phép kết quả thử nghiệm trong tương lai tham chiếu profile mà không phụ thuộc tên hiển thị.
+
+Toàn bộ profile, active flag và `lastAssignedProfileNumber` được ghi thành một Gson snapshot qua SharedPreferences:
+
+- Store: `fallsafe_detection_profiles_v1_<userId>`.
+- Key: `profiles_snapshot_json`.
+- Khởi tạo lần đầu: một `Bảng 1` active với `FallDetectionConfig.DEFAULT`.
+- Chỉ tồn tại một active profile.
+- Active profile sống qua process death, restart ứng dụng và reboot thiết bị.
+- Snapshot rỗng, hỏng, sai validation hoặc có nhiều active profile được phục hồi an toàn về một `Bảng 1` active.
+
+Tên bảng do hệ thống tạo, người dùng không phải nhập. Khi tạo mới:
+
+```text
+newNumber = max(lastAssignedProfileNumber, max(existing profileNumber)) + 1
+displayName = "Bảng " + newNumber
+```
+
+Vì `lastAssignedProfileNumber` được lưu bền vững, số bảng đã xóa không được tái sử dụng. Ví dụ đã có Bảng 1–4, xóa Bảng 2, lần Save As tiếp theo tạo Bảng 5.
+
+### 14.3. Save, Save As, Activate, Delete và Reset
+
+- **LƯU**: cập nhật đúng profile đang chỉnh; không tạo profile mới và không đổi active profile. Nếu đang lưu profile active, Detection Engine nhận config mới ngay và xóa bằng chứng phát hiện đang dở.
+- **LƯU THÀNH BẢNG MỚI**: sao chép toàn bộ draft hợp lệ sang một profile inactive mới, giữ nguyên profile nguồn và chuyển UI sang bảng vừa tạo.
+- **SỬ DỤNG BẢNG NÀY**: kích hoạt rõ ràng profile đã lưu; tất cả profile khác trở thành inactive. Draft chưa lưu không được kích hoạt.
+- **XÓA BẢNG**: luôn yêu cầu xác nhận; không cho xóa active profile và không cho xóa profile cuối cùng.
+- **KHÔI PHỤC GIÁ TRỊ MẶC ĐỊNH**: sau xác nhận, cập nhật profile đang chọn về các giá trị khởi tạo thử nghiệm. Đây không phải tuyên bố về độ chính xác y khoa.
+
+UI duy trì riêng `selectedProfileId`/draft và active profile. Chọn bảng, Save hoặc Save As không tự động đổi cấu hình Detection Engine.
+
+### 14.4. Detection Engine và trạng thái nghiên cứu
+
+Luồng Android hiện tại:
+
+```text
+PhoneSensorPacket
+  → acceleration magnitude
+  → active FallDetectionProfile.config
+  → DemoDetector
+  → FallDetectionObservation
+  → DemoSession
+  → AlertCore
+  → countdown / cancel / SOS
+```
+
+`DemoDetector` lấy cấu hình của active profile thay vì dùng magic number. `FallDetectionObservation` phản ánh đúng state machine hiện tại: `NORMAL`, `IMPACT_DETECTED`, `POST_IMPACT_STILLNESS`, `FALL_CONFIRMED`; đồng thời expose độ lớn gia tốc, trạng thái vượt ngưỡng va chạm, tiến độ/thống kê mẫu tĩnh và profile active. Gyroscope, góc, áp suất và độ cao chưa tham gia quyết định của detector hiện tại nên không được trình bày như bằng chứng xác nhận té ngã.
+
+### 14.5. Cách mở và quy trình thử nghiệm
+
+Đường dẫn: **Cài đặt → Phát hiện té ngã → Hiệu chỉnh thử nghiệm**. Màn hình chính cho người cao tuổi không hiển thị threshold.
+
+Quy trình đề xuất:
+
+1. Chọn bảng đang chỉnh và kiểm tra riêng nhãn bảng active.
+2. Thực hiện có giám sát các tình huống đi bộ, ngồi/đứng/nằm xuống, chuyển tư thế nhanh, va chạm nhẹ và ngã giả lập an toàn.
+3. Quan sát gia tốc X/Y/Z, độ lớn gia tốc, ngưỡng active, detector phase và bằng chứng bất động. Panel cập nhật khoảng 4 Hz để tránh nhấp nháy.
+4. Sửa giá trị; dùng **LƯU** nếu muốn cập nhật cùng bảng hoặc **LƯU THÀNH BẢNG MỚI** để giữ bản cũ đối chiếu.
+5. Chỉ sau khi đánh giá mới dùng **SỬ DỤNG BẢNG NÀY**. Việc kích hoạt không cần Internet hoặc backend server.
+6. Dùng **KHÔI PHỤC GIÁ TRỊ MẶC ĐỊNH** khi cần quay lại giá trị khởi tạo thử nghiệm.
+
+Data model dùng stable profile ID để sau này gắn số lần thử, True Positive, False Positive, False Negative, sensitivity, specificity, accuracy hoặc confusion matrix mà không phải thay lại cấu trúc profile. Phase hiện tại chưa triển khai thống kê này.
+
 Chuẩn API trong tài liệu này là hợp đồng chung giữa nhóm Android và nhóm ESP32. Hai nhóm phải dùng đúng tên biến, kiểu dữ liệu, đơn vị, UUID và `protocolVersion`; mọi thay đổi cần được ghi lại trước khi cập nhật mã nguồn hai phía.

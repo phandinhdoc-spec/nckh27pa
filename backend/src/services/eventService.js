@@ -18,11 +18,14 @@ export function eventService({db,config,now}) {
    if(b.watchdogActive!==undefined)v.boolean(b.watchdogActive,'watchdogActive');
    if(b.watchdogDeadlineMs!==undefined)v.nullable(b.watchdogDeadlineMs,'watchdogDeadlineMs',v.integer);
    if(b.eligibleContactsCount!==undefined)v.integer(b.eligibleContactsCount,'eligibleContactsCount');
+   const displayName=b.displayName===undefined?'Người dùng FallSafe':v.string(b.displayName,'displayName',100).trim();
    const input=Object.fromEntries(['eventId','deviceId','userId','sequenceNumber','timestampMs','eventType','severity','alertState','sensorSource','peakAccelerationMs2','orientationChangeDeg','altitudeDeltaM','sosButtonPressed','confidencePercent'].map(k=>[k,b[k]]));
+   input.displayName=displayName;
    input.location=v.location(b.location);
    const existing=repo.row(b.eventId);
    if(existing) {
-    if(!isDeepStrictEqual(JSON.parse(existing.original_json),input)) conflict('Conflicting eventId','DUPLICATE_EVENT_ID');
+    const original=JSON.parse(existing.original_json);if(original.displayName===undefined)original.displayName='Người dùng FallSafe';
+    if(!isDeepStrictEqual(original,input)) conflict('Conflicting eventId','DUPLICATE_EVENT_ID');
     return {status:200,data:repo.get(b.eventId)};
    }
    const time=now(), verifying=b.alertState==='VERIFYING';

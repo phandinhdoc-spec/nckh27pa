@@ -77,7 +77,8 @@ Mọi phản hồi từ REST API (thành công hoặc thất bại) đều sử 
 | `DUPLICATE_EVENT_ID` | 409 | `eventId` đã được ghi nhận trước đó với nội dung xung đột. |
 | `DEVICE_DISCONNECTED` | 503 | Thiết bị mục tiêu mất kết nối (heartbeat quá hạn) khi yêu cầu thao tác trực tiếp. |
 | `INTERNAL_SERVER_ERROR` | 500 | Lỗi xử lý backend không xác định. |
-| `SERVICE_UNAVAILABLE` | 503 | Cơ sở dữ liệu hoặc thành phần lưu trữ gặp sự cố. |
+| `SERVICE_UNAVAILABLE` | 503 | Thành phần backend, lưu trữ hoặc provider tùy chọn tạm thời không khả dụng. |
+| `NOT_CONFIGURED` | 503 | Tính năng tùy chọn (ví dụ AI văn bản) chưa được cấu hình đầy đủ trên server. |
 
 ### 1.8. Tính Lũy Kế Tự Nhiên (Natural Idempotency)
 Thay vì hứa hẹn cơ chế khóa tùy biến chưa triển khai, contract quy định tính lũy kế tự nhiên dựa trên các khóa định danh nghiệp vụ:
@@ -1078,3 +1079,131 @@ module.exports = {
   AUTH_DISABLED: process.env.AUTH_DISABLED !== 'false'
 };
 ```
+
+---
+
+## 7. Hợp đồng Định vị, SMS và Điều phối Cuộc gọi Khẩn cấp
+
+### 7.1. Bản sửa đổi tương thích v1
+- `eventId` do Android tạo là UUID bền vững, được giữ nguyên qua recreation/retry. Backend vẫn chấp nhận các `eventId` v1 cũ tối đa 64 ký tự.
+- `EmergencyContact` có thêm `callPriority: integer >= 0`. Số nhỏ hơn được gọi trước; khi client cũ không gửi, backend gán thứ tự ổn định theo thời điểm tạo. Giá trị được trả trong mọi API contact CRUD.
+- `dispatchStatus` của sự kiện giữ nguyên để tương thích. Chi tiết SMS/cuộc gọi được đọc tại endpoint trạng thái điều phối dưới đây; `RECORDED` không có nghĩa đã gửi.
+- Request tạo sự kiện và manual SOS có thể gửi `displayName` (chuỗi đã trim, 1..100 ký tự). Backend lưu bền vững tên này trong context sự kiện/cuộc gọi. Client cũ không gửi trường này vẫn tương thích và dùng đúng mặc định `Người dùng FallSafe`.
+
+### 7.2. Hợp đồng định vị Android (không phải REST mới)
+```kotlin
+enum class LocationSource { PHONE, ESP32_GNSS }
+enum class LocationFreshness { FRESH, STALE, UNAVAILABLE }
+enum class LocationFailureCause { PERMISSION_DENIED, PROVIDER_DISABLED, NO_FIX, INVALID_FIX }
+data class LocationFix(latitude: Double, longitude: Double, accuracyM: Float?, fixTimeMs: Long, source: LocationSource)
+data class LocationState(val fix: LocationFix?, val freshness: LocationFreshness, val cause: LocationFailureCause?, val explanation: String, val remediation: String?)
+interface EmergencyLocationController {
+  val locationState: LocationState
+  fun onVerifyingStarted()
+  fun acceptEsp32Gnss(fix: LocationFix)
+  fun openMyLocation(): Boolean
+  fun requestManualShare(contactId: String): ManualShareConfirmation
+  fun confirmManualShare(token: String): SmsDispatchState
+}
+```
+- Chỉ chấp nhận fix hữu hạn, latitude `[-90,90]`, longitude `[-180,180]`, không phải `(0,0)`, `fixTimeMs >= 0`, accuracy hữu hạn và không âm nếu có. `ESP32_GNSS` chỉ dùng cho fix GNSS thật; BMP390/áp suất/độ cao không bao giờ là vị trí.
+- Mỗi sự kiện yêu cầu đúng một lần cập nhật vị trí mới khi lần đầu đi vào `VERIFYING`, hoặc khi manual SOS mới đi thẳng vào `ALERTING`/`AWAITING_HELP`; yêu cầu này không reset countdown, không nhân callback, và không chặn SMS/voice. Freshness mặc định: `FRESH` khi tuổi fix `<= 120000 ms`, nếu lớn hơn là `STALE`.
+- Mở vị trí dùng `geo:lat,lon?q=lat,lon`; nếu không có activity xử lý thì dùng `https://www.google.com/maps/search/?api=1&query=lat,lon`.
+- Chia sẻ vị trí thủ công luôn cần xác nhận riêng, chỉ gửi contact đã chọn, dùng văn bản trung tính và không chứa từ ngữ té/ngã/SOS.
+- `DeviceDetails` chỉ hiện kết nối/pin/firmware/GNSS lấy từ heartbeat backend hoặc packet ESP thật; trường không có dữ liệu là `null`/`UNKNOWN`, không suy diễn từ BMP390 hay dữ liệu demo.
+- Android đọc `GET /devices/{espDeviceId}/status` theo chu kỳ hữu hạn 30 giây. `PHONE-DEFAULT`/heartbeat điện thoại là telemetry riêng và không được gắn nhãn ESP32. Chỉ response ESP32 thành công, đúng `deviceId`, mới cập nhật `DeviceDetails`; `404`, offline hoặc payload không xác định giữ `UNKNOWN` hay dữ liệu cũ kèm nhãn lỗi/stale, không dựng trạng thái kết nối hoặc pin.
+- Android 14+ khai báo `FOREGROUND_SERVICE_LOCATION` và service type `health|location`, nhưng chỉ thêm bit `location` vào `startForeground` khi đã có `ACCESS_FINE_LOCATION` hoặc `ACCESS_COARSE_LOCATION`; nếu không, service vẫn chạy health FGS. Quyền vị trí được hỏi trong bước thiết lập khi Activity đang hiển thị. V1 không hỏi `ACCESS_BACKGROUND_LOCATION` trong cùng prompt: người dùng chỉ cấp quyền foreground thì Android có thể giới hạn vị trí khi app/FGS không còn đủ điều kiện, nên hệ thống không cam kết độ tin cậy vị trí nền không hạn chế.
+
+### 7.3. Hợp đồng SMS Android
+```kotlin
+enum class SmsDeliveryStatus { QUEUED, SENDING, SENT, DELIVERED, FAILED }
+data class SmsDispatchState(val eventId: String, val contactId: String, val status: SmsDeliveryStatus, val detail: String? = null)
+interface EmergencySmsGateway { fun send(request: SmsRequest): SmsDispatchState }
+```
+- Adapter production dùng `SmsManager`, chia multipart bằng chính manager và gắn `sentIntent`/`deliveryIntent` cho từng phần. `SENT` chỉ nghĩa nhà mạng đã nhận để chuyển tiếp, tuyệt đối không hiển thị là đã đọc; chỉ tất cả delivery callback thành công mới là `DELIVERED`. Chỉ lỗi `sentIntent` đổi submission thành `FAILED`; lỗi/unsupported ở `deliveryIntent` sau khi mọi phần đã `SENT` phải giữ `SENT` và gắn chi tiết giao thất bại/không hỗ trợ.
+- Trước khi xếp hàng phải kiểm tra feature telephony messaging, `SEND_SMS`, và subscription. Máy nhiều SIM phải dùng subscription được người dùng chọn; không có subscription mặc định/được chọn thì trả `FAILED` trung thực, không tự chọn ngầm.
+- Quyền `ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION`, `SEND_SMS` và tùy chọn `CALL_PHONE` được điều phối lúc thiết lập trong `MainActivity`, không bật dialog quyền trong luồng SOS.
+- Nhãn người dùng mặc định an toàn là `Người dùng FallSafe`; cài đặt có thể thay bằng tên hiển thị thật, không gài tên cá nhân giả.
+- Tin khẩn cấp gồm: nhãn người dùng, nghi ngờ bị ngã/cần trợ giúp, thời điểm sự kiện, lat/lon, URL chính xác `https://www.google.com/maps/search/?api=1&query=<lat>,<lon>`, thời điểm fix, nguồn `điện thoại` hoặc `ESP32 GNSS`, và accuracy nếu biết. Fix cũ phải ghi `Vị trí gần nhất, cập nhật lúc…`. Nếu chưa có fix, gửi cảnh báo không vị trí ngay; mỗi `(eventId, contactId)` chỉ được gửi tối đa một tin bổ sung vị trí khi fix hợp lệ đến sau. Tin bổ sung không được dựng lại header khẩn cấp với thời điểm gửi bổ sung làm thời điểm sự kiện.
+- Tin chia sẻ thủ công không được dùng nội dung khẩn cấp hoặc nhắc đến té/ngã.
+
+### 7.4. Điều phối ứng dụng Android
+- Một `EmergencyCoordinator` application-scoped phục vụ cả timeout và manual SOS. Dispatch theo khóa `(eventId, contactId, channel, attempt)`; retry/recreation/callback trễ không tạo SMS/cuộc gọi trùng.
+- Hủy trước timeout vô hiệu pending dispatch và callback định vị đến trễ. Khi timeout/manual SOS, SMS cho contacts bật `receiveSos` và POST backend voice escalation khởi chạy độc lập; không kênh nào được chờ vô hạn hay chặn kênh kia.
+- Cuộc gọi SIM thủ công chỉ mở khi thiết bị/permission cho phép và luôn được mô tả là cuộc gọi thường; Android không tuyên bố phát giọng nói tự động vào cuộc gọi SIM.
+- UI gọi `DemoController.callContactViaSim(contactId)` cho đúng contact được chọn và hiển thị nguyên `SimCallResult.started/detail`; không có auto-call SIM trong luồng test hay SOS.
+
+### 7.5. REST điều phối Voice
+
+#### `GET /api/v1/alerts/{eventId}/dispatch`
+Trả trạng thái bền vững của provider và từng attempt, theo thứ tự `callPriority`.
+```json
+{"success":true,"data":{"eventId":"evt-1001","provider":"DISABLED","providerConfigured":false,"status":"PENDING","acknowledged":false,"attempts":[]},"timestamp":1789363210150}
+```
+`status`: `PENDING`, `CALLING`, `ACKNOWLEDGED`, `EXHAUSTED`, `FAILED`. Runtime mặc định thiếu credentials luôn là `provider: "DISABLED"`, `providerConfigured: false`, `status: "PENDING"`; không giả lập thành công.
+
+#### `POST /api/v1/voice/twilio/{eventId}/{contactId}/{attempt}/twiml`
+Callback có chữ ký Twilio hợp lệ, trả `application/xml`. TwiML có intro tự động, đọc đầy đủ thông điệp tiếng Việt 4 lần, mỗi lần có `<Pause length="3"/>`, trong một `<Gather numDigits="1">` hữu hạn. Chỉ nói liên kết đã gửi khi trạng thái transport SMS tổng hợp thật là `SENT`/`DELIVERED`; `alert_outbox.status=RECORDED` không đủ để tuyên bố đã gửi.
+
+#### `POST /api/v1/voice/twilio/{eventId}/{contactId}/{attempt}/gather`
+Callback có chữ ký Twilio hợp lệ. Chỉ `Digits=1` ghi nhận `alert receipt`, đặt dispatch `ACKNOWLEDGED` và ngăn bắt đầu contact tiếp theo; không resolve incident và không chủ động kết thúc active call. Response sau ACK tiếp tục đọc thông điệp khẩn cấp hữu hạn 3 lần với pause 3 giây, không có `<Gather>` mới và không có `<Hangup>`.
+
+#### `POST /api/v1/voice/twilio/{eventId}/{contactId}/{attempt}/status`
+Callback có chữ ký Twilio hợp lệ. Nhận status provider kể cả reorder/duplicate. `busy`, `no-answer`, `failed`, hoặc `completed` khi chưa DTMF 1 đều không phải ACK và cho phép chuyển contact/attempt kế tiếp trong giới hạn. `completed` có thể là người, IVR, voicemail hoặc hangup.
+
+### 7.6. Provider và giới hạn
+- Interface provider nhận attempt đã lưu và trả provider call SID; disabled provider không gọi mạng. Twilio adapter chỉ dùng Node built-ins; Account SID/auth token, caller ID Twilio/verified và public HTTPS callback base URL chỉ đến từ environment.
+- Chữ ký callback Twilio là Base64 HMAC-SHA1 của URL công khai chính xác nối các tham số POST đã sort theo tên; so sánh constant-time. Thiếu/sai chữ ký trả `403`.
+- Mỗi contact có số attempt cấu hình hữu hạn và tổng contact hữu hạn. Retry theo vòng: mọi contact đủ điều kiện nhận attempt 1 theo `callPriority` trước bất kỳ attempt 2 nào. Khóa duy nhất `(event_id, contact_id, attempt)` và cập nhật SQL có điều kiện bảo đảm callback/provider completion reorder không gọi lại hay ghi đè terminal state của cùng attempt.
+- Twilio cung cấp outbound tới Việt Nam nhưng không quảng bá số local Việt Nam voice-enabled; caller ID phải là số Twilio hoặc số đã xác minh. Không dùng `Play loop="0"`; chính sách lặp và thời lượng luôn hữu hạn.
+
+### 7.7. Báo cáo trạng thái transport Android → Backend
+
+#### `POST /api/v1/alerts/{eventId}/transport-status`
+Request phải có đồng thời `X-Device-Id` và `X-User-Id` trùng quyền sở hữu sự kiện. Khóa idempotency bền vững là `(eventId, contactId, channel)`; hiện v1 chỉ chấp nhận `channel: "SMS"` và client chỉ được báo `SENT`, `DELIVERED`, `FAILED`. Backend từ chối `READ` vì Android/SMS carrier callback không chứng minh người nhận đã đọc.
+
+```json
+{
+  "contactId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "channel": "SMS",
+  "status": "SENT",
+  "timestampMs": 1789363210200,
+  "detail": "Đã gửi tới mạng; báo cáo giao SMS chưa có"
+}
+```
+
+Response trả cùng event/contact/channel/status đã lưu. Transition không được lùi `DELIVERED → SENT/FAILED` hay `SENT → FAILED`; report cũ theo `timestampMs` không ghi đè report mới. Backend tổng hợp trạng thái SMS từ bảng report này cho mỗi lần tạo TwiML/ACK speech, vì vậy callback đến sau lần fetch TwiML đầu sẽ được phản ánh ở lần fetch tiếp theo. Bảng bền vững `transport_status_reports` lưu `status`, `detail`, client timestamp và server update timestamp; `safety_events.display_name` lưu context tên hiển thị, mặc định `Người dùng FallSafe` để tương thích client cũ.
+
+### 7.8. AI văn bản tùy chọn
+
+#### `POST /api/v1/ai/text`
+
+AI là tính năng tùy chọn có consent/toggle lưu bền vững trên Android, không phải runtime permission. Luồng SOS không gọi endpoint này và mọi lỗi AI/offline/backend không được trì hoãn hay ngăn SMS, cuộc gọi SIM hoặc voice escalation.
+
+Request chỉ chấp nhận đúng một trường văn bản, tối đa 2.000 ký tự:
+
+```json
+{"text":"Tóm tắt hướng dẫn an toàn này"}
+```
+
+Mọi trường khác đều bị từ chối với `400 VALIDATION_ERROR`, bao gồm contact, lịch sử SMS/cuộc gọi, tọa độ hoặc object ngữ cảnh. Backend không ghi log request body và không tự động bổ sung dữ liệu hồ sơ/SOS/vị trí. Thành công trả tối đa 4.000 ký tự:
+
+```json
+{"success":true,"data":{"status":"COMPLETED","text":"..."},"timestamp":1789363210200}
+```
+
+Mặc định `AI_PROVIDER=DISABLED`; endpoint trả `503 NOT_CONFIGURED`. Cấu hình provider thiếu một phần cũng suy giảm về `NOT_CONFIGURED` và không làm backend ngừng khởi động. Timeout, upstream lỗi, payload upstream sai hoặc response quá giới hạn trả `503 SERVICE_UNAVAILABLE` mà không phản chiếu lỗi/provider body cho client.
+
+Provider server hỗ trợ API tương thích OpenAI **Responses API** (`POST {AI_BASE_URL}/responses`), không cam kết tương thích riêng với Chat Completions. Payload upstream tối thiểu gồm `model`, text `input`, `max_output_tokens` và `store:false`; không bật tools, file/image input, metadata hay conversation. Các biến môi trường server-only:
+
+- `AI_PROVIDER=OPENAI_COMPATIBLE`
+- `AI_BASE_URL` — HTTPS API root, ví dụ kết thúc bằng `/v1`
+- `AI_MODEL`
+- `AI_API_KEY`
+- `AI_REQUEST_TIMEOUT_MS` (mặc định 6.000, tối đa 15.000)
+- `AI_MAX_INPUT_CHARS` (mặc định 2.000)
+- `AI_MAX_OUTPUT_CHARS` (mặc định 4.000)
+- `AI_MAX_OUTPUT_TOKENS` (mặc định 256)
+- `AI_PROVIDER_RESPONSE_LIMIT_BYTES` (mặc định 32.768)
+
+API key không được đưa vào APK, BuildConfig, request Android hoặc response/log backend.

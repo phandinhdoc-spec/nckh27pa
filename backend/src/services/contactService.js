@@ -6,10 +6,11 @@ import {contactRepository} from '../repositories/contactRepository.js';
 export function uuid(id) {if(typeof id!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(id)) invalid('Invalid contact UUID v4');return id;}
 function validate(b) {
  v.string(b.name,'name',100);v.string(b.relationship,'relationship');v.boolean(b.receiveSos,'receiveSos');v.boolean(b.isPrimary,'isPrimary');
+ if(b.callPriority!==undefined) v.integer(b.callPriority,'callPriority');
  if(typeof b.phone!=='string') invalid('Invalid phone type');
  const phone=b.phone.replace(/[\s.()\-]/g,'');
  if(!/^(\+84[35789][0-9]{8}|0[35789][0-9]{8})$/.test(phone)) throw new ApiError(400,'INVALID_PHONE_NUMBER','Invalid Vietnamese phone number');
- return {name:b.name.trim(),relationship:b.relationship,phone,receiveSos:b.receiveSos,isPrimary:b.isPrimary};
+ return {name:b.name.trim(),relationship:b.relationship,phone,receiveSos:b.receiveSos,isPrimary:b.isPrimary,callPriority:b.callPriority};
 }
 export function contactService({db}) {
  const repo=contactRepository(db);
@@ -21,7 +22,7 @@ export function contactService({db}) {
     if(method==='POST'&&!id) {
      const cid=b.id===undefined?randomUUID():uuid(b.id);
      const existing=repo.get(user,cid);if(existing)return {status:200,data:{contact:existing}};
-     const c=validate(b);c.isPrimary=repo.list(user).length===0||c.isPrimary;
+     const c=validate(b);const existingContacts=repo.list(user);c.isPrimary=existingContacts.length===0||c.isPrimary;c.callPriority=c.callPriority??existingContacts.length;
      if(c.isPrimary)repo.clearPrimary(user);repo.save(user,cid,c);
      return {status:201,data:{contact:repo.get(user,cid)}};
     }
@@ -33,7 +34,7 @@ export function contactService({db}) {
     }
     if(action==='primary') {repo.clearPrimary(user);repo.primary(user,id);return {data:{primaryContactId:id,updated:true}};}
     if(action==='toggle-sos') {repo.save(user,id,{...current,receiveSos:!current.receiveSos});return {data:{id,receiveSos:!current.receiveSos}};}
-    const updated=validate(b);updated.isPrimary=updated.isPrimary||current.isPrimary;
+    const updated=validate(b);updated.isPrimary=updated.isPrimary||current.isPrimary;updated.callPriority=updated.callPriority??current.callPriority;
     if(updated.isPrimary)repo.clearPrimary(user);repo.save(user,id,updated);
     return {data:{contact:repo.get(user,id)}};
    });

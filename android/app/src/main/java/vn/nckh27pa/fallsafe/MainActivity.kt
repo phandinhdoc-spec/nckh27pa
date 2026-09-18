@@ -10,6 +10,7 @@ import android.os.Looper
 import android.os.SystemClock
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -35,6 +36,15 @@ import core.Status
 import androidx.core.view.WindowCompat
 
 class MainActivity : ComponentActivity() {
+    private val callingPermissionRequest = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+        controller.refreshCapabilityTruth()
+    }
+    private val messagingPermissionRequest = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        controller.refreshCapabilityTruth()
+    }
+    private val locationPermissionRequest = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        controller.refreshCapabilityTruth()
+    }
     private val contactsViewModel by lazy {
         androidx.lifecycle.ViewModelProvider(this, object : androidx.lifecycle.ViewModelProvider.Factory {
             override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
@@ -60,6 +70,12 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, true)
         collector = PhoneSensorCollector(this, controller::acceptPhone)
         ownership = SensorOwnership({ collector.start() }, { collector.stop() })
+        controller.bindCapabilityAccess(
+            vn.nckh27pa.fallsafe.permissions.CapabilityAccessController(
+                vn.nckh27pa.fallsafe.permissions.AndroidCapabilityPlatform(this, ::launchCapabilityRequest),
+                vn.nckh27pa.fallsafe.permissions.SharedPreferencesCapabilityAttemptStore(this)
+            )
+        )
         setContent {
             val darkTheme = isSystemInDarkTheme()
             val view = androidx.compose.ui.platform.LocalView.current
@@ -78,6 +94,16 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+    private fun launchCapabilityRequest(capability: vn.nckh27pa.fallsafe.permissions.Capability) {
+        when (capability) {
+            vn.nckh27pa.fallsafe.permissions.Capability.CALLING ->
+                callingPermissionRequest.launch(Manifest.permission.CALL_PHONE)
+            vn.nckh27pa.fallsafe.permissions.Capability.MESSAGING ->
+                messagingPermissionRequest.launch(arrayOf(Manifest.permission.SEND_SMS, Manifest.permission.READ_PHONE_STATE))
+            vn.nckh27pa.fallsafe.permissions.Capability.LOCATION ->
+                locationPermissionRequest.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+        }
+    }
     override fun onResume() {
         super.onResume()
         controller.foreground = true
@@ -87,6 +113,7 @@ class MainActivity : ComponentActivity() {
         }
         ownership.update(true, controller.backgroundMonitoring)
         sensorSummary = if (controller.backgroundMonitoring) controller.backgroundSensors else collector.activeSensors.joinToString().ifEmpty { "Không có cảm biến khả dụng" }
+        controller.refreshCapabilityTruth()
         controller.resumed()
         handler.post(poll)
         if (backgroundStartPending) { backgroundStartPending = false; beginMonitoring() }
@@ -132,83 +159,101 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun DemoScreen(c: DemoController, contactsViewModel: ContactsViewModel, sensorSummary: String, startBackground: () -> Unit, stopBackground: () -> Unit) {
     var tab by rememberSaveable { mutableIntStateOf(0) }
+    var inCalibrationScreen by rememberSaveable { mutableStateOf(false) }
     val tabs = listOf("Trang chủ", "Sự kiện", "Người thân", "Cài đặt")
     val scrollState = rememberScrollState()
-    LaunchedEffect(tab, c.snapshot.state) { scrollState.scrollTo(0) }
+    LaunchedEffect(tab, c.snapshot.state, inCalibrationScreen) { scrollState.scrollTo(0) }
+
+    // When back button is pressed in calibration, return to Settings screen
+    androidx.activity.compose.BackHandler(enabled = inCalibrationScreen) {
+        inCalibrationScreen = false
+    }
 
     // When back button is pressed on other tabs, navigate back to Home
-    androidx.activity.compose.BackHandler(enabled = tab != 0) {
+    androidx.activity.compose.BackHandler(enabled = !inCalibrationScreen && tab != 0) {
         tab = 0
     }
 
     // When danger is detected, automatically switch to Home tab so the large countdown is front and center
     LaunchedEffect(c.snapshot.state) {
         if (c.snapshot.state == State.VERIFYING) {
+            inCalibrationScreen = false
             tab = 0
         }
     }
 
     Scaffold(bottomBar = {
-        val fontScale = LocalDensity.current.fontScale
-        val navLabelSize = when {
-            fontScale >= 1.45f -> 10.sp
-            fontScale >= 1.25f -> 10.5.sp
-            else -> 13.sp
-        }
-        val navIconSize = when {
-            fontScale >= 1.45f -> 18.sp
-            fontScale >= 1.25f -> 19.sp
-            else -> 22.sp
-        }
+        if (!inCalibrationScreen) {
+            val fontScale = LocalDensity.current.fontScale
+            val navLabelSize = when {
+                fontScale >= 1.45f -> 10.sp
+                fontScale >= 1.25f -> 10.5.sp
+                else -> 13.sp
+            }
+            val navIconSize = when {
+                fontScale >= 1.45f -> 18.sp
+                fontScale >= 1.25f -> 19.sp
+                else -> 22.sp
+            }
 
-        NavigationBar {
-            tabs.forEachIndexed { i, title ->
-                NavigationBarItem(
-                    selected = tab == i,
-                    onClick = { tab = i },
-                    icon = { Text(listOf("⌂", "≡", "♡", "⚙")[i], fontSize = navIconSize) },
-                    label = {
-                        Text(
-                            text = title,
-                            fontSize = navLabelSize,
-                            fontWeight = if (tab == i) FontWeight.Bold else FontWeight.Normal,
-                            maxLines = 1,
-                            softWrap = false,
-                            letterSpacing = if (fontScale >= 1.25f) (-0.2).sp else 0.sp
-                        )
-                    }
-                )
+            NavigationBar {
+                tabs.forEachIndexed { i, title ->
+                    NavigationBarItem(
+                        selected = tab == i,
+                        onClick = { tab = i },
+                        icon = { Text(listOf("⌂", "≡", "♡", "⚙")[i], fontSize = navIconSize) },
+                        label = {
+                            Text(
+                                text = title,
+                                fontSize = navLabelSize,
+                                fontWeight = if (tab == i) FontWeight.Bold else FontWeight.Normal,
+                                maxLines = 1,
+                                softWrap = false,
+                                letterSpacing = if (fontScale >= 1.25f) (-0.2).sp else 0.sp
+                            )
+                        }
+                    )
+                }
             }
         }
     }) { inset ->
-        when (tab) {
-            0 -> {
-                HomeScreen(
-                    controller = c,
-                    onOpenContacts = { tab = 2 },
-                    modifier = Modifier.fillMaxSize().padding(inset)
-                )
-            }
-            1 -> {
-                EventsScreen(c, Modifier.fillMaxSize().padding(inset))
-            }
-            2 -> {
-                ContactsScreen(
-                    controller = c,
-                    viewModel = contactsViewModel,
-                    onBack = { tab = 0 },
-                    modifier = Modifier.fillMaxSize().padding(inset)
-                )
-            }
-            3 -> {
-                SettingsScreen(
-                    c = c,
-                    sensorSummary = sensorSummary,
-                    startBackground = startBackground,
-                    stopBackground = stopBackground,
-                    onOpenContacts = { tab = 2 },
-                    modifier = Modifier.fillMaxSize().padding(inset)
-                )
+        if (inCalibrationScreen) {
+            FallDetectionCalibrationScreen(
+                controller = c,
+                onBack = { inCalibrationScreen = false },
+                modifier = Modifier.fillMaxSize().padding(inset)
+            )
+        } else {
+            when (tab) {
+                0 -> {
+                    HomeScreen(
+                        controller = c,
+                        onOpenContacts = { tab = 2 },
+                        modifier = Modifier.fillMaxSize().padding(inset)
+                    )
+                }
+                1 -> {
+                    EventsScreen(c, Modifier.fillMaxSize().padding(inset))
+                }
+                2 -> {
+                    ContactsScreen(
+                        controller = c,
+                        viewModel = contactsViewModel,
+                        onBack = { tab = 0 },
+                        modifier = Modifier.fillMaxSize().padding(inset)
+                    )
+                }
+                3 -> {
+                    SettingsScreen(
+                        c = c,
+                        sensorSummary = sensorSummary,
+                        startBackground = startBackground,
+                        stopBackground = stopBackground,
+                        onOpenContacts = { tab = 2 },
+                        onOpenCalibration = { inCalibrationScreen = true },
+                        modifier = Modifier.fillMaxSize().padding(inset)
+                    )
+                }
             }
         }
     }
@@ -250,6 +295,7 @@ private fun SettingsScreen(
     startBackground: () -> Unit,
     stopBackground: () -> Unit,
     onOpenContacts: () -> Unit,
+    onOpenCalibration: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scroll = rememberScrollState()
@@ -280,6 +326,38 @@ private fun SettingsScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = ContactBlue)
                 ) {
                     Text("QUẢN LÝ DANH SÁCH NGƯỜI THÂN", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            }
+        }
+
+        // Section: Fall Detection Calibration Entry
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp)
+        ) {
+            Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "PHÁT HIỆN TÉ NGÃ",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Text(
+                    text = "Cấu hình bảng ngưỡng thử nghiệm và theo dõi cảm biến gia tốc phục vụ nghiên cứu.",
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Text(
+                    text = "Đang sử dụng: ${c.activeProfile.displayName}",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Button(
+                    onClick = onOpenCalibration,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                ) {
+                    Text("HIỆU CHỈNH THỬ NGHIỆM", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -329,14 +407,6 @@ private fun SettingsScreen(
 
         Action("Dùng cảm biến điện thoại thật", c::usePhone, c.snapshot.state == State.MONITORING)
         Text("Cảm biến đã đăng ký: ${if (c.backgroundMonitoring) c.backgroundSensors else sensorSummary}", fontSize = 16.sp)
-
-        // Engineering sensor details
-        val p = c.packet
-        Text("--- THÔNG SỐ CẢM BIẾN (KỸ THUẬT) ---", fontSize = 16.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-        Text("Gia tốc m/s²: ${p?.let { "${it.accelXMs2}, ${it.accelYMs2}, ${it.accelZMs2}" } ?: "chưa có / quá 500 ms"}", fontSize = 16.sp)
-        Text("Gyro °/s: ${p?.gyroXDps ?: "—"}, ${p?.gyroYDps ?: "—"}, ${p?.gyroZDps ?: "—"}", fontSize = 16.sp)
-        Text("Góc nghiêng °: ${p?.pitchDeg ?: "—"}, ${p?.rollDeg ?: "—"}, ${p?.yawDeg ?: "—"}", fontSize = 16.sp)
-        Text("Áp suất Pa: ${p?.pressurePa ?: "—"}; Chênh lệch cao m: ${p?.altitudeDeltaM ?: "—"}", fontSize = 16.sp)
     }
 }
 
@@ -367,4 +437,3 @@ private fun stateVietnamese(state: State): String = when (state) {
     State.ALERTING -> "Đang kích hoạt cảnh báo"
     State.AWAITING_HELP -> "Đang chờ trợ giúp"
 }
-

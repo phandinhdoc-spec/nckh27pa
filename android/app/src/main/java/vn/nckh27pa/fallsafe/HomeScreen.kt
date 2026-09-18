@@ -47,6 +47,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import vn.nckh27pa.fallsafe.device.DeviceDetails
+import vn.nckh27pa.fallsafe.device.DeviceValueSource
+import vn.nckh27pa.fallsafe.emergency.*
 
 // High-contrast, WCAG AAA compliant color scheme for elderly readability
 val SafeGreen = Color(0xFF1B5E20)
@@ -70,6 +73,47 @@ val ContactBlue = Color(0xFF0D47A1)
 val ContactBlueContainer = Color(0xFFE3F2FD)
 val ContactBlueBorder = Color(0xFF90CAF9)
 
+internal fun resolveLocationCardStatus(loc: LocationState): String = when {
+    loc.fix == null -> "Chưa có vị trí"
+    loc.freshness == LocationFreshness.FRESH -> "Vị trí mới"
+    loc.freshness == LocationFreshness.STALE -> "Vị trí cũ"
+    else -> "Chưa có vị trí"
+}
+
+internal fun resolveDeviceCardStatus(details: DeviceDetails): String = when (details.connected) {
+    true -> details.batteryPercent?.let { "Pin $it%" } ?: "Đã kết nối"
+    false -> "Mất kết nối"
+    null -> details.statusText.ifBlank { "Chưa có dữ liệu" }
+}
+
+internal fun resolveSmsDispatchStatusText(dispatch: SmsDispatchState): String {
+    val base = when (dispatch.status) {
+        SmsDeliveryStatus.QUEUED -> "Đã xếp hàng (QUEUED)"
+        SmsDeliveryStatus.SENDING -> "Đang gửi (SENDING)..."
+        SmsDeliveryStatus.SENT -> "Đã gửi tới nhà mạng (SENT) - chờ xác nhận giao"
+        SmsDeliveryStatus.DELIVERED -> "Đã giao SMS thành công (DELIVERED)"
+        SmsDeliveryStatus.FAILED -> "Gửi SMS thất bại (FAILED)"
+    }
+    return if (!dispatch.detail.isNullOrBlank()) "$base\nChi tiết: ${dispatch.detail}" else base
+}
+
+internal fun buildDeviceDetailsFieldList(details: DeviceDetails): List<String> = buildList {
+    details.deviceId?.let { add("Mã thiết bị: $it") }
+    details.connected?.let { add("Kết nối: ${if (it) "Đang kết nối" else "Mất kết nối"}") }
+    details.batteryPercent?.let { add("Mức pin: $it%") }
+    details.firmwareVersion?.let { add("Phiên bản firmware: $it") }
+    details.gnssStatus?.let { add("Trạng thái GNSS: $it") }
+    if (details.source != DeviceValueSource.UNKNOWN) {
+        val srcName = when (details.source) {
+            DeviceValueSource.BACKEND_HEARTBEAT -> "Máy chủ (Heartbeat)"
+            DeviceValueSource.ESP32_PACKET -> "Gói tin trực tiếp ESP32"
+            DeviceValueSource.UNKNOWN -> "Không xác định"
+        }
+        add("Nguồn dữ liệu: $srcName")
+    }
+    details.lastHeartbeatMs?.let { add("Heartbeat cuối: ${it}ms") }
+}
+
 @Composable
 fun HomeScreen(
     controller: DemoController,
@@ -79,8 +123,16 @@ fun HomeScreen(
     val context = LocalContext.current
     val scrollState = rememberScrollState()
     val status = controller.mainScreenStatus
-    var showCallConfirmDialog by remember { mutableStateOf(false) }
-    var callToastMessage by remember { mutableStateOf<String?>(null) }
+
+    // Dialog & Feedback states
+    var showLocationErrorDialog by remember { mutableStateOf(false) }
+    var showShareContactsDialog by remember { mutableStateOf(false) }
+    var pendingConfirmation by remember { mutableStateOf<ManualShareConfirmation?>(null) }
+    var shareDispatchState by remember { mutableStateOf<SmsDispatchState?>(null) }
+    var shareErrorMessage by remember { mutableStateOf<String?>(null) }
+    var showCallContactsDialog by remember { mutableStateOf(false) }
+    var simCallResult by remember { mutableStateOf<SimCallResult?>(null) }
+    var showDeviceDetailsDialog by remember { mutableStateOf(false) }
 
     // Vibration manager
     val vibrator = remember(context) {
@@ -126,6 +178,44 @@ fun HomeScreen(
         }
     }
 
+    // Backing states for cards
+    val locState = controller.emergencyLocationState
+    val locStatusText = resolveLocationCardStatus(locState)
+    val locColor = if (locState.fix != null) SafeGreen else DisconnectedGray
+    val locBg = if (locState.fix != null) SafeGreenContainer else DisconnectedGrayContainer
+    val locBorder = if (locState.fix != null) SafeGreenBorder else DisconnectedGrayBorder
+
+    val sendStatusText = if (locState.fix != null) "Sẵn sàng gửi" else "Chưa có GPS"
+
+    val callStatusText = if (controller.contacts.isNotEmpty()) controller.primaryContactName else "Chưa có liên hệ"
+
+    val devDetails = controller.emergencyDeviceDetails
+    val devStatusText = resolveDeviceCardStatus(devDetails)
+    val devConnected = devDetails.connected == true
+    val devColor = if (devConnected) SafeGreen else DisconnectedGray
+    val devBg = if (devConnected) SafeGreenContainer else DisconnectedGrayContainer
+    val devBorder = if (devConnected) SafeGreenBorder else DisconnectedGrayBorder
+    val devIcon = if (devConnected) "🔋" else "📟"
+
+    // Setup protective status banner
+    val (protectText, protectColor, protectBg, protectBorder, protectIcon) = when (status) {
+        MainScreenStatus.SAFE -> Quint(
+            "Đang bảo vệ", SafeGreen, SafeGreenContainer, SafeGreenBorder, "🛡️"
+        )
+        MainScreenStatus.WARNING_COUNTDOWN -> Quint(
+            "Cần kiểm tra • Nguy cơ ngã", WarningOrange, WarningOrangeContainer, WarningOrangeBorder, "⚠️"
+        )
+        MainScreenStatus.SOS_SENT -> Quint(
+            "Cần kiểm tra • SOS đã kích hoạt", SosRed, SosRedContainer, SosRedBorder, "🚨"
+        )
+        MainScreenStatus.HELP_ACKNOWLEDGED -> Quint(
+            "Đang bảo vệ • Đã nhận tin", SafeGreen, SafeGreenContainer, SafeGreenBorder, "🛡️"
+        )
+        MainScreenStatus.DEVICE_DISCONNECTED -> Quint(
+            "Cần kiểm tra • Mất kết nối thiết bị", DisconnectedGray, DisconnectedGrayContainer, DisconnectedGrayBorder, "❗"
+        )
+    }
+
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val screenWidth = maxWidth
         val screenHeight = maxHeight
@@ -133,502 +223,970 @@ fun HomeScreen(
 
         // Responsive layout detection
         val isLandscape = screenWidth > screenHeight
-        val isSmallPortrait = !isLandscape && screenWidth <= 340.dp
-        val isLargeFont = fontScale > 1.25f
+        val shouldReflow = fontScale >= 1.3f || screenWidth < 360.dp
 
         // Grid spacing between cards
-        val gridSpacing = if (isLandscape) 4.dp else if (isSmallPortrait) 6.dp else 8.dp
+        val gridSpacing = if (isLandscape) 4.dp else 8.dp
         val gapHalf = gridSpacing / 2
 
         // Dynamic center button diameter: sized proportionally to available dimension
         val buttonDiameter = if (isLandscape) {
-            (screenHeight * 0.46f).coerceIn(94.dp, 100.dp)
-        } else if (isSmallPortrait) {
-            (screenWidth * 0.44f).coerceIn(132.dp, 150.dp)
+            (screenHeight * 0.46f).coerceIn(94.dp, 106.dp)
+        } else if (shouldReflow) {
+            (screenWidth * 0.42f).coerceIn(136.dp, 160.dp)
         } else {
-            (minOf(screenWidth, screenHeight) * 0.44f).coerceIn(146.dp, 185.dp)
+            (minOf(screenWidth, screenHeight) * 0.44f).coerceIn(148.dp, 180.dp)
         }
         val buttonRadius = buttonDiameter / 2
-        // Cutout radius conforms to SOS radius with an 8-9dp uniform clearance gap
-        val cutoutRadius = buttonRadius + if (isLandscape) 8.dp else 9.dp
-
-        // Adaptive typography designed for elderly readability while guaranteeing NO ellipsis on mandatory strings:
-        val titleFontSize = when {
-            isLandscape -> 13.5.sp
-            isSmallPortrait && fontScale >= 1.45f -> 10.sp
-            isSmallPortrait && fontScale >= 1.3f -> 11.5.sp
-            isSmallPortrait -> 13.sp
-            fontScale >= 1.3f -> 13.sp
-            else -> 15.sp
-        }
-
-        val statusFontSize = when {
-            isLandscape -> 15.5.sp
-            isSmallPortrait && fontScale >= 1.3f -> 13.sp
-            isSmallPortrait -> 15.sp
-            fontScale >= 1.3f -> 15.sp
-            else -> 17.sp
-        }
-
-        val sublineFontSize = when {
-            isLandscape -> 12.5.sp
-            isSmallPortrait && fontScale >= 1.3f -> 11.sp
-            isSmallPortrait -> 12.sp
-            fontScale >= 1.3f -> 12.sp
-            else -> 14.sp
-        }
-
-        val iconSize = when {
-            isLandscape -> 18.sp
-            isSmallPortrait && fontScale >= 1.3f -> 16.sp
-            isSmallPortrait -> 18.sp
-            else -> 20.sp
-        }
-
-        // Setup status information for 4 blocks
-        val (protectText, protectColor, protectBg, protectBorder, protectIcon) = when (status) {
-            MainScreenStatus.SAFE -> Quint(
-                "Đang bảo vệ", SafeGreen, SafeGreenContainer, SafeGreenBorder, "🛡️"
-            )
-            MainScreenStatus.WARNING_COUNTDOWN -> Quint(
-                "Cần kiểm tra", WarningOrange, WarningOrangeContainer, WarningOrangeBorder, "⚠️"
-            )
-            MainScreenStatus.SOS_SENT -> Quint(
-                "Cần kiểm tra", SosRed, SosRedContainer, SosRedBorder, "🚨"
-            )
-            MainScreenStatus.HELP_ACKNOWLEDGED -> Quint(
-                "Đang bảo vệ", SafeGreen, SafeGreenContainer, SafeGreenBorder, "🛡️"
-            )
-            MainScreenStatus.DEVICE_DISCONNECTED -> Quint(
-                "Cần kiểm tra", DisconnectedGray, DisconnectedGrayContainer, DisconnectedGrayBorder, "❗"
-            )
-        }
-
-        val (deviceText, deviceColor, deviceBg, deviceBorder, deviceIcon) = if (!controller.deviceConnected) {
-            Quint("Mất kết nối", DisconnectedGray, DisconnectedGrayContainer, DisconnectedGrayBorder, "🔌")
-        } else {
-            Quint("Pin tốt", SafeGreen, SafeGreenContainer, SafeGreenBorder, "🔋")
-        }
+        val cutoutRadius = buttonRadius + 9.dp
 
         val containerModifier = Modifier
             .fillMaxSize()
             .padding(
-                horizontal = if (isLandscape) 8.dp else if (isSmallPortrait) 6.dp else 10.dp,
-                vertical = if (isLandscape) 2.dp else 6.dp
+                horizontal = if (isLandscape) 8.dp else 10.dp,
+                vertical = if (isLandscape) 4.dp else 8.dp
             )
 
-        Column(
-            modifier = containerModifier,
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Optional top status message banner for active alerts
-            when (status) {
-                MainScreenStatus.SOS_SENT -> {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 4.dp),
-                        colors = CardDefaults.cardColors(containerColor = SosRedContainer),
-                        border = BorderStroke(2.dp, SosRedBorder),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = controller.sosDeliveryMessage,
-                            fontSize = if (isLandscape) 14.sp else 17.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = SosRedDark,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp).fillMaxWidth()
-                        )
-                    }
-                }
-                MainScreenStatus.HELP_ACKNOWLEDGED -> {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 4.dp),
-                        colors = CardDefaults.cardColors(containerColor = SafeGreenContainer),
-                        border = BorderStroke(2.dp, SafeGreenBorder),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "Người thân đã nhận tin.",
-                                fontSize = if (isLandscape) 14.sp else 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = SafeGreen,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Button(
-                                onClick = {
-                                    controller.complete()
-                                    controller.safe()
-                                },
-                                modifier = Modifier.heightIn(min = if (isLandscape) 38.dp else 44.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = SafeGreen)
-                            ) {
-                                Text("HOÀN TẤT", fontSize = if (isLandscape) 12.sp else 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                            }
-                        }
-                    }
-                }
-                MainScreenStatus.DEVICE_DISCONNECTED -> {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 4.dp),
-                        colors = CardDefaults.cardColors(containerColor = DisconnectedGrayContainer),
-                        border = BorderStroke(1.dp, DisconnectedGrayBorder),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = "Mất kết nối thiết bị ngoại vi — Nút SOS vẫn hoạt động.",
-                            fontSize = if (isLandscape) 13.sp else 15.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = DisconnectedGray,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp).fillMaxWidth()
-                        )
-                    }
-                }
-                else -> {}
-            }
-
-            // Central Box containing the 4 concave blocks hugging the central SOS button
-            val gridModifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-
-            // Card internal content paddings keeping content at the 4 outer corners
-            val cardPaddingTL = if (isLandscape) {
-                PaddingValues(start = 14.dp, top = 5.dp, end = 6.dp, bottom = 3.dp)
-            } else if (isSmallPortrait) {
-                PaddingValues(start = 10.dp, top = 8.dp, end = 6.dp, bottom = 6.dp)
-            } else {
-                PaddingValues(start = 14.dp, top = 12.dp, end = 8.dp, bottom = 8.dp)
-            }
-
-            val cardPaddingTR = if (isLandscape) {
-                PaddingValues(end = 14.dp, top = 5.dp, start = 6.dp, bottom = 3.dp)
-            } else if (isSmallPortrait) {
-                PaddingValues(end = 10.dp, top = 8.dp, start = 6.dp, bottom = 6.dp)
-            } else {
-                PaddingValues(end = 14.dp, top = 12.dp, start = 8.dp, bottom = 8.dp)
-            }
-
-            val cardPaddingBL = if (isLandscape) {
-                PaddingValues(start = 14.dp, bottom = 5.dp, end = 6.dp, top = 3.dp)
-            } else if (isSmallPortrait) {
-                PaddingValues(start = 8.dp, bottom = 8.dp, end = 6.dp, top = 6.dp)
-            } else {
-                PaddingValues(start = 14.dp, bottom = 12.dp, end = 8.dp, top = 8.dp)
-            }
-
-            val cardPaddingBR = if (isLandscape) {
-                PaddingValues(end = 14.dp, bottom = 5.dp, start = 6.dp, top = 3.dp)
-            } else if (isSmallPortrait) {
-                PaddingValues(end = 10.dp, bottom = 8.dp, start = 6.dp, top = 6.dp)
-            } else {
-                PaddingValues(end = 14.dp, bottom = 12.dp, start = 8.dp, top = 8.dp)
-            }
-
-            Box(
-                modifier = gridModifier,
-                contentAlignment = Alignment.Center
+        if (isLandscape) {
+            // ==================== LANDSCAPE LAYOUT ====================
+            Row(
+                modifier = containerModifier,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // 2x2 Grid of cards
+                // Left Column: VỊ TRÍ CỦA TÔI & GỌI NGƯỜI THÂN
                 Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(gridSpacing)
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    // TOP ROW: Bảo vệ (TL) | Thiết bị (TR)
-                    Row(
+                    StandardRoundedCard(
+                        containerColor = locBg,
+                        borderColor = locBorder,
+                        talkBackLabel = "Vị trí của tôi: $locStatusText. Chạm để mở bản đồ.",
+                        onClick = {
+                            val ok = controller.openMyLocation()
+                            if (!ok) showLocationErrorDialog = true
+                        },
                         modifier = Modifier
+                            .weight(1f)
                             .fillMaxWidth()
-                            .weight(1f),
-                        horizontalArrangement = Arrangement.spacedBy(gridSpacing)
                     ) {
-                        // 1. Top-Left: BẢO VỆ (Concave cutout at BOTTOM_RIGHT, content anchored at TopStart)
-                        ConcaveCard(
-                            cutoutCorner = CutoutCorner.BOTTOM_RIGHT,
-                            cutoutRadius = cutoutRadius,
-                            containerColor = protectBg,
-                            borderColor = protectBorder,
-                            contentAlignment = Alignment.TopStart,
-                            contentPadding = cardPaddingTL,
-                            gapX = gapHalf,
-                            gapY = gapHalf,
-                            talkBackLabel = "Trạng thái bảo vệ: $protectText",
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                        ) {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(if (isLandscape) 1.dp else 2.dp),
-                                horizontalAlignment = Alignment.Start
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Text(text = protectIcon, fontSize = iconSize)
-                                    Text(
-                                        text = "BẢO VỆ",
-                                        fontSize = titleFontSize,
-                                        fontWeight = FontWeight.Bold,
-                                        color = protectColor,
-                                        maxLines = 1,
-                                        softWrap = false
-                                    )
-                                }
-                                Text(
-                                    text = protectText,
-                                    fontSize = statusFontSize,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.Black,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
-                            }
-                        }
-
-                        // 2. Top-Right: THIẾT BỊ (Concave cutout at BOTTOM_LEFT, content anchored at TopEnd)
-                        ConcaveCard(
-                            cutoutCorner = CutoutCorner.BOTTOM_LEFT,
-                            cutoutRadius = cutoutRadius,
-                            containerColor = deviceBg,
-                            borderColor = deviceBorder,
-                            contentAlignment = Alignment.TopEnd,
-                            contentPadding = cardPaddingTR,
-                            gapX = gapHalf,
-                            gapY = gapHalf,
-                            talkBackLabel = "Trạng thái thiết bị và pin: $deviceText",
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                        ) {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(if (isLandscape) 1.dp else 2.dp),
-                                horizontalAlignment = Alignment.End
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Text(
-                                        text = "THIẾT BỊ",
-                                        fontSize = titleFontSize,
-                                        fontWeight = FontWeight.Bold,
-                                        color = deviceColor,
-                                        maxLines = 1,
-                                        softWrap = false
-                                    )
-                                    Text(text = deviceIcon, fontSize = iconSize)
-                                }
-                                Text(
-                                    text = deviceText,
-                                    fontSize = statusFontSize,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.Black,
-                                    textAlign = TextAlign.End,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
-                            }
-                        }
+                        PeripheralCardContent(
+                            icon = "📍",
+                            title = "VỊ TRÍ CỦA TÔI",
+                            statusText = locStatusText,
+                            subline = "Chạm xem bản đồ",
+                            titleColor = locColor
+                        )
                     }
 
-                    // BOTTOM ROW: Người nhận (BL) | Vị trí (BR)
-                    Row(
+                    StandardRoundedCard(
+                        containerColor = ContactBlueContainer,
+                        borderColor = ContactBlueBorder,
+                        talkBackLabel = "Gọi người thân: $callStatusText. Chạm để mở danh bạ gọi.",
+                        onClick = { showCallContactsDialog = true },
                         modifier = Modifier
+                            .weight(1f)
                             .fillMaxWidth()
-                            .weight(1f),
-                        horizontalArrangement = Arrangement.spacedBy(gridSpacing)
                     ) {
-                        // 3. Bottom-Left: NGƯỜI NHẬN (Concave cutout at TOP_RIGHT, content anchored at BottomStart)
-                        ConcaveCard(
-                            cutoutCorner = CutoutCorner.TOP_RIGHT,
-                            cutoutRadius = cutoutRadius,
-                            containerColor = ContactBlueContainer,
-                            borderColor = ContactBlueBorder,
-                            contentAlignment = Alignment.BottomStart,
-                            contentPadding = cardPaddingBL,
-                            gapX = gapHalf,
-                            gapY = gapHalf,
-                            talkBackLabel = "Người nhận: ${controller.primaryContactName}. Chạm để xem danh sách.",
-                            onClick = onOpenContacts,
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                        ) {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(if (isLandscape) 1.dp else 2.dp),
-                                horizontalAlignment = Alignment.Start
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(if (isSmallPortrait) 2.dp else 4.dp)
-                                ) {
-                                    Text(text = "👤", fontSize = if (isSmallPortrait && fontScale >= 1.4f) 14.sp else iconSize)
-                                    Text(
-                                        text = "NGƯỜI NHẬN",
-                                        fontSize = titleFontSize,
-                                        fontWeight = FontWeight.Bold,
-                                        color = ContactBlue,
-                                        maxLines = 1,
-                                        softWrap = false
-                                    )
-                                }
-                                Text(
-                                    text = controller.primaryContactName,
-                                    fontSize = statusFontSize,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.Black,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    text = "Chạm để xem",
-                                    fontSize = sublineFontSize,
-                                    fontWeight = FontWeight.Medium,
-                                    color = Color(0xFF37474F),
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
-                            }
-                        }
-
-                        // 4. Bottom-Right: VỊ TRÍ (Concave cutout at TOP_LEFT, content anchored at BottomEnd)
-                        ConcaveCard(
-                            cutoutCorner = CutoutCorner.TOP_LEFT,
-                            cutoutRadius = cutoutRadius,
-                            containerColor = SafeGreenContainer,
-                            borderColor = SafeGreenBorder,
-                            contentAlignment = Alignment.BottomEnd,
-                            contentPadding = cardPaddingBR,
-                            gapX = gapHalf,
-                            gapY = gapHalf,
-                            talkBackLabel = "Vị trí đã xác định. Chạm để gọi khẩn cấp.",
-                            onClick = { showCallConfirmDialog = true },
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                        ) {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(if (isLandscape) 1.dp else 2.dp),
-                                horizontalAlignment = Alignment.End
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Text(
-                                        text = "VỊ TRÍ",
-                                        fontSize = titleFontSize,
-                                        fontWeight = FontWeight.Bold,
-                                        color = SafeGreen,
-                                        maxLines = 1,
-                                        softWrap = false
-                                    )
-                                    Text(text = "📍", fontSize = iconSize)
-                                }
-                                Text(
-                                    text = "Đã xác định",
-                                    fontSize = statusFontSize,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.Black,
-                                    textAlign = TextAlign.End,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
-                                Text(
-                                    text = "Chạm để gọi",
-                                    fontSize = sublineFontSize,
-                                    fontWeight = FontWeight.Medium,
-                                    color = Color(0xFF37474F),
-                                    textAlign = TextAlign.End,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
-                            }
-                        }
+                        PeripheralCardContent(
+                            icon = "📞",
+                            title = "GỌI NGƯỜI THÂN",
+                            statusText = callStatusText,
+                            subline = "Cuộc gọi SIM",
+                            titleColor = ContactBlue
+                        )
                     }
                 }
 
-                // CENTER REGION: Large Circular SOS Button elevated as visual center
+                // Center Column: Status badge + Center SOS button
+                Column(
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = protectBg),
+                        border = BorderStroke(1.dp, protectBorder),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.padding(bottom = 2.dp)
+                    ) {
+                        Text(
+                            text = if (status == MainScreenStatus.SOS_SENT) controller.sosDeliveryMessage else "$protectIcon $protectText",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = protectColor,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+
+                    CenterActionButton(
+                        status = status,
+                        controller = controller,
+                        diameter = buttonDiameter
+                    )
+
+                    if (status == MainScreenStatus.HELP_ACKNOWLEDGED) {
+                        Button(
+                            onClick = {
+                                controller.complete()
+                                controller.safe()
+                            },
+                            modifier = Modifier.heightIn(min = 36.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = SafeGreen)
+                        ) {
+                            Text("HOÀN TẤT", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.height(2.dp))
+                    }
+                }
+
+                // Right Column: GỬI VỊ TRÍ & THIẾT BỊ
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    StandardRoundedCard(
+                        containerColor = ContactBlueContainer,
+                        borderColor = ContactBlueBorder,
+                        talkBackLabel = "Gửi vị trí: $sendStatusText. Chạm để chọn người nhận.",
+                        onClick = { showShareContactsDialog = true },
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                    ) {
+                        PeripheralCardContent(
+                            icon = "📤",
+                            title = "GỬI VỊ TRÍ",
+                            statusText = sendStatusText,
+                            subline = "Gửi SMS tọa độ",
+                            titleColor = ContactBlue
+                        )
+                    }
+
+                    StandardRoundedCard(
+                        containerColor = devBg,
+                        borderColor = devBorder,
+                        talkBackLabel = "Thiết bị: $devStatusText. Chạm để xem chi tiết.",
+                        onClick = { showDeviceDetailsDialog = true },
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                    ) {
+                        PeripheralCardContent(
+                            icon = devIcon,
+                            title = "THIẾT BỊ",
+                            statusText = devStatusText,
+                            subline = "Chạm xem chi tiết",
+                            titleColor = devColor
+                        )
+                    }
+                }
+            }
+        } else if (shouldReflow) {
+            // ==================== REFLOW PORTRAIT LAYOUT ====================
+            // For fontScale >= 1.3f or width < 360dp: Scrollable vertical/two-column layout
+            Column(
+                modifier = containerModifier.verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Top compact protective status banner
+                ProtectiveStatusBanner(
+                    protectIcon = protectIcon,
+                    protectText = protectText,
+                    protectColor = protectColor,
+                    protectBg = protectBg,
+                    protectBorder = protectBorder,
+                    status = status,
+                    sosDeliveryMessage = controller.sosDeliveryMessage,
+                    onComplete = {
+                        controller.complete()
+                        controller.safe()
+                    }
+                )
+
+                // Top Two-Column Row: VỊ TRÍ CỦA TÔI & GỬI VỊ TRÍ
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    StandardRoundedCard(
+                        containerColor = locBg,
+                        borderColor = locBorder,
+                        talkBackLabel = "Vị trí của tôi: $locStatusText. Chạm để mở bản đồ.",
+                        onClick = {
+                            val ok = controller.openMyLocation()
+                            if (!ok) showLocationErrorDialog = true
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .heightIn(min = 76.dp)
+                    ) {
+                        PeripheralCardContent(
+                            icon = "📍",
+                            title = "VỊ TRÍ CỦA TÔI",
+                            statusText = locStatusText,
+                            subline = "Chạm xem bản đồ",
+                            titleColor = locColor
+                        )
+                    }
+
+                    StandardRoundedCard(
+                        containerColor = ContactBlueContainer,
+                        borderColor = ContactBlueBorder,
+                        talkBackLabel = "Gửi vị trí: $sendStatusText. Chạm để chọn người nhận.",
+                        onClick = { showShareContactsDialog = true },
+                        modifier = Modifier
+                            .weight(1f)
+                            .heightIn(min = 76.dp)
+                    ) {
+                        PeripheralCardContent(
+                            icon = "📤",
+                            title = "GỬI VỊ TRÍ",
+                            statusText = sendStatusText,
+                            subline = "Gửi SMS tọa độ",
+                            titleColor = ContactBlue
+                        )
+                    }
+                }
+
+                // Central SOS Button
                 CenterActionButton(
                     status = status,
                     controller = controller,
                     diameter = buttonDiameter,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .zIndex(2f)
+                    modifier = Modifier.padding(vertical = 4.dp)
                 )
-            }
 
-            // Quick call feedback banner (if triggered)
-            callToastMessage?.let { msg ->
-                Card(
+                // Bottom Two-Column Row: GỌI NGƯỜI THÂN & THIẾT BỊ
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    StandardRoundedCard(
+                        containerColor = ContactBlueContainer,
+                        borderColor = ContactBlueBorder,
+                        talkBackLabel = "Gọi người thân: $callStatusText. Chạm để mở danh bạ gọi.",
+                        onClick = { showCallContactsDialog = true },
+                        modifier = Modifier
+                            .weight(1f)
+                            .heightIn(min = 76.dp)
+                    ) {
+                        PeripheralCardContent(
+                            icon = "📞",
+                            title = "GỌI NGƯỜI THÂN",
+                            statusText = callStatusText,
+                            subline = "Cuộc gọi SIM",
+                            titleColor = ContactBlue
+                        )
+                    }
+
+                    StandardRoundedCard(
+                        containerColor = devBg,
+                        borderColor = devBorder,
+                        talkBackLabel = "Thiết bị: $devStatusText. Chạm để xem chi tiết.",
+                        onClick = { showDeviceDetailsDialog = true },
+                        modifier = Modifier
+                            .weight(1f)
+                            .heightIn(min = 76.dp)
+                    ) {
+                        PeripheralCardContent(
+                            icon = devIcon,
+                            title = "THIẾT BỊ",
+                            statusText = devStatusText,
+                            subline = "Chạm xem chi tiết",
+                            titleColor = devColor
+                        )
+                    }
+                }
+            }
+        } else {
+            // ==================== STANDARD PORTRAIT LAYOUT ====================
+            // 4 Concave cards hugging central circular SOS button
+            Column(
+                modifier = containerModifier,
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Top compact protective status banner
+                ProtectiveStatusBanner(
+                    protectIcon = protectIcon,
+                    protectText = protectText,
+                    protectColor = protectColor,
+                    protectBg = protectBg,
+                    protectBorder = protectBorder,
+                    status = status,
+                    sosDeliveryMessage = controller.sosDeliveryMessage,
+                    onComplete = {
+                        controller.complete()
+                        controller.safe()
+                    }
+                )
+
+                // 2x2 Grid with Central SOS Button
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 6.dp),
-                    colors = CardDefaults.cardColors(containerColor = ContactBlueContainer),
-                    border = BorderStroke(1.dp, ContactBlueBorder),
-                    shape = RoundedCornerShape(12.dp)
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(10.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(gridSpacing)
                     ) {
-                        Text(msg, fontSize = 16.sp, color = ContactBlue, modifier = Modifier.weight(1f))
-                        TextButton(onClick = { callToastMessage = null }) {
-                            Text("ĐÓNG", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        // TOP ROW: Vị trí của tôi (TL) | Gửi vị trí (TR)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            horizontalArrangement = Arrangement.spacedBy(gridSpacing)
+                        ) {
+                            // 1. Top-Left: VỊ TRÍ CỦA TÔI
+                            ConcaveCard(
+                                cutoutCorner = CutoutCorner.BOTTOM_RIGHT,
+                                cutoutRadius = cutoutRadius,
+                                containerColor = locBg,
+                                borderColor = locBorder,
+                                contentAlignment = Alignment.TopStart,
+                                contentPadding = PaddingValues(start = 14.dp, top = 12.dp, end = 8.dp, bottom = 8.dp),
+                                gapX = gapHalf,
+                                gapY = gapHalf,
+                                talkBackLabel = "Vị trí của tôi: $locStatusText. Chạm để mở bản đồ.",
+                                onClick = {
+                                    val ok = controller.openMyLocation()
+                                    if (!ok) showLocationErrorDialog = true
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                            ) {
+                                PeripheralCardContent(
+                                    icon = "📍",
+                                    title = "VỊ TRÍ CỦA TÔI",
+                                    statusText = locStatusText,
+                                    subline = "Chạm xem bản đồ",
+                                    titleColor = locColor,
+                                    alignment = Alignment.Start
+                                )
+                            }
+
+                            // 2. Top-Right: GỬI VỊ TRÍ
+                            ConcaveCard(
+                                cutoutCorner = CutoutCorner.BOTTOM_LEFT,
+                                cutoutRadius = cutoutRadius,
+                                containerColor = ContactBlueContainer,
+                                borderColor = ContactBlueBorder,
+                                contentAlignment = Alignment.TopEnd,
+                                contentPadding = PaddingValues(end = 14.dp, top = 12.dp, start = 8.dp, bottom = 8.dp),
+                                gapX = gapHalf,
+                                gapY = gapHalf,
+                                talkBackLabel = "Gửi vị trí: $sendStatusText. Chạm để chọn người nhận.",
+                                onClick = { showShareContactsDialog = true },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                            ) {
+                                PeripheralCardContent(
+                                    icon = "📤",
+                                    title = "GỬI VỊ TRÍ",
+                                    statusText = sendStatusText,
+                                    subline = "Gửi SMS tọa độ",
+                                    titleColor = ContactBlue,
+                                    alignment = Alignment.End
+                                )
+                            }
+                        }
+
+                        // BOTTOM ROW: Gọi người thân (BL) | Thiết bị (BR)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            horizontalArrangement = Arrangement.spacedBy(gridSpacing)
+                        ) {
+                            // 3. Bottom-Left: GỌI NGƯỜI THÂN
+                            ConcaveCard(
+                                cutoutCorner = CutoutCorner.TOP_RIGHT,
+                                cutoutRadius = cutoutRadius,
+                                containerColor = ContactBlueContainer,
+                                borderColor = ContactBlueBorder,
+                                contentAlignment = Alignment.BottomStart,
+                                contentPadding = PaddingValues(start = 14.dp, bottom = 12.dp, end = 8.dp, top = 8.dp),
+                                gapX = gapHalf,
+                                gapY = gapHalf,
+                                talkBackLabel = "Gọi người thân: $callStatusText. Chạm để mở danh bạ gọi.",
+                                onClick = { showCallContactsDialog = true },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                            ) {
+                                PeripheralCardContent(
+                                    icon = "📞",
+                                    title = "GỌI NGƯỜI THÂN",
+                                    statusText = callStatusText,
+                                    subline = "Cuộc gọi SIM",
+                                    titleColor = ContactBlue,
+                                    alignment = Alignment.Start
+                                )
+                            }
+
+                            // 4. Bottom-Right: THIẾT BỊ
+                            ConcaveCard(
+                                cutoutCorner = CutoutCorner.TOP_LEFT,
+                                cutoutRadius = cutoutRadius,
+                                containerColor = devBg,
+                                borderColor = devBorder,
+                                contentAlignment = Alignment.BottomEnd,
+                                contentPadding = PaddingValues(end = 14.dp, bottom = 12.dp, start = 8.dp, top = 8.dp),
+                                gapX = gapHalf,
+                                gapY = gapHalf,
+                                talkBackLabel = "Thiết bị: $devStatusText. Chạm để xem chi tiết.",
+                                onClick = { showDeviceDetailsDialog = true },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                            ) {
+                                PeripheralCardContent(
+                                    icon = devIcon,
+                                    title = "THIẾT BỊ",
+                                    statusText = devStatusText,
+                                    subline = "Chạm xem chi tiết",
+                                    titleColor = devColor,
+                                    alignment = Alignment.End
+                                )
+                            }
                         }
                     }
+
+                    // Center Action Button: elevated on top of the concave junction
+                    CenterActionButton(
+                        status = status,
+                        controller = controller,
+                        diameter = buttonDiameter,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .zIndex(2f)
+                    )
                 }
             }
         }
     }
 
-    // Confirmation dialog before calling to avoid accidental phone calls
-    if (showCallConfirmDialog) {
+    // ==================== DIALOGS & USER ACTIONS ====================
+
+    // 1. Vị trí của tôi — Error Dialog
+    if (showLocationErrorDialog) {
+        val loc = controller.emergencyLocationState
         AlertDialog(
-            onDismissRequest = { showCallConfirmDialog = false },
+            onDismissRequest = { showLocationErrorDialog = false },
             title = {
-                Text("Gọi cho người thân?", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Vị trí của tôi", fontSize = 20.sp, fontWeight = FontWeight.Bold)
             },
             text = {
-                Text(
-                    text = "Bạn có muốn thực hiện cuộc gọi khẩn cấp cho ${controller.primaryContactFullName} (${ContactValidator.mask(controller.primaryContactPhone)}) ngay bây giờ không?",
-                    fontSize = 18.sp
-                )
+                Column {
+                    Text(text = loc.explanation, fontSize = 16.sp)
+                    if (!loc.remediation.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = loc.remediation, fontSize = 15.sp, color = WarningOrange)
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showLocationErrorDialog = false },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ContactBlue)
+                ) {
+                    Text(text = "ĐÓNG", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            }
+        )
+    }
+
+    // 2. Gửi vị trí — Select Contact Dialog
+    if (showShareContactsDialog) {
+        AlertDialog(
+            onDismissRequest = { showShareContactsDialog = false },
+            title = {
+                Text(text = "Gửi vị trí cho người thân", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            },
+            text = {
+                if (controller.contacts.isEmpty()) {
+                    Text(text = "Chưa có liên hệ khẩn cấp nào trong danh sách.", fontSize = 16.sp)
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 350.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        controller.contacts.forEach { contact ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 56.dp)
+                                    .clickable {
+                                        showShareContactsDialog = false
+                                        val conf = controller.requestManualLocationShare(contact.id)
+                                        if (conf != null) {
+                                            pendingConfirmation = conf
+                                        } else {
+                                            val loc = controller.emergencyLocationState
+                                            shareErrorMessage = loc.explanation + (loc.remediation?.let { "\n\n$it" } ?: "")
+                                        }
+                                    }
+                                    .semantics {
+                                        role = Role.Button
+                                        contentDescription = "Gửi vị trí cho ${contact.name} (${contact.relationship})"
+                                    },
+                                colors = CardDefaults.cardColors(containerColor = ContactBlueContainer),
+                                border = BorderStroke(1.dp, ContactBlueBorder),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(text = contact.name, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                        Text(
+                                            text = "${contact.relationship.ifBlank { "Người thân" }} • ${ContactValidator.mask(contact.phone)}",
+                                            fontSize = 14.sp,
+                                            color = DisconnectedGray
+                                        )
+                                    }
+                                    Text(
+                                        text = "CHỌN",
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = ContactBlue
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                OutlinedButton(
+                    onClick = { showShareContactsDialog = false },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp)
+                ) {
+                    Text(text = "ĐÓNG", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+        )
+    }
+
+    // 2b. Gửi vị trí — Confirmation Dialog showing preview
+    pendingConfirmation?.let { conf ->
+        val contact = controller.contacts.firstOrNull { it.id == conf.contactId }
+        AlertDialog(
+            onDismissRequest = { pendingConfirmation = null },
+            title = {
+                Text(text = "Xác nhận gửi vị trí", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Column {
+                    if (contact != null) {
+                        Text(
+                            text = "Người nhận: ${contact.name} (${contact.relationship.ifBlank { "Người thân" }} - ${ContactValidator.mask(contact.phone)})",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    Text(text = "Nội dung tin nhắn SMS:", fontSize = 14.sp, color = DisconnectedGray)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = ContactBlueContainer),
+                        border = BorderStroke(1.dp, ContactBlueBorder),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = conf.preview,
+                            fontSize = 15.sp,
+                            modifier = Modifier.padding(10.dp)
+                        )
+                    }
+                }
             },
             confirmButton = {
                 Button(
                     onClick = {
-                        showCallConfirmDialog = false
-                        callToastMessage = "Đang kết nối thử nghiệm tới ${controller.primaryContactFullName} (chế độ demo, không phát cuộc gọi thật)"
+                        val token = conf.token
+                        pendingConfirmation = null
+                        val state = controller.confirmManualLocationShare(token)
+                        shareDispatchState = state
                     },
                     modifier = Modifier.heightIn(min = 56.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = SafeGreen)
                 ) {
-                    Text("GỌI NGAY", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(text = "GỬI SMS", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 }
             },
             dismissButton = {
                 OutlinedButton(
-                    onClick = { showCallConfirmDialog = false },
+                    onClick = { pendingConfirmation = null },
                     modifier = Modifier.heightIn(min = 56.dp)
                 ) {
-                    Text("HỦY", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "HỦY", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
             }
+        )
+    }
+
+    // 2c. Gửi vị trí — Truthful Dispatch Status Dialog
+    shareDispatchState?.let { state ->
+        AlertDialog(
+            onDismissRequest = { shareDispatchState = null },
+            title = {
+                Text(text = "Trạng thái gửi SMS", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Text(text = resolveSmsDispatchStatusText(state), fontSize = 16.sp)
+            },
+            confirmButton = {
+                Button(
+                    onClick = { shareDispatchState = null },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ContactBlue)
+                ) {
+                    Text(text = "ĐÓNG", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            }
+        )
+    }
+
+    // 2d. Gửi vị trí — Error Dialog
+    shareErrorMessage?.let { msg ->
+        AlertDialog(
+            onDismissRequest = { shareErrorMessage = null },
+            title = {
+                Text(text = "Không thể gửi vị trí", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Text(text = msg, fontSize = 16.sp)
+            },
+            confirmButton = {
+                Button(
+                    onClick = { shareErrorMessage = null },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ContactBlue)
+                ) {
+                    Text(text = "ĐÓNG", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            }
+        )
+    }
+
+    // 3. Gọi người thân — Contact List Dialog
+    if (showCallContactsDialog) {
+        AlertDialog(
+            onDismissRequest = { showCallContactsDialog = false },
+            title = {
+                Text(text = "Gọi người thân (SIM)", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            },
+            text = {
+                if (controller.contacts.isEmpty()) {
+                    Text(text = "Chưa có liên hệ khẩn cấp nào trong danh sách.", fontSize = 16.sp)
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 350.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        controller.contacts.forEach { contact ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 56.dp),
+                                colors = CardDefaults.cardColors(containerColor = ContactBlueContainer),
+                                border = BorderStroke(1.dp, ContactBlueBorder),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(end = 8.dp)
+                                    ) {
+                                        Text(text = contact.name, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                        Text(
+                                            text = "${contact.relationship.ifBlank { "Người thân" }} • ${contact.phone}",
+                                            fontSize = 14.sp,
+                                            color = DisconnectedGray
+                                        )
+                                    }
+                                    Button(
+                                        onClick = {
+                                            showCallContactsDialog = false
+                                            val result = controller.callContactViaSim(contact.id)
+                                            simCallResult = result
+                                        },
+                                        modifier = Modifier.heightIn(min = 56.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = SafeGreen)
+                                    ) {
+                                        Text(text = "GỌI", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                OutlinedButton(
+                    onClick = { showCallContactsDialog = false },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp)
+                ) {
+                    Text(text = "ĐÓNG", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+        )
+    }
+
+    // 3b. Gọi người thân — Call Result Dialog
+    simCallResult?.let { result ->
+        AlertDialog(
+            onDismissRequest = { simCallResult = null },
+            title = {
+                Text(
+                    text = if (result.started) "Cuộc gọi SIM" else "Không thể gọi",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(text = result.detail, fontSize = 16.sp)
+            },
+            confirmButton = {
+                Button(
+                    onClick = { simCallResult = null },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ContactBlue)
+                ) {
+                    Text(text = "ĐÓNG", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            }
+        )
+    }
+
+    // 4. Thiết bị — Details Dialog
+    if (showDeviceDetailsDialog) {
+        val details = controller.emergencyDeviceDetails
+        AlertDialog(
+            onDismissRequest = { showDeviceDetailsDialog = false },
+            title = {
+                Text(text = "Thông tin thiết bị ngoại vi", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    val fieldList = buildDeviceDetailsFieldList(details)
+                    if (fieldList.isNotEmpty()) {
+                        fieldList.forEach { field ->
+                            Text(
+                                text = field,
+                                fontSize = 15.sp,
+                                modifier = Modifier.padding(vertical = 2.dp)
+                            )
+                        }
+                        if (details.statusText.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = details.statusText, fontSize = 14.sp, color = DisconnectedGray)
+                        }
+                    } else {
+                        Text(
+                            text = details.statusText.ifBlank { "Chưa có thông tin thiết bị ngoại vi từ máy chủ." },
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider()
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Lưu ý: Thiết bị ngoại vi ESP32 hoạt động độc lập với nút SOS trên điện thoại. Khi thiết bị ngoại vi vắng mặt hoặc mất kết nối, nút SOS trên điện thoại vẫn hoạt động bình thường.",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = DisconnectedGray
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showDeviceDetailsDialog = false },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ContactBlue)
+                ) {
+                    Text(text = "ĐÓNG", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            }
+        )
+    }
+}
+
+/**
+ * Compact protective status area for top banner.
+ */
+@Composable
+private fun ProtectiveStatusBanner(
+    protectIcon: String,
+    protectText: String,
+    protectColor: Color,
+    protectBg: Color,
+    protectBorder: Color,
+    status: MainScreenStatus,
+    sosDeliveryMessage: String,
+    onComplete: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 4.dp)
+            .semantics {
+                contentDescription = "Trạng thái bảo vệ: $protectText"
+            },
+        colors = CardDefaults.cardColors(containerColor = protectBg),
+        border = BorderStroke(1.5.dp, protectBorder),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(text = protectIcon, fontSize = 16.sp)
+                Text(
+                    text = if (status == MainScreenStatus.SOS_SENT) sosDeliveryMessage else "BẢO VỆ: $protectText",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = protectColor,
+                    maxLines = 2,
+                    softWrap = true
+                )
+            }
+            if (status == MainScreenStatus.HELP_ACKNOWLEDGED) {
+                Button(
+                    onClick = onComplete,
+                    modifier = Modifier.heightIn(min = 40.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = SafeGreen)
+                ) {
+                    Text("HOÀN TẤT", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Reusable peripheral card content with guaranteed >= 14sp typography and softWrap.
+ */
+@Composable
+private fun PeripheralCardContent(
+    icon: String,
+    title: String,
+    statusText: String,
+    subline: String,
+    titleColor: Color,
+    alignment: Alignment.Horizontal = Alignment.Start
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        horizontalAlignment = alignment
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            if (alignment == Alignment.Start) {
+                Text(text = icon, fontSize = 18.sp)
+                Text(
+                    text = title,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = titleColor,
+                    maxLines = 2,
+                    softWrap = true
+                )
+            } else {
+                Text(
+                    text = title,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = titleColor,
+                    textAlign = TextAlign.End,
+                    maxLines = 2,
+                    softWrap = true
+                )
+                Text(text = icon, fontSize = 18.sp)
+            }
+        }
+        Text(
+            text = statusText,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black,
+            textAlign = if (alignment == Alignment.Start) TextAlign.Start else TextAlign.End,
+            maxLines = 2,
+            softWrap = true
+        )
+        Text(
+            text = subline,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color(0xFF37474F),
+            textAlign = if (alignment == Alignment.Start) TextAlign.Start else TextAlign.End,
+            maxLines = 1,
+            softWrap = true
         )
     }
 }
@@ -690,6 +1248,47 @@ fun ConcaveCard(
 }
 
 /**
+ * Standard rounded card used in reflow mode and landscape mode.
+ */
+@Composable
+fun StandardRoundedCard(
+    containerColor: Color,
+    borderColor: Color,
+    modifier: Modifier = Modifier,
+    borderWidth: Dp = 2.dp,
+    talkBackLabel: String = "",
+    onClick: (() -> Unit)? = null,
+    contentPadding: PaddingValues = PaddingValues(10.dp),
+    content: @Composable BoxScope.() -> Unit
+) {
+    val shape = RoundedCornerShape(16.dp)
+    Box(
+        modifier = modifier
+            .shadow(3.dp, shape)
+            .clip(shape)
+            .background(containerColor)
+            .border(borderWidth, borderColor, shape)
+            .then(
+                if (onClick != null) {
+                    Modifier
+                        .clickable(onClick = onClick)
+                        .semantics {
+                            role = Role.Button
+                            contentDescription = talkBackLabel
+                        }
+                } else {
+                    Modifier.semantics {
+                        contentDescription = talkBackLabel
+                    }
+                }
+            )
+            .padding(contentPadding),
+        contentAlignment = Alignment.CenterStart,
+        content = content
+    )
+}
+
+/**
  * Center circular button adapting to all 5 states with responsive diameter.
  */
 @Composable
@@ -705,7 +1304,7 @@ fun CenterActionButton(
 
     when (status) {
         MainScreenStatus.SAFE, MainScreenStatus.DEVICE_DISCONNECTED -> {
-            // Normal State: SOS - GIỮ 3 GIÂY - ĐỂ GỌI GIÚP (exactly 3 lines)
+            // Normal State: SOS - GIỮ 3 GIÂY - ĐỂ GỌI GIÚP
             val hold = remember { SosHold(3000L) }
             var holding by remember { mutableStateOf(false) }
             var accessibleArmed by remember { mutableStateOf(false) }
@@ -785,7 +1384,7 @@ fun CenterActionButton(
                     Spacer(modifier = Modifier.height(1.dp))
                     Text(
                         text = if (holding) "ĐANG GIỮ..." else "GIỮ 3 GIÂY",
-                        fontSize = if (isCompact) 13.sp else if (isMedium) (if (fontScale >= 1.4f) 12.sp else 15.sp) else 18.sp,
+                        fontSize = if (isCompact) 13.sp else if (isMedium) (if (fontScale >= 1.4f) 13.sp else 15.sp) else 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                         lineHeight = if (isCompact) 14.sp else 18.sp
@@ -793,7 +1392,7 @@ fun CenterActionButton(
                     Spacer(modifier = Modifier.height(1.dp))
                     Text(
                         text = "ĐỂ GỌI GIÚP",
-                        fontSize = if (isCompact) 12.sp else if (isMedium) (if (fontScale >= 1.4f) 11.sp else 14.sp) else 18.sp,
+                        fontSize = if (isCompact) 12.sp else if (isMedium) (if (fontScale >= 1.4f) 12.sp else 14.sp) else 18.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -804,7 +1403,7 @@ fun CenterActionButton(
         }
 
         MainScreenStatus.WARNING_COUNTDOWN -> {
-            // Danger Countdown: CẢNH BÁO SAU X GIÂY - TÔI VẪN ỔN - GIỮ ĐỂ HỦY (2 GIÂY)
+            // Danger Countdown: CẢNH BÁO SAU X GIÂY - TÔI AN TOÀN - GIỮ ĐỂ HỦY (2 GIÂY)
             val holdCancel = remember { SosHold(2000L) }
             var holdingCancel by remember { mutableStateOf(false) }
             var accessibleArmed by remember { mutableStateOf(false) }
@@ -845,7 +1444,7 @@ fun CenterActionButton(
                 backgroundColor = WarningOrange,
                 progress = cancelProgress,
                 progressColor = Color.White,
-                talkBackLabel = "Phát hiện nguy hiểm. Tự động gửi SOS sau $seconds giây. Nhấn và giữ Tôi vẫn ổn 2 giây để hủy.",
+                talkBackLabel = "Phát hiện nguy hiểm. Tự động gửi SOS sau $seconds giây. Nhấn và giữ Tôi an toàn 2 giây để hủy trong thời gian đếm ngược 10 giây.",
                 onAccessibilityClick = {
                     if (accessibleArmed) {
                         holdCancel.cancel()
@@ -879,25 +1478,25 @@ fun CenterActionButton(
                 ) {
                     Text(
                         text = "CẢNH BÁO",
-                        fontSize = if (isCompact) 11.5.sp else if (isMedium) 15.sp else 18.sp,
+                        fontSize = if (isCompact) 11.5.sp else if (isMedium) 14.sp else 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                     Text(
                         text = "$seconds GIÂY",
-                        fontSize = if (isCompact) 18.sp else if (isMedium) 26.sp else 32.sp,
+                        fontSize = if (isCompact) 18.sp else if (isMedium) 24.sp else 30.sp,
                         fontWeight = FontWeight.Black,
                         color = Color.White
                     )
                     Text(
-                        text = "TÔI VẪN ỔN",
-                        fontSize = if (isCompact) 12.5.sp else if (isMedium) 16.sp else 20.sp,
+                        text = "TÔI AN TOÀN",
+                        fontSize = if (isCompact) 12.5.sp else if (isMedium) 15.sp else 19.sp,
                         fontWeight = FontWeight.Black,
                         color = Color(0xFFFFEB3B)
                     )
                     Text(
-                        text = if (holdingCancel) "ĐANG HỦY..." else "GIỮ ĐỂ HỦY",
-                        fontSize = if (isCompact) 11.sp else if (isMedium) 14.sp else 18.sp,
+                        text = if (holdingCancel) "ĐANG HỦY..." else "GIỮ ĐỂ HỦY (10S)",
+                        fontSize = if (isCompact) 10.sp else if (isMedium) 12.sp else 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Color.White
                     )
@@ -906,7 +1505,7 @@ fun CenterActionButton(
         }
 
         MainScreenStatus.SOS_SENT -> {
-            // SOS Sent: ĐÃ GỬI SOS - ĐANG GỌI TRỢ GIÚP
+            // SOS Sent: ĐÃ KÍCH HOẠT - reflect truthful sosDeliveryMessage
             val isCompact = diameter < 110.dp
             val isMedium = diameter < 155.dp
 
@@ -919,7 +1518,7 @@ fun CenterActionButton(
                     .background(SosRedDark)
                     .semantics {
                         role = Role.Button
-                        contentDescription = "Đã bật SOS. Chưa xác nhận gửi ra ngoài."
+                        contentDescription = "Đã kích hoạt SOS: ${controller.sosDeliveryMessage}"
                     }
                     .padding(if (isCompact) 4.dp else 8.dp)
             ) {
@@ -928,15 +1527,16 @@ fun CenterActionButton(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "ĐÃ BẬT",
-                        fontSize = if (isCompact) 14.sp else if (isMedium) 20.sp else 26.sp,
+                        text = "SOS",
+                        fontSize = if (isCompact) 20.sp else if (isMedium) 26.sp else 32.sp,
                         fontWeight = FontWeight.Black,
                         color = Color.White,
                         textAlign = TextAlign.Center
                     )
+                    Spacer(modifier = Modifier.height(1.dp))
                     Text(
-                        text = "SOS",
-                        fontSize = if (isCompact) 18.sp else if (isMedium) 26.sp else 32.sp,
+                        text = "ĐÃ KÍCH HOẠT",
+                        fontSize = if (isCompact) 11.sp else if (isMedium) 15.sp else 18.sp,
                         fontWeight = FontWeight.Black,
                         color = Color.White,
                         textAlign = TextAlign.Center
@@ -944,7 +1544,7 @@ fun CenterActionButton(
                     Spacer(modifier = Modifier.height(if (isCompact) 1.dp else 2.dp))
                     Text(
                         text = "CẦN TRỢ GIÚP",
-                        fontSize = if (isCompact) 10.sp else if (isMedium) 14.sp else 18.sp,
+                        fontSize = if (isCompact) 10.sp else if (isMedium) 13.sp else 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFFFFD54F),
                         textAlign = TextAlign.Center
@@ -1051,7 +1651,6 @@ fun CircularHoldButton(
                 )
             }
     ) {
-        // Draw progress ring around border
         Canvas(modifier = Modifier.matchParentSize()) {
             val strokeWidth = if (diameter < 110.dp) 5.dp.toPx() else 8.dp.toPx()
             if (progress > 0f) {

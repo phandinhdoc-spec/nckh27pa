@@ -20,6 +20,7 @@ class PreferencesSyncStore(context: Context, scope: String) : SyncStore {
 data class SyncOperation(val identity: String, val kind: OperationKind,
     val event: EventRequest? = null, val action: ActionRequest? = null,
     val userId: String? = null, val contact: EmergencyContact? = null, val contactId: String? = null,
+    val transportStatus:TransportStatusRequest?=null,
     var attempts: Int = 0, var nextAttemptMs: Long = 0)
 private data class OutboxState(
     val pending: MutableList<SyncOperation> = mutableListOf(),
@@ -85,8 +86,12 @@ class SyncOutbox(private val store: SyncStore, private val jitter: () -> Double 
 /** UUID from process-session + numeric core ID is stable across all persisted retries.
  * A new core uses a new session namespace, so numeric IDs may safely restart at 1. */
 class TransitionSync(private val outbox: SyncOutbox, private val config: ApiConfig,
-    private val sessionId: String = UUID.randomUUID().toString(), private val wallMs: () -> Long = System::currentTimeMillis) {
-    fun eventId(localId: Long): String = UUID.nameUUIDFromBytes("$sessionId:$localId".toByteArray(Charsets.UTF_8)).toString()
+    private val sessionId: String = UUID.randomUUID().toString(),
+    private val displayName:()->String={"Người dùng FallSafe"},
+    private val identity: vn.nckh27pa.fallsafe.emergency.EventIdentityStore = vn.nckh27pa.fallsafe.emergency.SessionEventIdentityStore(sessionId),
+    private val wallMs: () -> Long = System::currentTimeMillis) {
+    fun eventId(localId: Long): String = identity.id(localId)
+    fun clearEventId(localId: Long) = identity.clear(localId)
     fun observe(s: Snapshot) {
         if (s.eventId <= 0) return
         val kind = when {
@@ -98,12 +103,13 @@ class TransitionSync(private val outbox: SyncOutbox, private val config: ApiConf
         }
         val id = eventId(s.eventId)
         val now = wallMs()
-        val event = if (kind == OperationKind.EVENT) EventRequest(id, config.deviceId, config.userId, s.eventId, now) else null
+        val event = if (kind == OperationKind.EVENT) EventRequest(id, config.deviceId, config.userId, s.eventId, now,displayName=displayName()) else null
         val action = if (event == null) ActionRequest(id, config.deviceId, config.userId, now,
             triggerSource = if (kind == OperationKind.SOS) { if (s.response == core.Response.NO_RESPONSE) "COUNTDOWN_TIMEOUT" else "MANUAL_APP_BUTTON" } else null,
             response = if (kind == OperationKind.SOS) s.response.name else null,
             reason = if (kind == OperationKind.CANCEL) "SAFE" else null,
-            resolvedBy = if (kind == OperationKind.RESOLVE) config.userId else null) else null
+            resolvedBy = if (kind == OperationKind.RESOLVE) config.userId else null,
+            displayName = if(kind==OperationKind.SOS)displayName() else null) else null
         outbox.enqueue(SyncOperation("$id:$kind", kind, event, action))
     }
 }

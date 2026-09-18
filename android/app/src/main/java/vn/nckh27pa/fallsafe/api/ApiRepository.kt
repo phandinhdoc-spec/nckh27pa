@@ -52,5 +52,10 @@ class ApiRepository(private val api: ApiService) {
     suspend fun active(config: ApiConfig) = request({ d: ActiveAlert -> d.alertState != null && d.caregiverAcknowledged != null }) { api.active(config.deviceId, config.userId) }
     suspend fun sensor(s: SensorRequest) = request({ d: Receipt -> d.deviceId == s.deviceId && d.stored == true }) { api.sensor(s) }
     suspend fun heartbeat(device: String, h: HeartbeatRequest) = request({ d: Receipt -> d.deviceId == device && d.recorded == true }) { api.heartbeat(device, h) }
+    suspend fun deviceStatus(device:String) = request({ d:DeviceStatusDto -> d.espDetails(device)!=null }) { api.deviceStatus(device) }
+    suspend fun aiText(text:String)=request({d:AiTextReply->d.status=="COMPLETED"&&d.text?.let{it.isNotBlank()&&it.length<=4000}==true}){api.aiText(AiTextRequest(text))}
+    suspend fun transportStatus(eventId:String,status:TransportStatusRequest)=request({d:TransportStatusReply->
+        d.eventId==eventId&&d.contactId==status.contactId&&d.channel==status.channel&&d.status in listOf("SENT","DELIVERED","FAILED")
+    }){api.transportStatus(eventId,status)}
 }
-enum class OperationKind { EVENT, CANCEL, SOS, RESOLVE, CONTACT_ADD, CONTACT_UPDATE, CONTACT_DELETE }
+enum class OperationKind { EVENT, CANCEL, SOS, RESOLVE, CONTACT_ADD, CONTACT_UPDATE, CONTACT_DELETE, TRANSPORT_STATUS }

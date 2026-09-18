@@ -5,6 +5,9 @@ import { startWatchdog } from './services/alertStateMachine.js';
 import { ApiError } from './services/errors.js';
 import { controller, respond } from './controllers/controller.js';
 import { route } from './routes/router.js';
+import { twilioVoiceProvider } from './providers/twilioVoiceProvider.js';
+import { voiceDispatchService } from './services/voiceDispatchService.js';
+import { openAiCompatibleTextProvider } from './providers/openAiCompatibleTextProvider.js';
 
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -30,7 +33,11 @@ function readBody(req) {
       if (settled) return;
       if (!size) { settled = true; resolve({}); return; }
       try {
-        const value = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(chunks)));
+        const text = new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(chunks));
+        if ((req.headers['content-type']??'').split(';')[0] === 'application/x-www-form-urlencoded') {
+          settled = true; resolve(Object.fromEntries(new URLSearchParams(text))); return;
+        }
+        const value = JSON.parse(text);
         if (!value || typeof value !== 'object' || Array.isArray(value)) return fail('Expected JSON object');
         settled = true;
         resolve(value);
@@ -44,13 +51,18 @@ export function createApp(options = {}) {
   const config = loadConfig(process.env, options.config);
   const now = options.now ?? Date.now;
   const db = openDatabase(config.DB_PATH);
-  const watchdog = startWatchdog({ db, config, now });
-  const actions = controller({ db, config, now, started: now(), watchdog });
+  const voiceProvider=options.voiceProvider??twilioVoiceProvider(config);
+  const aiProvider=options.aiProvider??openAiCompatibleTextProvider(config);
+  const voiceDispatcher=voiceDispatchService({db,config,now,voiceProvider});
+  const watchdog = startWatchdog({ db, config, now, onEscalated: voiceDispatcher.start });
+  const actions = controller({ db, config, now, started: now(), watchdog, voiceProvider, voiceDispatcher, aiProvider });
   const server = createServer(async (req, res) => {
     try {
       const body = await readBody(req);
       const result = await route(req.method, new URL(req.url, 'http://localhost'), actions, body, req.headers);
-      respond(res, result.status ?? 200, result.data, now());
+      if (result.raw !== undefined) {
+        res.writeHead(result.status??200,{'content-type':result.contentType??'text/plain; charset=utf-8'});res.end(result.raw);
+      } else respond(res, result.status ?? 200, result.data, now());
     } catch (error) {
       if (res.destroyed) return;
       // End the connection after a rejected body, including an unfinished upload.

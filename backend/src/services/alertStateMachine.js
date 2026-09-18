@@ -2,11 +2,12 @@ import {transaction} from '../repositories/db.js';
 import {eventRepository} from '../repositories/eventRepository.js';
 import {alertRepository} from '../repositories/alertRepository.js';
 import {alertOutboxService} from './alertOutboxService.js';
-export function startWatchdog({db,config,now}) {
+export function startWatchdog({db,config,now,onEscalated=()=>{}}) {
  const events=eventRepository(db),alerts=alertRepository(db),outbox=alertOutboxService(db);
  let healthy=true;
  function scan() {
   let failed=false;
+  const escalated=[];
   try {
    for(const {event_id:id} of alerts.due(now())) {
     try {
@@ -17,10 +18,12 @@ export function startWatchdog({db,config,now}) {
       const count=outbox.record({...event,response:'NO_RESPONSE'},time);
       alerts.sos(id,time,count,'NO_RESPONSE','COUNTDOWN_TIMEOUT',event.location);
       alerts.timeout(id);alerts.recordAction(id,'sos',time);
+      escalated.push(id);
      });
     } catch {failed=true;}
    }
   } catch {failed=true;}
+  for(const id of escalated) try{onEscalated(id);}catch{failed=true;}
   healthy=!failed;
  }
  scan();

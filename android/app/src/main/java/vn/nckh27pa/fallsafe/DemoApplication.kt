@@ -54,31 +54,138 @@ fun resolveMainScreenStatus(
 /** Process-scoped session survives Activity recreation. No foreground service. */
 class DemoApplication : Application() {
     lateinit var controller: DemoController; private set
+    lateinit var smsGateway: vn.nckh27pa.fallsafe.emergency.AndroidSmsManagerGateway; private set
+    lateinit var emergencyCoordinator: vn.nckh27pa.fallsafe.emergency.EmergencyCoordinator; private set
+    lateinit var locationController: vn.nckh27pa.fallsafe.emergency.EmergencyLocationController; private set
+    val deviceDetails = vn.nckh27pa.fallsafe.device.DeviceDetailsStore()
     private lateinit var apiClient: vn.nckh27pa.fallsafe.api.ApiClient
     private lateinit var sync: vn.nckh27pa.fallsafe.api.SyncCoordinator
     override fun onCreate() {
         super.onCreate()
-        val repo = SharedPrefsContactRepository(this)
-        controller = DemoController(repo)
+        val contactRepo = SharedPrefsContactRepository(this)
+        val profileRepo = GsonFallDetectionProfileRepository(
+            SharedPreferencesFallDetectionProfileStorage(this)
+        )
+        controller = DemoController(contactRepository = contactRepo, profileRepository = profileRepo)
+        smsGateway = vn.nckh27pa.fallsafe.emergency.AndroidSmsManagerGateway(this)
+        val displayNameSettings = vn.nckh27pa.fallsafe.emergency.UserDisplayNameSettings(this)
+        val identity = vn.nckh27pa.fallsafe.emergency.SharedPrefsEventIdentityStore(this)
+        emergencyCoordinator = vn.nckh27pa.fallsafe.emergency.EmergencyCoordinator(
+            smsGateway,
+            vn.nckh27pa.fallsafe.emergency.EmergencyBackendGateway { eventId -> sync.requestVoice(eventId) },
+            vn.nckh27pa.fallsafe.emergency.SharedPrefsEmergencyStore(this)
+        )
+        locationController = vn.nckh27pa.fallsafe.location.AndroidEmergencyLocationController(
+            this, { controller.contacts }, smsGateway,
+            onFix = { fix -> controller.snapshot.eventId.takeIf { it > 0 }?.let { emergencyCoordinator.updateLocation(identity.id(it), fix) } },
+            displayName = { displayNameSettings.value }
+        )
+        controller.emergencyCoordinator = emergencyCoordinator
+        controller.emergencyLocationController = locationController
+        controller.deviceDetailsStore = deviceDetails
+        controller.displayNameSettings = displayNameSettings
+        controller.simCallGateway = vn.nckh27pa.fallsafe.emergency.ManualSimCallFallback(this)
         val config = vn.nckh27pa.fallsafe.api.ApiConfig.generated()
         apiClient = vn.nckh27pa.fallsafe.api.ApiClient(config)
+        val repository = vn.nckh27pa.fallsafe.api.ApiRepository(apiClient.service)
+        controller.bindAiAssistant(
+            vn.nckh27pa.fallsafe.ai.OptionalAiAssistant(
+                vn.nckh27pa.fallsafe.ai.SharedPreferencesAiPreferenceStore(this),
+                vn.nckh27pa.fallsafe.ai.BackendTextAiProvider(repository)
+            )
+        )
         val outbox = vn.nckh27pa.fallsafe.api.SyncOutbox(
             vn.nckh27pa.fallsafe.api.PreferencesSyncStore(this, "${config.userId}_${config.deviceId}"))
         val info = vn.nckh27pa.fallsafe.api.AndroidDeviceInfo(this)
         sync = vn.nckh27pa.fallsafe.api.SyncCoordinator(controller,
-            vn.nckh27pa.fallsafe.api.ApiRepository(apiClient.service), config, outbox,
-            battery = info::battery, heartbeat = info::heartbeat)
+            repository, config, outbox,
+            battery = info::battery, heartbeat = info::heartbeat,
+            emergency = emergencyCoordinator, emergencyLocation = locationController, identity = identity,
+            displayName = { displayNameSettings.value })
+        smsGateway.onStateChanged=sync::reportTransportState
         androidx.lifecycle.ProcessLifecycleOwner.get().lifecycle.addObserver(sync)
         sync.start()
     }
     override fun onTerminate() {
         androidx.lifecycle.ProcessLifecycleOwner.get().lifecycle.removeObserver(sync)
-        sync.close(); apiClient.close(); controller.close()
+        sync.close(); apiClient.close(); smsGateway.close(); controller.close()
         super.onTerminate()
     }
 }
-class DemoController(val contactRepository: ContactRepository = InMemoryContactRepository(),
-    clock: MonotonicClock = MonotonicClock { SystemClock.elapsedRealtime() }) {
+class DemoController(
+    val contactRepository: ContactRepository = InMemoryContactRepository(),
+    clock: MonotonicClock = MonotonicClock { SystemClock.elapsedRealtime() },
+    val profileRepository: FallDetectionProfileRepository = GsonFallDetectionProfileRepository(
+        InMemoryFallDetectionProfileStorage()
+    )
+) {
+    private var optionalAi = vn.nckh27pa.fallsafe.ai.OptionalAiAssistant(
+        vn.nckh27pa.fallsafe.ai.MemoryAiPreferenceStore(),
+        vn.nckh27pa.fallsafe.ai.UnavailableTextAiProvider()
+    )
+    private var aiRevision by mutableStateOf(0)
+    val aiState: vn.nckh27pa.fallsafe.ai.AiState get() { aiRevision; return optionalAi.state() }
+    fun setAiConsent(granted: Boolean) { optionalAi.setConsent(granted); aiRevision++ }
+    fun setAiEnabled(enabled: Boolean): Boolean = optionalAi.setEnabled(enabled).also { aiRevision++ }
+    suspend fun requestOptionalAiText(prompt: String): vn.nckh27pa.fallsafe.ai.AiRequestResult = optionalAi.requestText(prompt)
+    internal fun bindAiAssistant(value: vn.nckh27pa.fallsafe.ai.OptionalAiAssistant) { optionalAi = value; aiRevision++ }
+    private var capabilityAccess = vn.nckh27pa.fallsafe.permissions.CapabilityAccessController(
+        vn.nckh27pa.fallsafe.permissions.UnboundCapabilityPlatform,
+        vn.nckh27pa.fallsafe.permissions.MemoryCapabilityAttemptStore()
+    )
+    private var capabilityRevision by mutableStateOf(0)
+    val callingCapability: vn.nckh27pa.fallsafe.permissions.CapabilityDisplay
+        get() = capabilityDisplay(vn.nckh27pa.fallsafe.permissions.Capability.CALLING)
+    val messagingCapability: vn.nckh27pa.fallsafe.permissions.CapabilityDisplay
+        get() = capabilityDisplay(vn.nckh27pa.fallsafe.permissions.Capability.MESSAGING)
+    val locationCapability: vn.nckh27pa.fallsafe.permissions.CapabilityDisplay
+        get() = capabilityDisplay(vn.nckh27pa.fallsafe.permissions.Capability.LOCATION)
+    fun requestCallingPermission(explanationAcknowledged: Boolean) = capabilityAccess.request(
+        vn.nckh27pa.fallsafe.permissions.Capability.CALLING, explanationAcknowledged
+    )
+    fun requestMessagingPermission(explanationAcknowledged: Boolean) = capabilityAccess.request(
+        vn.nckh27pa.fallsafe.permissions.Capability.MESSAGING, explanationAcknowledged
+    )
+    fun requestLocationPermission(explanationAcknowledged: Boolean) = capabilityAccess.request(
+        vn.nckh27pa.fallsafe.permissions.Capability.LOCATION, explanationAcknowledged
+    )
+    fun openCallingPermissionSettings() = capabilityAccess.openSettings(vn.nckh27pa.fallsafe.permissions.Capability.CALLING)
+    fun openMessagingPermissionSettings() = capabilityAccess.openSettings(vn.nckh27pa.fallsafe.permissions.Capability.MESSAGING)
+    fun openLocationPermissionSettings() = capabilityAccess.openSettings(vn.nckh27pa.fallsafe.permissions.Capability.LOCATION)
+    fun checkSosReadiness(): vn.nckh27pa.fallsafe.permissions.SosReadiness {
+        capabilityRevision
+        return capabilityAccess.checkSosReadiness(contacts.count { it.receiveSos })
+    }
+    internal fun bindCapabilityAccess(value: vn.nckh27pa.fallsafe.permissions.CapabilityAccessController) {
+        capabilityAccess = value
+        refreshCapabilityTruth()
+    }
+    fun refreshCapabilityTruth() {
+        capabilityRevision++
+        onStateChanged?.invoke()
+    }
+    private fun capabilityDisplay(capability: vn.nckh27pa.fallsafe.permissions.Capability): vn.nckh27pa.fallsafe.permissions.CapabilityDisplay {
+        capabilityRevision
+        return capabilityAccess.display(capability)
+    }
+    internal var emergencyCoordinator: vn.nckh27pa.fallsafe.emergency.EmergencyCoordinator? = null
+    internal var emergencyLocationController: vn.nckh27pa.fallsafe.emergency.EmergencyLocationController? = null
+    internal var deviceDetailsStore: vn.nckh27pa.fallsafe.device.DeviceDetailsStore? = null
+    internal var displayNameSettings: vn.nckh27pa.fallsafe.emergency.UserDisplayNameSettings? = null
+    internal var simCallGateway: vn.nckh27pa.fallsafe.emergency.SimCallGateway? = null
+    val userDisplayName: String get() = displayNameSettings?.value ?: vn.nckh27pa.fallsafe.emergency.DEFAULT_USER_DISPLAY_NAME
+    fun setUserDisplayName(value: String) { displayNameSettings?.value = value }
+    val emergencyDeviceDetails: vn.nckh27pa.fallsafe.device.DeviceDetails get() = deviceDetailsStore?.value ?: vn.nckh27pa.fallsafe.device.DeviceDetails.Unknown
+    val emergencyLocationState: vn.nckh27pa.fallsafe.emergency.LocationState get() = emergencyLocationController?.locationState ?: vn.nckh27pa.fallsafe.emergency.LocationState()
+    fun openMyLocation(): Boolean = emergencyLocationController?.openMyLocation() ?: false
+    fun requestManualLocationShare(contactId: String) = emergencyLocationController?.requestManualShare(contactId)
+    fun confirmManualLocationShare(token: String) = emergencyLocationController?.confirmManualShare(token)
+    fun callContactViaSim(contactId:String):vn.nckh27pa.fallsafe.emergency.SimCallResult {
+        val contact=contacts.firstOrNull{it.id==contactId}
+            ?:return vn.nckh27pa.fallsafe.emergency.SimCallResult(false,"Không tìm thấy liên hệ đã chọn")
+        return simCallGateway?.call(contact.phone)
+            ?:vn.nckh27pa.fallsafe.emergency.SimCallResult(false,"Cuộc gọi SIM chưa được cấu hình")
+    }
     var onContactMutation: ((vn.nckh27pa.fallsafe.api.OperationKind, EmergencyContact?, String) -> Unit)? = null
     var onSyncStateChanged: (() -> Unit)? = null
     var onPhoneReading: ((PhoneSensorPacket) -> Unit)? = null
@@ -92,7 +199,16 @@ class DemoController(val contactRepository: ContactRepository = InMemoryContactR
     var backgroundSensors by mutableStateOf("")
     var onStateChanged: (() -> Unit)? = null
     var onMonitoringChanged: (() -> Unit)? = null
-    val session = DemoSession(clock)
+    val session = DemoSession(clock, profileRepository = profileRepository)
+    var profiles by mutableStateOf(profileRepository.listProfiles()); private set
+    val esp32Profiles:List<vn.nckh27pa.fallsafe.espconfig.Esp32Profile> get()=(profileRepository as? vn.nckh27pa.fallsafe.espconfig.Esp32ProfileRepository)?.listEsp32Profiles()?:emptyList()
+    fun listEsp32Profiles()=esp32Profiles
+    val esp32Confirmations:List<vn.nckh27pa.fallsafe.espconfig.DeviceConfirmation> get()=(profileRepository as? vn.nckh27pa.fallsafe.espconfig.Esp32ProfileRepository)?.listConfirmations()?:emptyList()
+    val confirmations get()=esp32Confirmations
+    val storageStatus:vn.nckh27pa.fallsafe.espconfig.ProfileStorageStatus get()=(profileRepository as? GsonFallDetectionProfileRepository)?.storageStatus?:vn.nckh27pa.fallsafe.espconfig.ProfileStorageStatus.READY
+    val activeProfile: FallDetectionProfile get() = profiles.single { it.isActive }
+    val defaultConfig: FallDetectionConfig get() = profileRepository.defaultConfig
+    var observation by mutableStateOf(session.observation()); private set
     var snapshot by mutableStateOf(session.snapshot()); private set
     var events by mutableStateOf(session.events()); private set
     var source by mutableStateOf("PHONE_ONLY • cảm biến thật"); private set
@@ -101,8 +217,8 @@ class DemoController(val contactRepository: ContactRepository = InMemoryContactR
     var fail by mutableStateOf(false); private set
 
     // Redesigned Home Screen state properties
-    var deviceConnected by mutableStateOf(true)
-    var batteryStatus by mutableStateOf("Pin tốt")
+    var deviceConnected by mutableStateOf(false)
+    var batteryStatus by mutableStateOf("Chưa có dữ liệu pin ESP32")
     var locationStatus by mutableStateOf("Chưa xác định vị trí")
     var caregiverAcknowledged by mutableStateOf(false)
 
@@ -112,6 +228,51 @@ class DemoController(val contactRepository: ContactRepository = InMemoryContactR
 
     fun reloadContactsFromRepo() {
         contacts = contactRepository.getContacts()
+    }
+
+    /** Saving a selected draft never changes which profile is active. */
+    fun save(id: String, config: FallDetectionConfig): FallDetectionProfile? =
+        profileRepository.save(id, config)?.also {
+            reloadProfiles()
+            if (it.isActive) session.resetDetection()
+            observation = session.observation()
+        }
+
+    fun saveAs(config: FallDetectionConfig): FallDetectionProfile? =
+        profileRepository.saveAs(config)?.also { reloadProfiles() }
+
+    fun createDefaultProfile(): FallDetectionProfile? =
+        profileRepository.createDefault()?.also { reloadProfiles() }
+
+    fun activate(id: String): Boolean {
+        if (!profileRepository.activate(id)) return false
+        reloadProfiles()
+        session.resetDetection()
+        observation = session.observation()
+        return true
+    }
+
+    fun delete(id: String): Boolean {
+        if (!profileRepository.delete(id)) return false
+        reloadProfiles()
+        return true
+    }
+
+    fun resetToDefault(id: String): FallDetectionProfile? =
+        profileRepository.resetToDefault(id)?.also {
+            reloadProfiles()
+            if (it.isActive) session.resetDetection()
+            observation = session.observation()
+        }
+
+    fun createEsp32Default()=(profileRepository as? vn.nckh27pa.fallsafe.espconfig.Esp32ProfileRepository)?.createEsp32Default()
+    fun saveEsp32(id:String,config:vn.nckh27pa.fallsafe.espconfig.Esp32Config)=(profileRepository as? vn.nckh27pa.fallsafe.espconfig.Esp32ProfileRepository)?.saveEsp32(id,config)
+    fun saveEsp32As(config:vn.nckh27pa.fallsafe.espconfig.Esp32Config)=(profileRepository as? vn.nckh27pa.fallsafe.espconfig.Esp32ProfileRepository)?.saveEsp32As(config)
+    fun deleteEsp32(id:String)=(profileRepository as? vn.nckh27pa.fallsafe.espconfig.Esp32ProfileRepository)?.deleteEsp32(id)?:false
+    fun recordEsp32Confirmation(value:vn.nckh27pa.fallsafe.espconfig.DeviceConfirmation)=(profileRepository as? vn.nckh27pa.fallsafe.espconfig.Esp32ProfileRepository)?.recordConfirmation(value)?:false
+
+    private fun reloadProfiles() {
+        profiles = profileRepository.listProfiles()
     }
 
     val primaryContact: EmergencyContact?
@@ -137,7 +298,8 @@ class DemoController(val contactRepository: ContactRepository = InMemoryContactR
             relationship = relationship.trim(),
             phone = normPhone,
             receiveSos = receiveSos,
-            isPrimary = isPrimary || contacts.isEmpty()
+            isPrimary = isPrimary || contacts.isEmpty(),
+            callPriority = (contacts.maxOfOrNull { it.callPriority.takeIf { p -> p != Int.MAX_VALUE } ?: -1 } ?: -1) + 1
         )
         val updated = if (newContact.isPrimary) {
             contacts.map { it.copy(isPrimary = false) } + newContact
@@ -224,7 +386,13 @@ class DemoController(val contactRepository: ContactRepository = InMemoryContactR
             if (replay != null || snapshot.state == State.VERIFYING) handler?.postDelayed(this, 50)
         }
     }
-    fun refresh() { snapshot = session.snapshot(); events = session.events(); onStateChanged?.invoke(); onSyncStateChanged?.invoke() }
+    fun refresh() {
+        observation = session.observation()
+        snapshot = session.snapshot()
+        events = session.events()
+        onStateChanged?.invoke()
+        onSyncStateChanged?.invoke()
+    }
     private fun schedule() { handler?.removeCallbacks(tick); handler?.post(tick) }
     fun acceptPhone(p: PhoneSensorPacket?) {
         if (!source.startsWith("PHONE_ONLY")) return

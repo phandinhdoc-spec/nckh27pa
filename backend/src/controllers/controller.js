@@ -4,6 +4,9 @@ import { eventService } from '../services/eventService.js';
 import { sensorService } from '../services/sensorService.js';
 import { deviceService } from '../services/deviceService.js';
 import { systemStatus } from '../services/systemService.js';
+import { voiceDispatchService } from '../services/voiceDispatchService.js';
+import { transportStatusService } from '../services/transportStatusService.js';
+import { aiTextService } from '../services/aiTextService.js';
 
 export function controller(context) {
   const devices = deviceService(context);
@@ -11,8 +14,15 @@ export function controller(context) {
   const events = eventService(context);
   const contacts = contactService(context);
   const alerts = alertService(context);
+  const voice = context.voiceDispatcher ?? voiceDispatchService(context);
+  const transport = transportStatusService(context);
+  const aiText = aiTextService(context);
   return {
+    aiText: async body => ({ data: await aiText.request(body) }),
     alert: (action, body, query) => ({ data: action === 'active' ? alerts.active(query) : alerts.execute(action, body) }),
+    voiceStatus: eventId => ({ data: voice.status(eventId) }),
+    voiceCallback: (action,eventId,contactId,attempt,body,headers,path) => voice.callback(action,eventId,contactId,attempt,body,headers,path),
+    transportStatus: (eventId,body,headers) => ({data:transport.report(eventId,body,headers)}),
     contact: (...args) => contacts.execute(...args),
     event: (method, id, body, query) => method === 'POST'
       ? events.create(body) : { data: id ? events.get(id) : events.list(query) },

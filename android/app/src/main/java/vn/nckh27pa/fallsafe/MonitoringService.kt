@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.Handler
@@ -13,6 +14,8 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.PowerManager
 import core.State
+import android.Manifest
+import androidx.core.content.ContextCompat
 
 /** Explicitly user-started demo monitoring; no boot receiver or hidden restart. */
 class MonitoringService : Service() {
@@ -46,7 +49,13 @@ class MonitoringService : Service() {
         if (Build.VERSION.SDK_INT >= 31) notificationBuilder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
         val notification = notificationBuilder.build()
         try {
-            if (Build.VERSION.SDK_INT >= 34) startForeground(27, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH)
+            if (Build.VERSION.SDK_INT >= 34) {
+                val fine=ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED
+                val coarse=ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED
+                val type=ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH or
+                    (if(MonitoringForegroundPolicy.includeLocationType(fine,coarse))ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION else 0)
+                startForeground(27, notification, type)
+            }
             else startForeground(27, notification)
         } catch (_: RuntimeException) {
             controller.backgroundMessage = "Không thể bật giám sát nền; kiểm tra quyền/hệ thống."

@@ -4,11 +4,13 @@ import { ApiError, invalid, missing, conflict } from './errors.js';
 import { transaction } from '../repositories/db.js';
 import { eventRepository } from '../repositories/eventRepository.js';
 import { alertRepository } from '../repositories/alertRepository.js';
+import { voiceDispatchService } from './voiceDispatchService.js';
 
-export function alertService({ db, config, now, watchdog }) {
+export function alertService({ db, config, now, watchdog, voiceProvider, voiceDispatcher }) {
   const events = eventRepository(db);
   const repo = alertRepository(db);
   const outbox = alertOutboxService(db);
+  const voice = voiceDispatcher ?? voiceDispatchService({ db, config, now, voiceProvider });
 
   function result(id) {
     const event = events.get(id);
@@ -22,6 +24,7 @@ export function alertService({ db, config, now, watchdog }) {
   function manualEvent(b, time) {
     return {
       eventId: b.eventId, deviceId: b.deviceId, userId: b.userId,
+      displayName: b.displayName === undefined ? 'Người dùng FallSafe' : v.string(b.displayName,'displayName',100).trim(),
       sequenceNumber: 0, timestampMs: b.timestampMs, eventType: 'MANUAL_SOS',
       severity: 'CRITICAL', alertState: 'MONITORING',
       sensorSource: b.triggerSource === 'MANUAL_APP_BUTTON' ? 'PHONE' : 'ESP32',
@@ -86,12 +89,13 @@ export function alertService({ db, config, now, watchdog }) {
         v.enumeration(b.triggerSource, 'triggerSource', ['COUNTDOWN_TIMEOUT', 'MANUAL_APP_BUTTON', 'MANUAL_HARDWARE_BUTTON']);
         v.enumeration(b.response, 'response', b.triggerSource === 'COUNTDOWN_TIMEOUT' ? ['NO_RESPONSE'] : ['NEED_HELP']);
         v.location(b.location);
+        if (b.displayName !== undefined) v.string(b.displayName,'displayName',100);
       }
 
       // Commit overdue escalation before considering a late cancel. An invalid
       // cancel must not roll back the watchdog's independently due transaction.
       watchdog.scan();
-      return transaction(db, () => {
+      const executed = transaction(db, () => {
         let event = events.get(b.eventId);
         if (!event && action === 'sos' && b.triggerSource !== 'COUNTDOWN_TIMEOUT') {
           events.insert(manualEvent(b, now()), null);
@@ -116,6 +120,8 @@ export function alertService({ db, config, now, watchdog }) {
         repo.recordAction(b.eventId, action, time);
         return result(b.eventId);
       });
+      if (action === 'sos') voice.start(b.eventId);
+      return executed;
     },
   };
 }

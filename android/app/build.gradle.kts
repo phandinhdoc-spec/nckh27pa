@@ -21,6 +21,7 @@ android {
         buildConfigField("String", "API_BASE_URL", quoted(apiUrl))
         buildConfigField("String", "FALLSAFE_DEVICE_ID", quoted(setting("FALLSAFE_DEVICE_ID", "PHONE-DEFAULT")))
         buildConfigField("String", "FALLSAFE_USER_ID", quoted(setting("FALLSAFE_USER_ID", "user-01")))
+        buildConfigField("String", "FALLSAFE_ESP32_DEVICE_ID", quoted(setting("FALLSAFE_ESP32_DEVICE_ID", "FALLSAFE-01A2")))
     }
     buildFeatures { compose = true; buildConfig = true }
     compileOptions {
