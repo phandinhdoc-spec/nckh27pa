@@ -31,6 +31,11 @@ android {
     kotlinOptions { jvmTarget = "17" }
     sourceSets["main"].java.srcDir("../core/src")
     sourceSets["test"].resources.srcDir("../../docs/fixtures")
+    testOptions {
+        // Temporary AndroidTrace diagnostics call android.util.Log on production paths that the JVM
+        // unit tests also exercise; without this the unmocked framework call throws instead of no-op.
+        unitTests.isReturnDefaultValues = true
+    }
 }
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2025.08.01"))

@@ -1,7 +1,13 @@
 package vn.nckh27pa.fallsafe.location
 
 import android.content.ActivityNotFoundException
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.core.content.ContextCompat
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -18,8 +24,18 @@ class AndroidEmergencyLocationController(
     private val nowMs: () -> Long = System::currentTimeMillis,
     private val displayName: () -> String = { DEFAULT_USER_DISPLAY_NAME }
 ) : EmergencyLocationController {
-    @Volatile override var locationState: LocationState = LocationState(); private set
+    override var locationState: LocationState by mutableStateOf(LocationState()); private set
     @Volatile override var lastMapOpenReason:String?=null; private set
+
+    override fun refreshPermissionTruth() {
+        val current = locationState
+        if (current.fix == null && current.cause == LocationFailureCause.PERMISSION_DENIED && locationPermissionGranted()) {
+            locationState = LocationState()
+        }
+    }
+    private fun locationPermissionGranted(): Boolean =
+        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val confirmations=mutableMapOf<String,Pair<EmergencyContact,LocationFix>>()
     private var generation=0L
@@ -29,6 +45,8 @@ class AndroidEmergencyLocationController(
         val requestGeneration = ++generation
         activeRequest?.cancel()
         locationState = LocationState()
+        // TEMPORARY DIAGNOSTIC
+        vn.nckh27pa.fallsafe.AndroidTrace.logLocation(entered = true, providerEnabled = "checking", requestStarted = true, result = "STARTED", exception = "none")
         activeRequest = scope.launch {
             var publishedFix: LocationFix? = null
             val repository = BestAvailableLocationRepository(AndroidPlatformLocationSource(context), onCached = { cached ->
@@ -44,7 +62,12 @@ class AndroidEmergencyLocationController(
     }
     private fun publish(lookup: LocationLookup) {
         val fix = lookup.fix
-        val cause = lookup.cause
+        val cause = resolveDisplayedCause(lookup.cause, locationPermissionGranted())
+        // TEMPORARY DIAGNOSTIC
+        if (fix == null) {
+            vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("LOCATION", "fix_null_cause=${cause?.name}")
+        }
+        vn.nckh27pa.fallsafe.AndroidTrace.logLocation(entered = true, providerEnabled = "published", requestStarted = true, result = fix?.let { "FIX_${it.source.name}" } ?: (cause?.name ?: "NO_FIX"), exception = "none")
         locationState = if (fix != null) LocationState(
             fix, fix.freshness(nowMs()), cause,
             if (lookup.fromCache) "Đang dùng vị trí hợp lệ gần nhất; cảnh báo vẫn tiếp tục." else "Đã có vị trí mới.",

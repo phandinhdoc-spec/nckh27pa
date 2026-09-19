@@ -80,6 +80,7 @@ data class ManualShareConfirmation(val token: String, val contactId: String, val
 interface EmergencyLocationController {
     val locationState: LocationState
     val lastMapOpenReason: String? get() = null
+    fun refreshPermissionTruth()
     fun onVerifyingStarted()
     fun acceptEsp32Gnss(fix: LocationFix)
     fun openMyLocation(): Boolean
@@ -259,6 +260,8 @@ class EmergencyCoordinator(
         record.displayName=displayName.ifBlank{"Người dùng FallSafe"}
         record.dispatched=true;store.save(record)
         val permissionFacts=try{capabilities.snapshot()}catch(_:Exception){CapabilitySnapshot(false,false,false)}
+        // TEMPORARY DIAGNOSTIC
+        vn.nckh27pa.fallsafe.AndroidTrace.log("SOS_DISPATCH_INPUTS eventId=$eventId calling=${permissionFacts.calling} messaging=${permissionFacts.messaging} location=${permissionFacts.location} precision=${permissionFacts.locationPrecision} fixPresent=${record.fix != null} contactsCount=${record.contacts.size}")
         val steps=mutableListOf<SosStepResult>()
         steps += if(record.fix!=null) SosStepResult(SosStep.LOCATION,SosStepStatus.SUCCESS,"Đã xác định được vị trí.")
             else SosStepResult(SosStep.LOCATION,SosStepStatus.UNAVAILABLE,"Chưa xác định được vị trí.")
@@ -288,6 +291,8 @@ class EmergencyCoordinator(
             smsOutcome.mapLinkSubmitted -> SosStepResult(SosStep.MAP_LINK,SosStepStatus.SUCCESS,"Tin nhắn có liên kết bản đồ.")
             else -> SosStepResult(SosStep.MAP_LINK,SosStepStatus.FAILED,"Chưa gửi được liên kết bản đồ cho người thân.")
         }
+        // TEMPORARY DIAGNOSTIC
+        vn.nckh27pa.fallsafe.AndroidTrace.log("SOS_DISPATCH_RESULTS eventId=$eventId steps=${steps.joinToString { "${it.step.name}=${it.status.name}" }}")
         record.dispatchReport=SosDispatchReport(eventId,steps).also{latestReport=it}
         steps.forEach { logStatus("FallSafe/SOS", null, SosDiagnostic.line(eventId, it, (nowMs() - dispatchStarted).coerceAtLeast(0), permissionFacts, record.fix)) }
         store.save(record)
@@ -301,8 +306,18 @@ class EmergencyCoordinator(
         fun result(status: SosStepStatus, detail: String) = SosStepResult(SosStep.SIM_CALL, status, detail).also {
             logStatus("FallSafe/CALL", primary?.id, "SIM_CALL:$status")
         }
-        if (!permissionFacts.calling) return result(SosStepStatus.PERMISSION_MISSING, EmergencyFailureMessages.callPermissionMissing)
-        if (primary == null) return result(SosStepStatus.UNAVAILABLE, "Chưa có người thân để gọi.")
+        if (!permissionFacts.calling) {
+            // TEMPORARY DIAGNOSTIC
+            vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("CALL", "permissionFacts.calling=false")
+            vn.nckh27pa.fallsafe.AndroidTrace.logCall(entered = true, contactExists = primary != null, phonePresent = primary?.phone?.isNotBlank() == true, permission = false, intentCreated = false, startActivityReached = false, startActivityReturned = false, exception = "none")
+            return result(SosStepStatus.PERMISSION_MISSING, EmergencyFailureMessages.callPermissionMissing)
+        }
+        if (primary == null) {
+            // TEMPORARY DIAGNOSTIC
+            vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("CALL", "primary_contact_null")
+            vn.nckh27pa.fallsafe.AndroidTrace.logCall(entered = true, contactExists = false, phonePresent = false, permission = permissionFacts.calling, intentCreated = false, startActivityReached = false, startActivityReturned = false, exception = "none")
+            return result(SosStepStatus.UNAVAILABLE, "Chưa có người thân để gọi.")
+        }
         val state = try { call.call(primary.phone) }
             catch (_: SecurityException) { CallDispatchState(CallStatus.PERMISSION_MISSING, EmergencyFailureMessages.callPermissionMissing) }
             catch (_: Exception) { CallDispatchState(CallStatus.FAILED, "Không thể thực hiện cuộc gọi SIM.") }
@@ -316,11 +331,25 @@ class EmergencyCoordinator(
 
     private data class SmsStepOutcome(val result:SosStepResult,val mapLinkSubmitted:Boolean)
     private fun dispatchSms(record:EmergencyRecord,permissionFacts:CapabilitySnapshot):SmsStepOutcome {
-        if(!permissionFacts.messaging)return SmsStepOutcome(SosStepResult(SosStep.SMS,SosStepStatus.PERMISSION_MISSING,EmergencyFailureMessages.messagingPermissionMissing),false)
-        if(record.contacts.isEmpty())return SmsStepOutcome(SosStepResult(SosStep.SMS,SosStepStatus.UNAVAILABLE,"Chưa có người thân nhận cảnh báo."),false)
+        if(!permissionFacts.messaging) {
+            // TEMPORARY DIAGNOSTIC
+            vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("SMS", "permissionFacts.messaging=false")
+            vn.nckh27pa.fallsafe.AndroidTrace.logSms(entered = true, contactExists = record.contacts.isNotEmpty(), phonePresent = record.contacts.any { it.phone.isNotBlank() }, permission = false, sendTextMessageReached = false, exception = "none")
+            return SmsStepOutcome(SosStepResult(SosStep.SMS,SosStepStatus.PERMISSION_MISSING,EmergencyFailureMessages.messagingPermissionMissing),false)
+        }
+        if(record.contacts.isEmpty()) {
+            // TEMPORARY DIAGNOSTIC
+            vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("SMS", "contacts_empty")
+            vn.nckh27pa.fallsafe.AndroidTrace.logSms(entered = true, contactExists = false, phonePresent = false, permission = permissionFacts.messaging, sendTextMessageReached = false, exception = "none")
+            return SmsStepOutcome(SosStepResult(SosStep.SMS,SosStepStatus.UNAVAILABLE,"Chưa có người thân nhận cảnh báo."),false)
+        }
         var succeeded=0;var failed=0;var skipped=0;val details=mutableListOf<String>()
         for(contact in record.contacts) if(record.smsSentContacts.add(contact.id)) {
-            if(contact.phone.isBlank()){skipped++;details += "Số điện thoại của ${contact.name} để trống nên chưa gửi.";continue}
+            if(contact.phone.isBlank()){
+                // TEMPORARY DIAGNOSTIC
+                vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("SMS", "phone_blank_contact=${contact.id}")
+                skipped++;details += "Số điện thoại của ${contact.name} để trống nên chưa gửi.";continue
+            }
             store.save(record)
             val state=try {
                 sms.send(SmsRequest(record.eventId,contact.id,contact.phone,EmergencyMessageFormatter.emergency(record.displayName,record.eventTimeMs,record.fix,nowMs())))

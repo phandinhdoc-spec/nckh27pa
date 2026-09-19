@@ -93,6 +93,24 @@ class BestAvailableLocationRepositoryTest {
         assertEquals(LocationFailureCause.PROVIDER_DISABLED, lookup.cause)
         assertEquals(0, source.cacheReads); assertTrue(source.attempts.isEmpty())
     }
+    @Test fun securityExceptionWithGrantedPermissionIsNotPermissionDenied() = runTest {
+        val source = Fake().apply { cached = fix(); fetch = { _, _ -> null } }
+        val lookup = BestAvailableLocationRepository(source, onCached = { throw SecurityException("stray denial") }) { 200_000 }
+            .getBestAvailableLocation()
+        assertNotEquals(LocationFailureCause.PERMISSION_DENIED, lookup.cause)
+    }
+    @Test fun grantedPermissionAndNoFixIsNeverPermissionDenied() = runTest {
+        val source = Fake().apply { fetch = { _, _ -> null } }
+        val lookup = BestAvailableLocationRepository(source) { 200_000 }.getBestAvailableLocation()
+        assertNotEquals(LocationFailureCause.PERMISSION_DENIED, lookup.cause)
+    }
+    @Test fun displayedCauseKeepsHonestDenialAndNeverFakesDenial() {
+        assertEquals(LocationFailureCause.PERMISSION_DENIED, resolveDisplayedCause(LocationFailureCause.PERMISSION_DENIED, false))
+        assertNotEquals(LocationFailureCause.PERMISSION_DENIED, resolveDisplayedCause(LocationFailureCause.PERMISSION_DENIED, true))
+        assertEquals(LocationFailureCause.PROVIDER_DISABLED, resolveDisplayedCause(LocationFailureCause.PROVIDER_DISABLED, true))
+        assertEquals(LocationFailureCause.TIMEOUT, resolveDisplayedCause(LocationFailureCause.TIMEOUT, true))
+        assertNull(resolveDisplayedCause(null, true))
+    }
     @Test fun staleCacheSurvivesTimeoutAndWholeLookupIsBounded() = runTest {
         val source = Fake().apply { cached = fix(1); fetch = { _, _ -> delay(20_000); null } }
         val lookup = BestAvailableLocationRepository(source) { 200_000 + testScheduler.currentTime }.getBestAvailableLocation(8000)

@@ -25,6 +25,15 @@ class SharedPreferencesPermissionSetupStore(context: Context) : PermissionSetupS
         set(value) { preferences.edit().putBoolean("seen", value).apply() }
 }
 
+/**
+ * Telephony is present when the device publishes the base telephony feature or the API-33 granular
+ * sub-feature. The granular features are optional and many devices (e.g. MIUI on Android 13)
+ * publish only android.hardware.telephony, so requiring a sub-feature alone wrongly reports a
+ * granted capability as unsupported.
+ */
+internal fun resolveTelephonySupport(hasBaseTelephony: Boolean, hasGranularFeature: Boolean): Boolean =
+    hasBaseTelephony || hasGranularFeature
+
 class AndroidCapabilityPlatform(
     private val activity: Activity,
     private val launchRequest: (Capability) -> Unit
@@ -36,10 +45,15 @@ class AndroidCapabilityPlatform(
     }
 
     override fun isSupported(capability: Capability): Boolean = when (capability) {
-        Capability.CALLING -> activity.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
-        Capability.MESSAGING -> activity.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
+        Capability.CALLING -> telephonySupported(PackageManager.FEATURE_TELEPHONY_CALLING)
+        Capability.MESSAGING -> telephonySupported(PackageManager.FEATURE_TELEPHONY_MESSAGING)
         Capability.LOCATION -> true
     }
+
+    private fun telephonySupported(granularFeature: String): Boolean = resolveTelephonySupport(
+        hasBaseTelephony = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY),
+        hasGranularFeature = activity.packageManager.hasSystemFeature(granularFeature)
+    )
 
     override fun locationPrecision(): LocationPrecision = when {
         granted(Manifest.permission.ACCESS_FINE_LOCATION) -> LocationPrecision.PRECISE

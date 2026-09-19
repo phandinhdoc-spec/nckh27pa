@@ -77,6 +77,8 @@ class AndroidPlatformLocationSource(private val context: Context) : PlatformLoca
         null
     }
     override suspend fun current(kind: LocationProviderKind, timeoutMs: Long): LocationFix? {
+        // TEMPORARY DIAGNOSTIC
+        vn.nckh27pa.fallsafe.AndroidTrace.logPermission(context)
         val raw = withTimeoutOrNull(timeoutMs) {
             try {
                 if (playServices && kind != LocationProviderKind.GPS) {

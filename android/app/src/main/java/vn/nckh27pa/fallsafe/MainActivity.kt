@@ -113,6 +113,7 @@ class MainActivity : ComponentActivity() {
         }
         ownership.update(true, controller.backgroundMonitoring)
         sensorSummary = if (controller.backgroundMonitoring) controller.backgroundSensors else collector.activeSensors.joinToString().ifEmpty { "Không có cảm biến khả dụng" }
+        AndroidTrace.logPermission(this) // TEMPORARY DIAGNOSTIC
         controller.refreshCapabilityTruth()
         controller.resumed()
         handler.post(poll)

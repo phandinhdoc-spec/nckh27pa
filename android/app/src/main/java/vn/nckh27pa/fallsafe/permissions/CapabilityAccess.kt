@@ -136,12 +136,30 @@ class CapabilityAccessController(
         eligibleContactCount = eligibleContactCount.coerceAtLeast(0)
     )
 
-    fun snapshot(): CapabilitySnapshot = CapabilitySnapshot(
-        calling = platform.isSupported(Capability.CALLING) && platform.isGranted(Capability.CALLING),
-        messaging = platform.isSupported(Capability.MESSAGING) && platform.isGranted(Capability.MESSAGING),
-        location = platform.isGranted(Capability.LOCATION),
-        locationPrecision = platform.locationPrecision()
-    )
+    fun snapshot(): CapabilitySnapshot {
+        val snap = CapabilitySnapshot(
+            calling = platform.isSupported(Capability.CALLING) && platform.isGranted(Capability.CALLING),
+            messaging = platform.isSupported(Capability.MESSAGING) && platform.isGranted(Capability.MESSAGING),
+            location = platform.isGranted(Capability.LOCATION),
+            locationPrecision = platform.locationPrecision()
+        )
+        // TEMPORARY DIAGNOSTIC
+        try {
+            val locD = display(Capability.LOCATION)
+            val msgD = display(Capability.MESSAGING)
+            val callD = display(Capability.CALLING)
+            vn.nckh27pa.fallsafe.AndroidTrace.logCapabilities(
+                locationCapability = locD.state.name,
+                smsCapability = msgD.state.name,
+                callCapability = callD.state.name,
+                snapshotCalling = snap.calling,
+                snapshotMessaging = snap.messaging,
+                snapshotLocation = snap.location,
+                locationPrecision = snap.locationPrecision.name
+            )
+        } catch (_: Throwable) {}
+        return snap
+    }
 
     private data class Copy(
         val reason: String,

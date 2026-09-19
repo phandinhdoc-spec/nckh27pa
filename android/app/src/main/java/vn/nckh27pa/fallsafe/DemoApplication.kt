@@ -180,6 +180,7 @@ class DemoController(
     }
     fun refreshCapabilityTruth() {
         capabilityRevision++
+        emergencyLocationController?.refreshPermissionTruth()
         onStateChanged?.invoke()
     }
     fun capabilitySnapshot(): vn.nckh27pa.fallsafe.permissions.CapabilitySnapshot = capabilityAccess.snapshot()

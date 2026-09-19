@@ -13,16 +13,33 @@ import androidx.core.content.ContextCompat
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
+import vn.nckh27pa.fallsafe.permissions.resolveTelephonySupport
 
 class AndroidSimCallGateway(private val context: Context) : EmergencyCallGateway {
     override fun call(phone: String): CallDispatchState {
         val state = try {
             when {
-                ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED ->
+                ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED -> {
+                    // TEMPORARY DIAGNOSTIC
+                    vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("CALL", "checkSelfPermission(CALL_PHONE)!=PERMISSION_GRANTED")
+                    vn.nckh27pa.fallsafe.AndroidTrace.logCall(entered = true, contactExists = true, phonePresent = phone.isNotBlank(), permission = false, intentCreated = false, startActivityReached = false, startActivityReturned = false, exception = "none")
                     CallDispatchState(CallStatus.PERMISSION_MISSING, EmergencyFailureMessages.callPermissionMissing)
-                !context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_CALLING) ->
+                }
+                !resolveTelephonySupport(
+                    hasBaseTelephony = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY),
+                    hasGranularFeature = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
+                ) -> {
+                    // TEMPORARY DIAGNOSTIC
+                    vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("CALL", "FEATURE_TELEPHONY_CALLING=false")
+                    vn.nckh27pa.fallsafe.AndroidTrace.logCall(entered = true, contactExists = true, phonePresent = phone.isNotBlank(), permission = ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED, intentCreated = false, startActivityReached = false, startActivityReturned = false, exception = "none")
                     CallDispatchState(CallStatus.UNAVAILABLE, "Thiết bị không hỗ trợ cuộc gọi SIM.")
-                phone.isBlank() -> CallDispatchState(CallStatus.UNAVAILABLE, "Chưa có số điện thoại để gọi.")
+                }
+                phone.isBlank() -> {
+                    // TEMPORARY DIAGNOSTIC
+                    vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("CALL", "phone_blank")
+                    vn.nckh27pa.fallsafe.AndroidTrace.logCall(entered = true, contactExists = true, phonePresent = false, permission = true, intentCreated = false, startActivityReached = false, startActivityReturned = false, exception = "none")
+                    CallDispatchState(CallStatus.UNAVAILABLE, "Chưa có số điện thoại để gọi.")
+                }
                 else -> {
                     val encodedPhone = Uri.encode(phone)
                     val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$encodedPhone")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -61,13 +78,26 @@ class AndroidSimCallGateway(private val context: Context) : EmergencyCallGateway
         return state
     }
     private fun launch(intent: Intent): CallDispatchState = try {
+        // TEMPORARY DIAGNOSTIC
+        vn.nckh27pa.fallsafe.AndroidTrace.logPermission(context)
+        vn.nckh27pa.fallsafe.AndroidTrace.logCall(entered = true, contactExists = true, phonePresent = true, permission = true, intentCreated = true, startActivityReached = true, startActivityReturned = false, exception = "none")
         context.startActivity(intent)
+        vn.nckh27pa.fallsafe.AndroidTrace.logCall(entered = true, contactExists = true, phonePresent = true, permission = true, intentCreated = true, startActivityReached = true, startActivityReturned = true, exception = "none")
         CallDispatchState(CallStatus.STARTED, "Đã mở cuộc gọi SIM.")
-    } catch (_: SecurityException) {
+    } catch (e: SecurityException) {
+        // TEMPORARY DIAGNOSTIC
+        vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("CALL", "SecurityException: ${e.message}")
+        vn.nckh27pa.fallsafe.AndroidTrace.logCall(entered = true, contactExists = true, phonePresent = true, permission = true, intentCreated = true, startActivityReached = true, startActivityReturned = false, exception = e.javaClass.simpleName)
         CallDispatchState(CallStatus.PERMISSION_MISSING, "Hệ thống từ chối quyền gọi điện.")
-    } catch (_: ActivityNotFoundException) {
+    } catch (e: ActivityNotFoundException) {
+        // TEMPORARY DIAGNOSTIC
+        vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("CALL", "ActivityNotFoundException: ${e.message}")
+        vn.nckh27pa.fallsafe.AndroidTrace.logCall(entered = true, contactExists = true, phonePresent = true, permission = true, intentCreated = true, startActivityReached = true, startActivityReturned = false, exception = e.javaClass.simpleName)
         CallDispatchState(CallStatus.FAILED, "Không có ứng dụng gọi điện.")
-    } catch (_: RuntimeException) {
+    } catch (e: RuntimeException) {
+        // TEMPORARY DIAGNOSTIC
+        vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("CALL", "RuntimeException: ${e.message}")
+        vn.nckh27pa.fallsafe.AndroidTrace.logCall(entered = true, contactExists = true, phonePresent = true, permission = true, intentCreated = true, startActivityReached = true, startActivityReturned = false, exception = e.javaClass.simpleName)
         CallDispatchState(CallStatus.UNAVAILABLE, "Không thể mở cuộc gọi SIM lúc này.")
     }
     private fun log(state: CallDispatchState) {

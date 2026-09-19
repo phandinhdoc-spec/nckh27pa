@@ -15,6 +15,7 @@ import android.telephony.SmsManager
 import android.telephony.SubscriptionManager
 import androidx.core.content.ContextCompat
 import java.io.Closeable
+import vn.nckh27pa.fallsafe.permissions.resolveTelephonySupport
 import java.util.concurrent.ConcurrentHashMap
 
 class AndroidSmsManagerGateway(private val context:Context) : EmergencySmsGateway, Closeable {
@@ -48,8 +49,21 @@ class AndroidSmsManagerGateway(private val context:Context) : EmergencySmsGatewa
             Log.w("FallSafe/SMS", "contactId=${request.contactId} status=${it.status}")
             states["${request.eventId}:${request.contactId}"]=it;onStateChanged?.invoke(it)
         }
-        if(!context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING))return fail("Thiết bị không hỗ trợ SMS di động")
-        if(ContextCompat.checkSelfPermission(context,Manifest.permission.SEND_SMS)!=PackageManager.PERMISSION_GRANTED)return fail(EmergencyFailureMessages.messagingPermissionMissing)
+        if(!resolveTelephonySupport(
+                hasBaseTelephony = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY),
+                hasGranularFeature = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
+            )) {
+            // TEMPORARY DIAGNOSTIC
+            vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("SMS", "FEATURE_TELEPHONY_MESSAGING=false")
+            vn.nckh27pa.fallsafe.AndroidTrace.logSms(entered = true, contactExists = true, phonePresent = request.phone.isNotBlank(), permission = ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED, sendTextMessageReached = false, exception = "none")
+            return fail("Thiết bị không hỗ trợ SMS di động")
+        }
+        if(ContextCompat.checkSelfPermission(context,Manifest.permission.SEND_SMS)!=PackageManager.PERMISSION_GRANTED) {
+            // TEMPORARY DIAGNOSTIC
+            vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("SMS", "checkSelfPermission(SEND_SMS)!=PERMISSION_GRANTED")
+            vn.nckh27pa.fallsafe.AndroidTrace.logSms(entered = true, contactExists = true, phonePresent = request.phone.isNotBlank(), permission = false, sendTextMessageReached = false, exception = "none")
+            return fail(EmergencyFailureMessages.messagingPermissionMissing)
+        }
         val subscription=try {
             SmsSubscriptionChoice.resolve(request.subscriptionId,
                 SmsManager.getDefaultSmsSubscriptionId().takeIf { it != SubscriptionManager.INVALID_SUBSCRIPTION_ID })
@@ -59,7 +73,11 @@ class AndroidSmsManagerGateway(private val context:Context) : EmergencySmsGatewa
                 else if(Build.VERSION.SDK_INT>=31)context.getSystemService(SmsManager::class.java).createForSubscriptionId(subscription)
                 else @Suppress("DEPRECATION") SmsManager.getSmsManagerForSubscriptionId(subscription)
             val bodies=manager.divideMessage(request.message)
-            if(bodies.isEmpty())return fail("Nội dung SMS trống")
+            if(bodies.isEmpty()) {
+                // TEMPORARY DIAGNOSTIC
+                vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("SMS", "bodies_empty")
+                return fail("Nội dung SMS trống")
+            }
             val key="${request.eventId}:${request.contactId}"
             val dispatchId=java.util.UUID.randomUUID().toString()
             parts[dispatchId]=SmsPartAggregation(bodies.size)
@@ -67,11 +85,24 @@ class AndroidSmsManagerGateway(private val context:Context) : EmergencySmsGatewa
             val sent=ArrayList<PendingIntent>(bodies.size);val delivered=ArrayList<PendingIntent>(bodies.size)
             bodies.indices.forEach{index->sent+=callback(sentAction,request,index,dispatchId);delivered+=callback(deliveredAction,request,index,dispatchId)}
             states[key]=SmsDispatchState(request.eventId,request.contactId,SmsDeliveryStatus.SENDING,"subscriptionId=${subscription ?: "default"}")
+            // TEMPORARY DIAGNOSTIC
+            vn.nckh27pa.fallsafe.AndroidTrace.logPermission(context)
+            vn.nckh27pa.fallsafe.AndroidTrace.logSms(entered = true, contactExists = true, phonePresent = request.phone.isNotBlank(), permission = true, sendTextMessageReached = true, exception = "none")
             manager.sendMultipartTextMessage(request.phone,null,bodies,sent,delivered)
             Log.i("FallSafe/SMS", "eventId=${request.eventId} contactId=${request.contactId} status=${states[key]!!.status} subscriptionId=${subscription ?: "default"}")
             states[key]!!
-        } catch(_:SecurityException) { fail("Hệ thống từ chối gửi SMS") }
-        catch(_:RuntimeException){fail("Không thể xếp hàng SMS")}
+        } catch(e:SecurityException) {
+            // TEMPORARY DIAGNOSTIC
+            vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("SMS", "SecurityException: ${e.message}")
+            vn.nckh27pa.fallsafe.AndroidTrace.logSms(entered = true, contactExists = true, phonePresent = request.phone.isNotBlank(), permission = true, sendTextMessageReached = false, exception = e.javaClass.simpleName)
+            fail("Hệ thống từ chối gửi SMS")
+        }
+        catch(e:RuntimeException){
+            // TEMPORARY DIAGNOSTIC
+            vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("SMS", "RuntimeException: ${e.message}")
+            vn.nckh27pa.fallsafe.AndroidTrace.logSms(entered = true, contactExists = true, phonePresent = request.phone.isNotBlank(), permission = true, sendTextMessageReached = false, exception = e.javaClass.simpleName)
+            fail("Không thể xếp hàng SMS")
+        }
     }
     private fun callback(action:String,request:SmsRequest,index:Int,dispatchId:String):PendingIntent {
         val intent=Intent(action).setPackage(context.packageName)
