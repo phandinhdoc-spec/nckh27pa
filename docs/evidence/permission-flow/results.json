@@ -2,56 +2,56 @@
   {
     "name": "first-run",
     "passed": true,
-    "elapsedSeconds": 12.12
+    "elapsedSeconds": 12.25
   },
   {
     "name": "permission-center",
     "passed": true,
-    "elapsedSeconds": 103.85
+    "elapsedSeconds": 103.88
   },
   {
     "name": "request-deny",
     "passed": true,
-    "elapsedSeconds": 57.25
+    "elapsedSeconds": 57.56
   },
   {
     "name": "permanent-denial",
     "passed": true,
-    "elapsedSeconds": 122.7
+    "elapsedSeconds": 122.68
   },
   {
     "name": "grant-on-resume",
     "passed": true,
-    "elapsedSeconds": 80.51
+    "elapsedSeconds": 75.87
   },
   {
     "name": "approximate-only",
     "passed": true,
-    "elapsedSeconds": 39.94
+    "elapsedSeconds": 39.88
   },
   {
     "name": "sos-degradation",
     "passed": true,
-    "elapsedSeconds": 58.88
+    "elapsedSeconds": 76.04
   },
   {
     "name": "gps-off",
     "passed": true,
-    "elapsedSeconds": 47.0
+    "elapsedSeconds": 46.99
   },
   {
     "name": "maps-intents",
     "passed": true,
-    "elapsedSeconds": 2.82
+    "elapsedSeconds": 2.85
   },
   {
     "name": "maps-opens-google-maps",
     "passed": true,
-    "elapsedSeconds": 46.47
+    "elapsedSeconds": 46.62
   },
   {
     "name": "maps-fallback-browser",
     "passed": true,
-    "elapsedSeconds": 47.46
+    "elapsedSeconds": 47.66
   }
 ]

@@ -73,23 +73,39 @@ không crash. Không có tọa độ thì báo "Chưa có vị trí để mở b
 
 ## 4. Ghi chú kiến trúc
 
-- Gọi tự động trong SOS là adapter thoại qua máy chủ backend (D03). Gọi SIM vẫn là thao tác thủ công có
-  kiểm tra `CALL_PHONE`; ứng dụng không tự quay số SIM. Muốn đổi thì cần quyết định mới (`docs/next-gate.md` §4).
-- Vị trí được lấy trong cửa sổ có hạn (8 giây) khi bắt đầu sự kiện, có fallback "vị trí hợp lệ gần nhất";
-  hết hạn hoặc GPS tắt **không** chặn cảnh báo (D03).
+- Gọi tự động trong SOS có hai nhánh tách biệt: adapter thoại qua máy chủ backend (D03) và **Cuộc gọi SIM**
+  bằng `ACTION_CALL` tới người nhận ưu tiên (D09) — một lần duy nhất, chỉ sau khi SMS đã được chuyển cho thiết
+  bị gửi. Adapter máy chủ là nhánh PHỤ TRỢ best-effort: máy chủ đã tiếp nhận (`STARTED`), máy chủ lỗi hay máy
+  chủ vắng mặt đều KHÔNG chặn cuộc gọi SIM; SMS và vị trí cũng không quyết định cuộc gọi đó. Thiếu
+  `CALL_PHONE` → báo thiếu quyền, không crash, SMS/backend vẫn chạy. Thao tác gọi tay trong thẻ
+  "GỌI NGƯỜI THÂN" không đổi.
+- Vị trí được lấy qua MỘT abstraction `LocationRepository.getBestAvailableLocation(timeoutMs)` trong cửa sổ có hạn
+  (mặc định 8 giây) khi sự kiện bắt đầu: permission → cache/last-known còn mới (dùng ngay) → current theo
+  FUSED → GPS → NETWORK → cache cũ → thất bại rõ ràng. `fused` (kết hợp GNSS + Wi-Fi + cell + sensor) là nguồn
+  chính; `LocationManager` là dự phòng khi máy không có Google Play Services. **Không cần satellite fix**,
+  **không ngưỡng accuracy** (100–200 m vẫn gửi), toàn bộ không bao giờ throw. GPS tắt/không fix **không** chặn
+  cảnh báo (D03/D08), và câu "ra nơi thoáng" chỉ còn là GỢI Ý cải thiện độ chính xác, không phải lỗi chặn.
+- Bước SOS gồm 5 nhánh độc lập: Vị trí, Tin nhắn, Cuộc gọi trợ giúp (adapter máy chủ), **Cuộc gọi SIM**
+  (`ACTION_CALL` một lần tới người nhận ưu tiên — độc lập với máy chủ, SMS và vị trí, D09), Liên kết bản đồ.
+  Thiếu vị trí chỉ đổi nội dung tin nhắn; SMS/CALL/backend luôn được thử.
 - Không đưa tên hằng quyền vào chuỗi hiển thị; mọi câu chữ tiếng Việt, ngắn, chữ lớn, nút tối thiểu 56dp.
 
 ## 5. Kiểm thử tự động
 
-Trạng thái kiểm chứng hiện tại (2026-09-18): 147 test đơn vị PASS, 0 lỗi; 11/11 check emulator PASS
-(`docs/evidence/permission-flow/results.json`); `assembleDebug` PASS; backend 55/55 PASS.
+Trạng thái kiểm chứng hiện tại (2026-09-18, sau task sửa luồng SOS): **170 test đơn vị PASS, 0 lỗi
+(`assembleDebug` PASS)**; 11/11 check emulator PASS cho quyền (`docs/evidence/permission-flow/results.json`);
+**2/2 check emulator PASS cho luồng SOS + vị trí** (`docs/evidence/sos-location/results.json`);
+backend 55/55 PASS.
 
 - Test đơn vị (không cần thiết bị), chạy bằng
-  `cd android && JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew testDebugUnitTest --no-daemon`:
-  `permissions/CapabilityHardeningTest`, `emergency/SosDispatchReportTest`, `location/LocationIntentAndProviderTest`,
-  `PermissionCenterUiTest`, cùng các test cũ `CapabilityAccessTest`, `EmergencyLogicTest`, `BoundedLocationResolutionTest`.
-  Không test nào gửi SMS thật hoặc gọi số thật.
-- Kiểm thử trên emulator (không dùng thiết bị thật), hai bộ kiểm thử độc lập:
+  `cd android && JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew testDebugUnitTest --rerun-tasks --no-daemon`:
+  xác nhận đọc số thật từ `app/build/test-results/testDebugUnitTest/*.xml`, không tin exit code/báo cáo worker.
+- Test đơn vị mới cho luồng này: `location/BestAvailableLocationRepositoryTest` (15),
+  `emergency/SosCallStepTest` (9), `location/LocationIntentAndProviderTest` (4),
+  `emergency/SosDispatchReportTest` (7), `emergency/EmergencyLogicTest` (10), `HomeScreenPureUiTest` (4).
+  `emergency/BoundedLocationResolutionTest` đã bị xoá cùng class không còn dùng; coverage thay thế nằm trong
+  `BestAvailableLocationRepositoryTest`. Không test nào gửi SMS thật hoặc gọi số thật (JVM thuần).
+- Kiểm thử trên emulator (không dùng thiết bị thật), ba bộ độc lập:
   - `python3 android/scripts/permission-dialog-acceptance.py` — **bắt buộc sau mỗi lần cài sạch**
     (`adb uninstall vn.nckh27pa.fallsafe` → `adb install …`): xác nhận hộp thoại hệ thống Android thật sự
     xuất hiện cho Vị trí (từ hộp thoại giải thích lần đầu), Điện thoại và SMS; từ chối không crash;
@@ -97,7 +113,14 @@ Trạng thái kiểm chứng hiện tại (2026-09-18): 147 test đơn vị PASS
     Bằng chứng: `docs/evidence/permission-dialog/` (`acceptance-results.json` + dump UI từng hộp thoại).
   - `python3 android/scripts/permission-flow-check.py` — Permission Center, suy giảm SOS, GPS tắt, bản đồ.
     Bằng chứng: `docs/evidence/permission-flow/`.
-  Cả hai runner chỉ chạy trên emulator và từ chối thiết bị thật.
+  - `python3 android/scripts/sos-location-acceptance.py` — **luồng SOS thật**: dựng liên hệ người thân trong
+    dữ liệu người dùng, bơm `adb emu geo fix 106.6297 10.8231`, gây ngã THẬT bằng
+    `adb emu sensor set acceleration` (không dùng replay), xác nhận: fix được lấy trong lúc đếm ngược, thẻ vị
+    trí đạt "Đã xác định ± N m • vừa xong", SMS thật được gửi tới số của người thân (đọc lại từ
+    `content://sms/sent`), `ACTION_CALL` thật được phát (màn hình gọi điện hiện số), và bước "Cuộc gọi SIM"
+    trong báo cáo SOS. Bằng chứng: `docs/evidence/sos-location/` (`results.json`, `logcat-dispatch.txt`,
+    `sent-sms-provider.txt`, `location-card.txt`, `countdown.txt`, `sos-state.txt`).
+  Cả ba runner chỉ chạy trên emulator và từ chối thiết bị thật.
   Các check: `first-run`, `permission-center`, `request-deny`, `permanent-denial`, `grant-on-resume`,
   `approximate-only`, `sos-degradation`, `gps-off`, `maps-intents`, `maps-opens-google-maps`,
   `maps-fallback-browser`.
@@ -112,7 +135,7 @@ Trạng thái kiểm chứng hiện tại (2026-09-18): 147 test đơn vị PASS
    Cài đặt ứng dụng"; bấm nút mở App Settings; bật quyền trong Android; quay lại ứng dụng thấy "Đã cấp".
 4. Chỉ cấp vị trí gần đúng (Approximate) và kiểm tra dòng hiển thị "Đã cấp (vị trí gần đúng)".
 5. Tắt Vị trí/GPS trong cài đặt hệ thống rồi kích hoạt SOS: ứng dụng không crash, báo cáo ghi bước Vị trí
-   không thành công và tin nhắn ghi "Chưa xác định được vị trí."
+   không thành công và tin nhắn ghi "Hiện chưa xác định được vị trí chính xác."; SMS và cuộc gọi SIM vẫn chạy.
 6. Thu hồi từng quyền (SMS, Điện thoại) rồi kích hoạt SOS: kiểm tra đúng hành vi suy giảm ở §3, bao gồm
    thông báo "không thể tự động gọi" khi thiếu `CALL_PHONE`.
 7. Với máy có SIM thật: kiểm tra nhận SMS trên máy người nhận được phép, biên nhận `DELIVERED`, chọn SIM
@@ -124,8 +147,17 @@ Trạng thái kiểm chứng hiện tại (2026-09-18): 147 test đơn vị PASS
 
 ## 7. Giới hạn đã biết
 
-- Emulator không có SIM/GSM thật và không thể thay thế thiết bị thật cho hộp thoại quyền theo hãng máy,
-  đa SIM, biên nhận SMS/cuộc gọi thật, GPS ngoài trời hay khoá màn hình.
-- Trên emulator, vị trí chỉ có khi có client đang yêu cầu và toạ độ được "bơm" bằng `adb emu geo fix`;
-  khi chưa từng có fix, sự kiện SOS đầu tiên sẽ hết hạn 8 giây và rơi vào nhánh "không có vị trí" (đúng
-  thiết kế). Trên điện thoại thật cần xác nhận thời gian bắt fix ngoài trời.
+- Emulator không có SIM/GSM thật: SMS được ghi vào `content://sms/sent` của thiết bị (đã xác minh) và
+  `ACTION_CALL` mở được màn hình gọi điện của emulator (đã xác minh), nhưng **biên nhận giao SMS của nhà mạng
+  và cuộc gọi qua mạng di động thật vẫn chưa kiểm chứng**. Hộp thoại quyền theo hãng máy, đa SIM, GPS ngoài
+  trời và hành vi FGS khi khoá màn hình vẫn cần thiết bị thật.
+- Trên emulator, vị trí chỉ có khi có client đang yêu cầu và toạ độ được "bơm" bằng `adb emu geo fix`.
+  Đã xác minh cả hai nhánh: (a) fix FUSED mới trong lúc đếm ngược (`source=FUSED accuracy=5.0 cause=none`), và
+  (b) current timeout → dùng cache CŨ (`source=CACHED accuracy=5.0 age=117559 cause=TIMEOUT`) và **SOS vẫn
+  được gửi** kèm câu "Vị trí gần nhất, cập nhật lúc …". Trên điện thoại thật cần xác nhận thời gian bắt fix
+  ngoài trời.
+- Giới hạn của bản DEMO (không phải lỗi luồng SOS): bộ đếm sự kiện cục bộ khởi động lại từ 1 sau mỗi lần mở
+  app, nên id sự kiện từ xa được tái sử dụng; `EmergencyCoordinator.dispatch` khi đó thấy bản ghi đã
+  `dispatched` và bỏ qua, UI hiển thị báo cáo cũ. Runner `sos-location-acceptance.py` xoá
+  `fallsafe_emergency_records.xml` + `fallsafe_emergency_identity.xml` để bảo đảm sự kiện mới. Cần theo dõi
+  khi làm phần bền vững hoá sự kiện.

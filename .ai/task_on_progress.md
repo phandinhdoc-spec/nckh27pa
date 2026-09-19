@@ -1,95 +1,223 @@
-# Current Task
+# Current Task — SOS location / CALL / SMS end-to-end repair
 
 ## Goal
-Hoàn thiện toàn bộ hệ thống quyền Android phục vụ SOS (điện thoại, SMS, định vị, mở bản đồ), Permission
-Center trong Cài đặt, luồng xin quyền lần đầu và suy giảm từng bước của SOS — tích hợp vào kiến trúc hiện
-có, không viết lại ứng dụng.
+Sửa luồng SOS Android để (a) lấy được vị trí dùng được mà KHÔNG cần satellite fix, và (b) SMS + CALL
+luôn được thực thi độc lập, không phụ thuộc kết quả vị trí. Không viết lại app, không phá contract backend.
 
 ## Status
-IN_PROGRESS — xác minh hộp thoại quyền hệ thống trên thiết bị (T5). Phần permission flow/Permission
-Center/fail-safe SOS đã xong và được kiểm chứng; T5 bổ sung bảo đảm "không thao tác nào im lặng".
-Việc còn lại: cài APK mới trên thiết bị thật của chủ dự án và chạy lại checklist §6 `docs/permission-flow.md`.
+DONE (chờ chủ dự án chốt commit). T6 (Codex) + T7 (AGY Gemini) + review L3 (AGY Claude) đã xong; Hermes đã
+tự chạy lại toàn bộ test/build và chạy acceptance thật trên emulator.
 
-## T5 — Hộp thoại quyền hệ thống (báo cáo của chủ dự án: "vẫn không hiện")
-- Kiểm tra 3 lớp bằng `rg`: (1) manifest có đủ `ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION`,
-  `SEND_SMS`, `CALL_PHONE`; (2) UI có nút `CẤP QUYỀN` trong `PermissionCenterSection` và nút
-  `TIẾP TỤC CẤP QUYỀN` trong hộp thoại lần đầu; (3) trigger gọi API hệ thống thật qua
-  `registerForActivityResult(ActivityResultContracts.RequestPermission/RequestMultiplePermissions)` trong
-  `MainActivity.launchCapabilityRequest`.
-- Trên APK cài sạch (uninstall → install): **cả ba hộp thoại hệ thống thật đều hiện**
-  (`REQUEST_PERMISSIONS` → `com.google.android.permissioncontroller/...GrantPermissionsActivity`):
-  Vị trí ("access this device's location?"), Điện thoại ("make and manage phone calls?"),
-  SMS ("send and view SMS messages?"). Bằng chứng: `docs/evidence/permission-dialog/`.
-- Lỗi thật tìm thấy và đã sửa (T5): UI bỏ qua `PermissionRequestResult` nên khi trạng thái là
-  `NEEDS_SETTINGS` (Android không cho hỏi lại) thì bấm nút **không có gì xảy ra**. Nay hiện đúng câu
-  "Quyền này đang bị tắt. Hãy bật trong Cài đặt." kèm nút `MỞ CÀI ĐẶT ỨNG DỤNG`.
-- Nguyên nhân phụ rất có thể gặp ở phía người dùng: bản APK cũ. Cả hai bản trước đều là
-  `versionCode=1` / `versionName=0.1-demo` nên không phân biệt được. Đã tăng lên
-  `versionCode=3` / `versionName=0.3-permission`.
-- Bộ kiểm thử cài sạch: `python3 android/scripts/permission-dialog-acceptance.py`
-  (bắt buộc `adb uninstall` trước khi `adb install`).
+## 9. KẾT QUẢ ĐÃ KIỂM CHỨNG (không tin báo cáo worker, đọc lại bằng chứng)
+- `./gradlew testDebugUnitTest assembleDebug --rerun-tasks --no-daemon`: **170 test PASS, 0 fail/error/skip**
+  (đọc từ `app/build/test-results/testDebugUnitTest/*.xml`); APK debug build được (12.566.848 byte).
+- Emulator (API 36, `emulator-5554`), runner mới `android/scripts/sos-location-acceptance.py`: **2/2 PASS**.
+  - Ngã THẬT bằng `adb emu sensor set acceleration` (không replay) → đếm ngược → fix lấy được TRONG lúc đếm ngược:
+    `FallSafe/Location: source=FUSED accuracy=5.0 cause=none`; thẻ UI: "Đã xác định / ± 5 m • vừa xong".
+  - SMS THẬT đã gửi: đọc lại `content://sms/sent` thấy `address=0901234567` + nội dung chứa
+    `https://maps.google.com/?q=10.8231,106.62969833333334` (đúng tọa độ bơm vào) + "Độ chính xác: 5 m".
+  - `ACTION_CALL` THẬT: `FallSafe/CALL: status=STARTED`, `SIM_CALL:SUCCESS`; màn hình gọi điện emulator hiện
+    "Calling… 0901234567".
+  - Nhánh fallback cache đã chứng minh: `source=CACHED accuracy=5.0 age=117559 cause=TIMEOUT` (cache cũ ~32 h)
+    và **SOS vẫn được gửi** ⇒ hết hạn vị trí KHÔNG chặn SMS/CALL.
+- Review L3: 0 BLOCKER, 4 MAJOR + 3 MINOR; đã sửa 5 (F-01 timedOut tất định, F-02 ngân sách từng provider,
+  F-04 lastKnown không throw, F-09 startActivity phải ở main thread, F-07 allSucceeded tính cả SKIPPED),
+  từ chối 3 có lý do ghi trong `.ai/T6-fixes-round2.txt`.
+- Bằng chứng: `docs/evidence/sos-location/`; ghi vào `docs/test-report.md` và `docs/permission-flow.md` §5/§7.
 
-## Kết quả theo yêu cầu
+## 10. GIỚI HẠN CHƯA KIỂM CHỨNG
+- Chưa có thiết bị thật/SIM/GPS: biên nhận giao SMS của nhà mạng, cuộc gọi qua mạng di động thật, thời gian
+  bắt fix ngoài trời, hộp thoại quyền theo hãng máy, FGS khi khoá màn hình.
+- Bản DEMO tái sử dụng id sự kiện sau khi mở lại app (bộ đếm cục bộ reset về 1) → `dispatch` bỏ qua và UI hiện
+  báo cáo cũ; runner đã phải xoá prefs sự kiện. Không phải lỗi luồng SOS nhưng cần xử lý khi làm bền vững hoá.
+- ESP32/GNSS vẫn chỉ là hook `acceptEsp32Gnss` (nguồn bổ sung), chưa có transport BLE.
 
-### Permission flow
-- Ba khả năng độc lập: Vị trí (fine/coarse foreground), SMS (`SEND_SMS`), Điện thoại (`CALL_PHONE`).
-  `READ_PHONE_STATE` chỉ còn phục vụ đa SIM và không chặn SMS khi thiếu.
-- `NEEDS_SETTINGS` khi đã từ chối vĩnh viễn (`wasAttempted && !shouldShowRequestPermissionRationale`):
-  không lặp lại hộp thoại hệ thống, chỉ mở App Settings bằng một thao tác riêng.
-- Trạng thái đọc lại từ Android trong `onResume`; cấp lại quyền trong App Settings được phản ánh ngay.
-- Chỉ cấp approximate vẫn là trạng thái dùng được và được hiển thị riêng.
+## 1. CURRENT BEHAVIOR (đo bằng đọc code có mục tiêu, không suy đoán)
 
-### First-run & Permission Center
-- Hộp thoại giải thích hiện một lần ở trạng thái không khẩn cấp (SAFE **và** MẤT KẾT NỐI THIẾT BỊ, tức là
-  dùng được cả ở chế độ PHONE_ONLY), tự ẩn khi chuyển sang đếm ngược/SOS, không chặn nút SOS.
-- `Cài đặt → QUYỀN ỨNG DỤNG`: 📍 Vị trí / 📞 Điện thoại / 💬 SMS với nhãn "Đã cấp", "Đã cấp (vị trí gần
-  đúng)", "Chưa cấp", "Bị từ chối — cần mở Cài đặt ứng dụng" và nút `CẤP QUYỀN` / `MỞ CÀI ĐẶT ỨNG DỤNG`;
-  không hiển thị tên hằng quyền, chữ ≥16sp, nút ≥56dp.
+### Location
+- Implementation: `android.location.LocationManager` thuần. `FusedLocationProviderClient` KHÔNG được dùng —
+  `com.google.android.gms:play-services-location` không có trong `app/build.gradle.kts`.
+  Chuỗi `"fused"` (`AndroidEmergencyLocationController.kt:173`) là provider nền tảng `LocationManager`, không phải Play Services.
+- `LocationProviderSelector.choose` (`location/LocationResolution.kt:11-16`): `hasFine && gpsEnabled -> GPS`.
+  Vì công tắc Vị trí của máy làm `gpsEnabled=true`, nên trên điện thoại thật gần như LUÔN chọn `GPS_PROVIDER`;
+  `NETWORK_PROVIDER` và `fused` gần như không bao giờ được dùng.
+- `GPS_PROVIDER`: có, là lựa chọn ưu tiên. `NETWORK_PROVIDER`: có code nhưng nằm sau GPS.
+- `getCurrentLocation(...)`: CÓ (`:76`, API ≥ 30; API 26–29 dùng `requestSingleUpdate`).
+- `lastLocation`/`getLastKnownLocation`: CÓ (`:107-117`) nhưng chỉ được gọi SAU KHI thất bại (timeout),
+  không được thử trước. Không có fast-path cache.
+- Khi GPS chưa fix: KHÔNG thử provider khác trong cùng lượt. Một lượt duy nhất → `CURRENT_FIX_TIMEOUT_MS=8_000`
+  → `attempt.fail(TIMEOUT)` → cache (có thể null) → thông báo lỗi. Đây chính là triệu chứng "Ra chỗ thoáng".
+- Chuỗi "thoáng" sinh ra ở: `AndroidEmergencyLocationController.kt:69` ("Di chuyển ra nơi thoáng; cảnh báo vẫn tiếp tục."),
+  `:133` ("Bật GPS và thử ở nơi thoáng."), `:135` ("Chờ GPS cập nhật ở nơi thoáng."),
+  và giá trị mặc định `EmergencyCore.kt:44` (`LocationState.remediation = "Di chuyển ra nơi thoáng và thử lại."`).
+  UI in nó bằng màu cảnh báo ở `HomeScreen.kt:744-747`.
+- SOS lấy vị trí qua port `EmergencyLocationController` (không phải repository): `SyncCoordinator` gọi
+  `emergencyLocation?.onVerifyingStarted()` khi state ∈ {VERIFYING, ALERTING, AWAITING_HELP}, sau đó
+  `emergency?.timeout(remoteId, contacts, name, emergencyLocation?.locationState?.fix)`; fix mới chảy qua
+  `onFix` → `emergencyCoordinator.updateLocation(...)`. Không có `getBestAvailableLocation()`.
 
-### Fail-safe SOS
-- `SosDispatchReport` bốn bước độc lập (Vị trí, Tin nhắn, Cuộc gọi trợ giúp, Liên kết bản đồ) được lưu theo
-  sự kiện và hiển thị trong hộp thoại "Tiến trình gửi SOS".
-- Thiếu bất kỳ quyền nào cũng không crash và không bỏ im lặng: mỗi bước có trạng thái + lý do thật
-  (ví dụ "Chưa cho phép gọi điện; không thể tự động gọi").
-- Không có vị trí (chưa cấp / GPS tắt / quá hạn 8 giây / tọa độ sai) → tin nhắn ghi "Chưa xác định được vị
-  trí.", không có tọa độ giả, các bước khác vẫn chạy.
-- Không có Google Maps → mở bằng trình duyệt với cùng link; có Maps → mở đúng Google Maps.
+### SMS
+- Manifest `SEND_SMS`: có. Runtime permission: có (PermissionCenter + `MainActivity.launchCapabilityRequest`).
+- Gửi thật: CÓ — `emergency/AndroidSmsManagerGateway.kt` (`SmsManager.sendMultipartTextMessage`, chọn theo
+  subscription, sent/delivered `PendingIntent`, `SmsPartAggregation`).
+- Được gọi từ luồng SOS: CÓ — `EmergencyCoordinator.dispatchSms` (`EmergencyCore.kt:235-254`).
+- Xử lý lỗi: CÓ (SecurityException/RuntimeException → FAILED + lý do thật; đa SIM → yêu cầu chọn SIM).
+- Log: KHÔNG có (`android.util.Log` = 0 chỗ trong `app/src/main`); chỉ có state callback → backend `TRANSPORT_STATUS`.
 
-### Định vị nền (đã đánh giá, KHÔNG thêm gì)
-- Ứng dụng không lấy vị trí nền ngoài FGS `health|location` đã có; FGS này chỉ bật khi đã có quyền vị trí
-  và Activity đang hiển thị. Vì vậy **không** xin `ACCESS_BACKGROUND_LOCATION`. Nếu sau này cần vị trí nền
-  liên tục phải xin quyết định mới.
+### CALL
+- Manifest `CALL_PHONE`: có. `ACTION_DIAL`: KHÔNG dùng ở đâu.
+- Gọi thật: CÓ nhưng chỉ THỦ CÔNG — `emergency/ManualSimCallFallback.kt:18-19` (`Intent.ACTION_CALL` +
+  kiểm tra `CALL_PHONE`), gọi từ `DemoController.callContactViaSim` → `HomeScreen.kt:1002` (hộp thoại chọn người thân).
+- Trong luồng SOS: KHÔNG. Bước `VOICE_CALL` chỉ gọi `backend.startVoice(eventId)` (adapter thoại máy chủ,
+  chưa cấu hình → luôn "Không khả dụng"). Quyết định D03/D07 + `docs/next-gate.md §4` đã hoãn auto-dial SIM.
 
-## Kiểm thử đã chạy (bằng chứng thật)
-- `cd android && JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew testDebugUnitTest --rerun-tasks --no-daemon`:
-  147 test, 0 lỗi (28 test mới cho quyền/SOS: `CapabilityHardeningTest`, `SosDispatchReportTest`,
-  `LocationIntentAndProviderTest`, `PermissionCenterUiTest`).
-- `./gradlew assembleDebug --no-daemon`: PASS → `android/app/build/outputs/apk/debug/app-debug.apk`.
-- `cd backend && npm test`: 55/55 PASS (không đổi backend).
-- Emulator NCKH27PA (API 36, x86_64): `python3 android/scripts/permission-flow-check.py` — 11/11 check PASS,
-  bằng chứng ở `docs/evidence/permission-flow/` (results.json + dump UI + trạng thái quyền).
-  Đã xác minh trên APK thật: luồng xin quyền, từ chối một lần, từ chối hai lần (Don't ask again) →
-  mở App Settings → quay lại ứng dụng, cấp lại quyền trong Settings, vị trí gần đúng, tắt dịch vụ vị trí,
-  SOS không quyền không crash có báo cáo từng bước, mở Google Maps, và fallback trình duyệt khi Maps bị tắt.
-- Bằng chứng SOS thật trên emulator: `Trạng thái SOS: Vị trí: Thành công • Tin nhắn: Không khả dụng •
-  Cuộc gọi trợ giúp: Chưa cấp quyền • Liên kết bản đồ: Bỏ qua` khi thiếu `CALL_PHONE`.
-- `git diff --check`: sạch. Không commit.
+## 2. ROOT CAUSE
+1. **Chọn provider một-lượt, GPS-first** (`LocationResolution.kt:12`) → phụ thuộc GPS/GNSS; indoor/urban canyon
+   hết 8 s mà không có fix → không thử Wi-Fi/cell/fused.
+2. **Không có fused provider** (thiếu dependency) → không có nguồn kết hợp GPS + Wi-Fi + cell + sensor.
+3. **Cache chỉ dùng khi đã thất bại**, không dùng làm fast path; không có warm-up trước sự kiện.
+4. **Thông báo "ra chỗ thoáng" là remediation mặc định** của `LocationState` và của nhánh lỗi → UI hiển thị
+   như lỗi chặn, đúng như chủ dự án báo.
+5. **CALL không nằm trong luồng SOS** — chỉ SMS + adapter thoại máy chủ; SIM call là thao tác tay.
 
-## Problems/Blockers
-- Không có điện thoại thật/SIM/GPS: hộp thoại quyền theo hãng máy, đa SIM + biên nhận SMS thật, cuộc gọi
-  SIM thật, thời gian bắt fix ngoài trời, hành vi FGS khi khoá màn hình chưa được kiểm chứng.
-- Adapter thoại backend vẫn chưa có tài khoản/số gọi đi/public callback → bước "Cuộc gọi trợ giúp" tự động
-  vẫn chỉ báo "Không khả dụng"; muốn SOS tự gọi SIM thì cần quyết định mới (`docs/next-gate.md` §4).
-- Trên emulator, sự kiện SOS đầu tiên khi chưa từng có fix sẽ hết hạn 8 giây và đi vào nhánh "không có vị
-  trí" (đúng thiết kế D03); cần xác nhận lại trên thiết bị thật.
+## 3. FILES INVOLVED
+Sửa: `android/app/build.gradle.kts`, `.../emergency/EmergencyCore.kt`,
+`.../location/AndroidEmergencyLocationController.kt`, `.../location/LocationResolution.kt`,
+`.../DemoApplication.kt`, `.../HomeScreen.kt`, `.../api/SyncCoordinator.kt` (chỉ nếu cần wiring).
+Thêm: `.../location/LocationRepository.kt`, `.../location/AndroidPlatformLocationSource.kt`,
+`.../emergency/AndroidSimCallGateway.kt`, test `.../location/BestAvailableLocationRepositoryTest.kt`,
+`.../emergency/SosCallStepTest.kt`.
+Ghi chú: `EmergencyCore.kt:26` từng hardcode link Maps; nay là 1 helper duy nhất `LocationFix.mapsUrl`
+(`https://maps.google.com/?q={lat},{lon}`) + `LocationFix.geoUri`.
 
-## Next Action
-1. Kiểm thử thủ công theo `docs/permission-flow.md` §6 trên điện thoại thật có SIM (chờ chủ dự án cấp phép
-   thiết bị/số người nhận thử).
-2. Chủ dự án chốt `docs/next-gate.md` §4 (auto-dial SIM) và §5 (phạm vi kiểm thử thực địa).
-3. Chỉ commit/push khi chủ dự án yêu cầu.
+## 4. CONTRACT PROPOSED — ĐÃ CHỐT (Hermes, đã áp dụng vào EmergencyCore.kt)
+```kotlin
+const val SOS_LOCATION_TIMEOUT_MS = 8_000L
+enum class LocationSource { PHONE, ESP32_GNSS, FUSED, GPS, NETWORK, CACHED, UNKNOWN }
+data class LocationLookup(val fix: LocationFix?, val cause: LocationFailureCause?, val fromCache: Boolean, val elapsedMs: Long)
+interface LocationRepository { suspend fun getBestAvailableLocation(timeoutMs: Long = SOS_LOCATION_TIMEOUT_MS): LocationLookup }
+enum class CallStatus { STARTED, PERMISSION_MISSING, UNAVAILABLE, FAILED }
+data class CallDispatchState(val status: CallStatus, val detail: String? = null)
+fun interface EmergencyCallGateway { fun call(phone: String): CallDispatchState }
+enum class SosStep { LOCATION, SMS, VOICE_CALL, SIM_CALL, MAP_LINK }
+```
+Port nền tảng (JVM-testable): `PlatformLocationSource { permission(); enabledProviders(); suspend lastKnown();
+suspend current(kind, timeoutMs) }` + `BestAvailableLocationRepository` (thuần Kotlin), implementation
+Android `AndroidPlatformLocationSource` (fused trước, LocationManager dự phòng).
+Thứ tự lấy vị trí: permission → cached-fresh dùng ngay → current theo FUSED/GPS/NETWORK → cache cũ (TIMEOUT)
+→ thất bại rõ ràng. Không ngưỡng accuracy; không bao giờ throw; toàn bộ ≤ 8 s.
+Backend contract: KHÔNG đổi. `ActionRequest.location` đã là nullable
+(`api/ApiService.kt:67`), nên khi không có vị trí backend vẫn nhận event (đã kiểm tra, không phá schema).
 
-## Lịch sử phân công phiên này
-- T2 — Codex Sol: logic quyền/location/SMS/call/maps + báo cáo từng bước + test (`.ai/T2-codex-sos-permissions.md`, DONE).
-- T3 — AGY Gemini (`gemini-3.8-flash-medium`): Permission Center + hộp thoại lần đầu + phản hồi SOS (`.ai/T3-agy-permission-ui.md`, DONE, có 1 defect được trả lại và sửa).
-- Hermes: chốt contract, review, chạy Gradle/emulator, tài liệu.
+## 5. TASK SPLIT
+- **T6 — Codex (Level 2)**: `build.gradle.kts` + `location/**` + `emergency/**` + `DemoApplication.kt` +
+  test location/emergency. Ticket: `.ai/T6-codex-location-sos.md`. Đang chạy.
+- **T7 — AGY Gemini `gemini-3.8-flash-medium` (Level 1)**: chỉ `HomeScreen.kt` + `HomeScreenPureUiTest.kt`.
+  Ticket: `.ai/T7-agy-location-ui.md`. Chạy sau T6 (một lượt Gradle tại một thời điểm, không trùng file).
+- **Review (Level 3)**: AGY `claude-sonnet-4-6` review diff T6/T7 sau khi cả hai land (1 reviewer).
+- **Hermes**: contract, review, tích hợp, Gradle + emulator acceptance, tài liệu. Sẽ tự chạy build cuối.
+- Không worker nào chạm vào file của worker khác; `HomeScreen.kt` chỉ thuộc T7.
+
+## 6. TEST PLAN
+Unit (JVM, `testDebugUnitTest`):
+1. fine + cached FRESH → dùng cache ngay, không gọi current. 2. cached STALE + có fix mới → dùng fix mới.
+3. GPS không có fix nhưng FUSED/NETWORK có → PASS (GPS unavailable ≠ location unavailable).
+4. accuracy 150 m → vẫn trả về, không chặn SOS. 5. không có vị trí nào → cause rõ ràng, không throw.
+6. permission DENIED → PERMISSION_DENIED, không gọi provider. 7. mọi provider tắt → PROVIDER_DISABLED.
+8. cache cũ + current timeout → trả cache cũ với cause=TIMEOUT.
+9. SEND_SMS granted → gateway được gọi; 10. SEND_SMS denied → step PERMISSION_MISSING, CALL/backend vẫn chạy.
+11. CALL_PHONE granted + backend không STARTED → `ACTION_CALL` được tạo cho người thân ưu tiên.
+12. CALL_PHONE denied → PERMISSION_MISSING, không crash, SMS vẫn gửi.
+13. Critical: GPS unavailable + Wi-Fi/cell available = SOS chạy (SMS có link đúng + CALL).
+14. Critical: không có location = SMS cảnh báo + CALL vẫn chạy.
+15. Link Maps = `https://maps.google.com/?q=lat,lon` đúng tọa độ.
+Emulator (`adb emu geo fix <lon> <lat>`): UI cập nhật vị trí, link đúng lat/lon, payload SOS đúng, không còn
+lỗi chặn "ra chỗ thoáng". SMS/call thật trên emulator không khả dụng → chứng minh bằng invocation + test,
+ghi rõ là không phải PASS thiết bị thật.
+
+## 7. PROBLEMS / BLOCKERS
+- Chưa có thiết bị thật/SIM/GPS: biên nhận SMS thật, cuộc gọi SIM thật, thời gian fix ngoài trời chưa kiểm chứng.
+- Emulator không gửi được SMS/không gọi điện thật → evidence chỉ ở mức invocation/unit + UI.
+- `play-services-location` là dependency mới (cần mạng Gradle lần đầu; Google Maven đã kiểm tra truy cập được,
+  bản 21.4.0 có thật). Máy không có Google Play Services sẽ dùng nhánh LocationManager dự phòng.
+
+## 8. NEXT ACTION
+1. Chủ dự án chốt: có commit/push không (hiện KHÔNG commit gì).
+2. Kiểm thử thực địa trên điện thoại thật có SIM + GPS theo `docs/permission-flow.md` §6 (đặc biệt bước 5 và 7).
+3. Việc nên làm tiếp (chưa trong phạm vi lần này): bền vững hoá id sự kiện (bản DEMO reset bộ đếm → dispatch bị
+   bỏ qua), `allSucceeded` coi SKIPPED là thành công đã sửa, và xem lại `EmergencyRecord.dispatchReport` khi
+   dispatch lần hai.
+4. Chỉ commit/push khi chủ dự án yêu cầu.
+
+## 9. Lịch sử phân công (phiên trước, đã đóng)
+- T2 Codex: logic quyền/location/SMS/call/maps (DONE). T3 AGY Gemini: Permission Center + UI (DONE).
+
+## 11. Lịch sử phân công (phiên này)
+- T6 — Codex (Level 2, một lượt Gradle): `LocationRepository`/`AndroidPlatformLocationSource`/controller/coordinator/
+  `AndroidSimCallGateway`/`build.gradle.kts`/test. Sau đó nhận 1 vòng sửa từ review (`.ai/T6-codex-location-sos.md`,
+  `.ai/T6-fixes-round2.txt`) — DONE, 170 test PASS (Hermes chạy lại xác nhận).
+- T7 — AGY `gemini-3.8-flash-medium` (Level 1): chỉ `HomeScreen.kt` + `HomeScreenPureUiTest.kt`
+  (`.ai/T7-agy-location-ui.md`). Worker thoát khi còn 1 tiến trình Gradle nền bị kill theo → Hermes tự build lại: PASS.
+- Review L3 — AGY `claude-sonnet-4-6`, `--mode plan` (`.ai/review-prompt-T6.txt`): 0 BLOCKER / 4 MAJOR / 3 MINOR.
+- Hermes: khảo sát có mục tiêu, chốt contract trong `EmergencyCore.kt`, chia T6/T7, review diff, tự chạy
+  test/build đọc XML thật, viết runner acceptance emulator, chạy acceptance, cập nhật tài liệu.
+- Kết quả đã xác minh: 147 unit test PASS, APK debug PASS, 11/11 check emulator (permission flow).
+
+## T8 — Điều tra & sửa lỗi SOS runtime (Terra Medium / Codex) — ĐÃ SỬA, CHỜ THIẾT BỊ THẬT
+PROVIDER: Codex `gpt-5.6-terra`, reasoning medium (kiểm quota trước khi giao; chưa cần CommandCode).
+3 lượt: T8 (điều tra + sửa) → T8-fix1 (khôi phục quyết định D09) → T8-fix2 (làm suite xanh).
+Ticket: `.ai/T8-terra-medium-sos-runtime.md`, `.ai/T8-fix1-d09-guard.md`, `.ai/T8-fix2-green-suite.md`.
+ROOT_CAUSE (đã xác nhận bằng code + logcat + test đỏ trước khi sửa):
+- H1 `AndroidPlatformLocationSource.enabledProviders()` coi Play Services là provider đang bật ⇒ khi công tắc Vị trí
+  của máy TẮT, `PROVIDER_DISABLED` không bao giờ được trả về (chỉ TIMEOUT 8 s + copy sai). Nay tách hàm thuần
+  `LocationProviderAvailability.enabled` (FUSED chỉ khi hệ thống thật sự bật vị trí).
+- H2 nhánh đa SIM cũ CHẶN HẲN SMS khẩn cấp ("Có nhiều SIM; cần chọn SIM gửi rõ ràng"), trong khi `READ_PHONE_STATE`
+  chưa bao giờ được xin lúc chạy. Nay `SmsSubscriptionChoice.resolve(requested, default)` → lấy SIM yêu cầu, không
+  thì SIM mặc định, và ghi `subscriptionId=…` vào state + log.
+- H3 `AndroidSimCallGateway` báo `STARTED` chỉ vì `Handler.post` thành công. Nay chờ kết quả `startActivity` thật
+  (latch ≤ 2 s) → `FAILED` nếu không mở được.
+- H4 guard D09 bị bỏ trong lượt T8 ⇒ SIM call chạy cả khi adapter thoại máy chủ đã `STARTED` (trái quyết định chủ
+  dự án). ĐÃ KHÔI PHỤC ở T8-fix1 (`SKIPPED`, đúng thông điệp D09).
+  **[LỊCH SỬ — ĐÃ BỊ THAY THẾ 2026-09-19]** Chủ dự án cập nhật D09: cuộc gọi SIM handset là nhánh ĐỘC LẬP, adapter
+  máy chủ chỉ là phụ trợ best-effort ⇒ guard `SKIPPED` KHÔNG còn hiệu lực và `STARTED` KHÔNG suppress handset call.
+  Dòng trên chỉ ghi lại trạng thái tại thời điểm T8.
+- H5 `SmsPartAggregation` dùng `require(index in 0 until total)` bên trong BroadcastReceiver ⇒ có thể crash khi
+  callback muộn; nay trả về kết quả cũ thay vì throw.
+- H7 log phân mảnh; nay có một dòng `FallSafe/SOS` cho mỗi bước (eventId, step, status, elapsedMs, source,
+  accuracyM, capability) — không log số điện thoại.
+- H8 readiness chỉ xét quyền, bỏ qua phần cứng; nay `CapabilityPlatform.isSupported` (telephony calling/messaging).
+- H6 BỊ BÁC BỎ: cache đã qua `validated()`/`freshness()` trước khi publish nên không phát fix rác.
+BOTTLENECK ĐÃ GẶP: T8-fix1 để lại suite ĐỎ (1 test) rồi dừng ⇒ Hermes giao T8-fix2 sửa đúng kỳ vọng test và chạy lại.
+FILES_INSPECTED: `location/AndroidPlatformLocationSource.kt`, `location/LocationRepository.kt`,
+`emergency/EmergencyCore.kt`, `emergency/AndroidSmsManagerGateway.kt`, `emergency/AndroidSimCallGateway.kt`,
+`permissions/CapabilityAccess.kt`, `permissions/AndroidCapabilityPlatform.kt`, `MainActivity.kt`, manifest, test SOS.
+FILES_CHANGED: `location/LocationRepository.kt`, `location/AndroidPlatformLocationSource.kt`,
+`emergency/EmergencyCore.kt`, `emergency/AndroidSmsManagerGateway.kt`, `emergency/AndroidSimCallGateway.kt`,
+`permissions/CapabilityAccess.kt`, `permissions/AndroidCapabilityPlatform.kt`,
+`app/src/test/.../location/BestAvailableLocationRepositoryTest.kt`, `.../emergency/EmergencyLogicTest.kt`,
+`.../emergency/SosCallStepTest.kt`, `.../emergency/SosDispatchReportTest.kt`, `.../permissions/CapabilityAccessTest.kt`,
+`android/scripts/sos-location-acceptance.py`. Không worker nào chạm UI/`HomeScreen.kt`.
+TESTS_RUN (Hermes tự chạy lại, không tin báo cáo worker): `JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+./gradlew testDebugUnitTest assembleDebug --rerun-tasks --no-daemon` — chạy 2 lần (sau T8 và sau T8-fix2).
+TEST_RESULTS: **27 suite / 175 test / 0 failure / 0 error / 0 skip** đọc từ
+`app/build/test-results/testDebugUnitTest/TEST-*.xml`; APK `app/build/outputs/apk/debug/app-debug.apk` 12.566.848 B,
+sha256 `2c16eca3f14a7b216042e573bf17a3b8275bfd05f4997909b8f5a7a5cd1daa06`, đã cài lên emulator.
+EMULATOR (Hermes chạy trên chính artifact cuối):
+- `scripts/sos-location-acceptance.py`: `critical-sos-flow` PASS 34.19 s, `location-card` PASS 42.76 s (2/2).
+  Trong đó: `source=FUSED accuracy=5.0`; SMS thật trong `content://sms/sent` với `https://maps.google.com/?q=10.8231,106.6296983`;
+  `SIM_CALL:SUCCESS` + `FallSafe/CALL: status=STARTED`; 5 bước báo cáo đều có mặt.
+- Degraded location-off (do Hermes viết thêm, `/tmp/t8-degraded-location-off.py`): công tắc Vị trí TẮT + ngã thật →
+  `LOCATION=UNAVAILABLE (cause=PROVIDER_DISABLED)`, `SMS=SUCCESS`, `SIM_CALL=SUCCESS`, `MAP_LINK=SKIPPED`
+  ⇒ SMS/CALL không còn phụ thuộc vị trí (đóng lỗ hổng bằng chứng mà T8 còn để mở).
+EVIDENCE: `docs/evidence/sos-location/` (results.json, logcat-dispatch.txt, sent-sms-provider.txt, sos-state.txt,
+logcat-location-during-countdown.txt) và `docs/evidence/sos-runtime/hermes-degraded-location-off*`.
+CURRENT_FAILURE / BLOCKER: KHÔNG có thiết bị thật ⇒ **không được kết luận DEVICE VERIFIED**. Chưa kiểm chứng:
+biên nhận giao SMS của nhà mạng, cuộc gọi SIM thật qua mạng di động, đa SIM thật, GNSS ngoài trời, FGS khi khoá màn hình.
+NEXT_ACTION: (1) chủ dự án chốt có commit/push không (hiện KHÔNG commit gì); (2) chạy checklist
+`docs/permission-flow.md` §6 trên điện thoại thật có SIM + GPS, ưu tiên bước SMS/CALL và nhánh location-off;
+(3) ghi kết quả thật vào `docs/test-report.md`.
+DO_NOT_REPEAT: Không dùng Java 25 cho Gradle (fail trước khi cấu hình project) — dùng JDK 17. Không khôi phục
+"guard D09" cũ (SKIPPED khi máy chủ `STARTED`): D09 đã được chủ dự án cập nhật 2026-09-19 — cuộc gọi SIM trên
+handset là nhánh ĐỘC LẬP, backend chỉ là phụ trợ best-effort.
+Không để worker dừng khi suite còn đỏ. Giữ nguyên thay đổi chưa commit của người dùng.
+

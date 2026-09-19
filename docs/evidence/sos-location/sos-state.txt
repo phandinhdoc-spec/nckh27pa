@@ -1,0 +1,12 @@
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Cannot place a call as there is already another call connecting. Wait for the call to be answered or disconnect it before placing another call. 
+ 
+ 
+OK 

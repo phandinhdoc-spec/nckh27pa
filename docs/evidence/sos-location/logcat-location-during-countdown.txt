@@ -1,0 +1,6 @@
+--------- beginning of main
+09-19 13:59:44.459 32513 32513 I FallSafe/Location: playServicesAvailability=0
+09-19 13:59:44.470 32513 32513 I FallSafe/Location: playServicesAvailability=0
+09-19 13:59:44.638 32513 32513 I FallSafe/Location: playServicesAvailability=0
+09-19 13:59:48.236 32513 32513 I FallSafe/Location: source=FUSED accuracy=5.0 age=43 cause=none
+09-19 13:59:48.236 32513 32513 I FallSafe/Location: source=FUSED accuracy=5.0 age=43 cause=null

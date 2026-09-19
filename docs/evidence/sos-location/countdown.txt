@@ -1,0 +1,69 @@
+ 
+ 
+ 
+ 
+ 
+ 
+ Trạng thái bảo vệ: Cần kiểm tra • Nguy cơ ngã
+⚠️ 
+BẢO VỆ: Cần kiểm tra • Nguy cơ ngã 
+ 
+ Vị trí của tôi: Đang xác định.... Chạm để mở bản đồ.
+📍 
+VỊ TRÍ CỦA TÔI 
+Đang xác định... 
+Vị trí sẽ được gửi ngay khi có 
+ 
+ 
+ Gửi vị trí: Chưa có GPS. Chạm để chọn người nhận.
+GỬI VỊ TRÍ 
+📤 
+Chưa có GPS 
+Gửi SMS tọa độ 
+ 
+ 
+ Gọi người thân: Con gái. Chạm để mở danh bạ gọi.
+📞 
+GỌI NGƯỜI THÂN 
+Con gái 
+Cuộc gọi SIM 
+ 
+ 
+ Thiết bị: Không làm mới được trạng thái ESP32. Chạm để xem chi tiết.
+THIẾT BỊ 
+📟 
+Không làm mới được trạng thái ESP32 
+Chạm xem chi tiết 
+ 
+ Phát hiện nguy hiểm. Tự động gửi SOS sau 8 giây. Nhấn và giữ Tôi an toàn 2 giây để hủy trong thời gian đếm ngược 10 giây.
+CẢNH BÁO 
+8 GIÂY 
+TÔI AN TOÀN 
+GIỮ ĐỂ HỦY (10S) 
+ 
+ 
+ 
+ 
+ 
+Trang chủ 
+ 
+ 
+ 
+ 
+ 
+Sự kiện 
+ 
+ 
+ 
+ 
+ 
+Người thân 
+ 
+ 
+ 
+ 
+ 
+Cài đặt 
+ 
+ 
+ 

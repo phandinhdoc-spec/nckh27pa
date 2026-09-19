@@ -24,13 +24,13 @@ class EmergencyLogicTest {
         val fix = LocationFix.validated(10.5, 106.5, 8f, 1000, LocationSource.PHONE)!!
         assertEquals(LocationFreshness.FRESH, fix.freshness(121000))
         assertEquals(LocationFreshness.STALE, fix.freshness(121001))
-        assertEquals("https://www.google.com/maps/search/?api=1&query=10.5,106.5", fix.mapsUrl)
+        assertEquals("https://maps.google.com/?q=10.5,106.5", fix.mapsUrl)
     }
 
     @Test fun emergencyAndManualMessagesAreTruthfulAndDistinct() {
         val fix = LocationFix.validated(10.5, 106.5, 8f, 1000, LocationSource.PHONE)!!
         val emergency = EmergencyMessageFormatter.emergency("Người dùng FallSafe", 2000, fix, 200000)
-        assertTrue(emergency.startsWith("CẢNH BÁO SOS: Tôi có thể đã bị ngã."))
+        assertTrue(emergency.startsWith("CẢNH BÁO SOS: Tôi có thể đã bị ngã và cần hỗ trợ."))
         assertTrue(emergency.contains("Thời điểm sự kiện:"))
         assertTrue(emergency.contains("Tọa độ: 10.5,106.5"))
         assertTrue(emergency.contains(fix.mapsUrl))
@@ -44,9 +44,9 @@ class EmergencyLogicTest {
 
     @Test fun emergencyWithoutAFixUsesTheRequiredTruthfulFallback() {
         val emergency = EmergencyMessageFormatter.emergency("Bà An", 2_000, null, 2_000)
-        assertTrue(emergency.startsWith("CẢNH BÁO SOS: Tôi có thể đã bị ngã."))
+        assertTrue(emergency.startsWith("CẢNH BÁO SOS: Tôi có thể đã bị ngã và cần hỗ trợ."))
         assertTrue(emergency.contains("Thời điểm sự kiện:"))
-        assertTrue(emergency.contains("Chưa xác định được vị trí."))
+        assertTrue(emergency.contains("Hiện chưa xác định được vị trí chính xác."))
         assertFalse(emergency.contains("0.0,0.0"))
     }
 
@@ -77,6 +77,17 @@ class EmergencyLogicTest {
         assertEquals(SmsDeliveryStatus.FAILED, aggregate.recordSent(1, false).status)
     }
 
+    @Test fun lateCallbackForAnOlderMultipartSendIsIgnoredInsteadOfCrashing() {
+        val aggregate = SmsPartAggregation(1)
+        assertEquals(SmsDeliveryStatus.SENDING, aggregate.recordSent(1, true).status)
+    }
+
+    @Test fun defaultSubscriptionIsRetainedForEmergencySmsEvenWithMultipleSims() {
+        assertEquals(42, SmsSubscriptionChoice.resolve(requestedId = null, defaultId = 42))
+        assertEquals(7, SmsSubscriptionChoice.resolve(requestedId = 7, defaultId = 42))
+        assertNull(SmsSubscriptionChoice.resolve(requestedId = null, defaultId = null))
+    }
+
     @Test fun cancelledGenerationIgnoresLateLocationAndDispatchIsIdempotent() {
         val sms = RecordingSmsGateway()
         val backend = RecordingBackendGateway()
@@ -92,7 +103,7 @@ class EmergencyLogicTest {
         coordinator.dispatchManual("event-2", listOf(contact), "Người dùng FallSafe", null)
         coordinator.dispatchManual("event-2", listOf(contact), "Người dùng FallSafe", null)
         assertEquals(1, sms.sent.size);assertEquals(1, backend.events.size)
-        assertTrue(sms.sent.single().message.contains("Chưa xác định được vị trí."))
+        assertTrue(sms.sent.single().message.contains("Hiện chưa xác định được vị trí chính xác."))
         coordinator.updateLocation("event-2", LocationFix.validated(10.5,106.5,5f,1100,LocationSource.PHONE)!!)
         coordinator.updateLocation("event-2", LocationFix.validated(10.6,106.6,5f,1200,LocationSource.PHONE)!!)
         assertEquals(2, sms.sent.size)

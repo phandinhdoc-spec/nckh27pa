@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import kotlin.math.roundToInt
 import vn.nckh27pa.fallsafe.device.DeviceDetails
 import vn.nckh27pa.fallsafe.device.DeviceValueSource
 import vn.nckh27pa.fallsafe.emergency.*
@@ -104,11 +105,68 @@ internal fun resolveSosDispatchSummaryText(report: SosDispatchReport?, fallbackM
     }
 }
 
-internal fun resolveLocationCardStatus(loc: LocationState): String = when {
-    loc.fix == null -> "Chưa có vị trí"
-    loc.freshness == LocationFreshness.FRESH -> "Vị trí mới"
-    loc.freshness == LocationFreshness.STALE -> "Vị trí cũ"
-    else -> "Chưa có vị trí"
+internal data class LocationCardView(
+    val title: String,
+    val detail: String,
+    val hint: String?
+)
+
+internal fun resolveLocationCardView(
+    loc: LocationState,
+    nowMs: Long = System.currentTimeMillis()
+): LocationCardView {
+    val fix = loc.fix
+    if (fix == null) {
+        return when (loc.cause) {
+            LocationFailureCause.PERMISSION_DENIED -> LocationCardView(
+                title = "Chưa cấp quyền vị trí",
+                detail = "Ứng dụng chưa được phép dùng vị trí",
+                hint = loc.remediation
+            )
+            LocationFailureCause.PROVIDER_DISABLED -> LocationCardView(
+                title = "Vị trí đang tắt",
+                detail = "Dịch vụ vị trí của máy đang tắt",
+                hint = loc.remediation
+            )
+            LocationFailureCause.NO_FIX,
+            LocationFailureCause.TIMEOUT,
+            LocationFailureCause.INVALID_FIX,
+            null -> LocationCardView(
+                title = "Đang xác định...",
+                detail = "Vị trí sẽ được gửi ngay khi có",
+                hint = null
+            )
+        }
+    }
+
+    val accuracyPart = if (fix.accuracyM != null) {
+        "± ${fix.accuracyM.roundToInt()} m"
+    } else {
+        "Độ chính xác chưa rõ"
+    }
+
+    val ageSec = (nowMs - fix.fixTimeMs).coerceAtLeast(0L) / 1000L
+
+    return if (loc.freshness == LocationFreshness.FRESH) {
+        val agePart = when {
+            ageSec < 5L -> "vừa xong"
+            ageSec < 60L -> "Cập nhật $ageSec giây trước"
+            else -> "Cập nhật ${ageSec / 60L} phút trước"
+        }
+        LocationCardView(
+            title = "Đã xác định",
+            detail = "$accuracyPart • $agePart",
+            hint = null
+        )
+    } else {
+        val ageMin = maxOf(1L, ageSec / 60L)
+        val agePart = "Cập nhật $ageMin phút trước"
+        LocationCardView(
+            title = "Vị trí gần đúng",
+            detail = "$accuracyPart • $agePart",
+            hint = loc.remediation
+        )
+    }
 }
 
 internal fun resolveDeviceCardStatus(details: DeviceDetails): String = when (details.connected) {
@@ -213,7 +271,9 @@ fun HomeScreen(
 
     // Backing states for cards
     val locState = controller.emergencyLocationState
-    val locStatusText = resolveLocationCardStatus(locState)
+    val locCardView = resolveLocationCardView(locState, System.currentTimeMillis())
+    val locStatusText = locCardView.title
+    val locSubline = locCardView.detail
     val locColor = if (locState.fix != null) SafeGreen else DisconnectedGray
     val locBg = if (locState.fix != null) SafeGreenContainer else DisconnectedGrayContainer
     val locBorder = if (locState.fix != null) SafeGreenBorder else DisconnectedGrayBorder
@@ -310,7 +370,7 @@ fun HomeScreen(
                             icon = "📍",
                             title = "VỊ TRÍ CỦA TÔI",
                             statusText = locStatusText,
-                            subline = "Chạm xem bản đồ",
+                            subline = locSubline,
                             titleColor = locColor
                         )
                     }
@@ -481,7 +541,7 @@ fun HomeScreen(
                             icon = "📍",
                             title = "VỊ TRÍ CỦA TÔI",
                             statusText = locStatusText,
-                            subline = "Chạm xem bản đồ",
+                            subline = locSubline,
                             titleColor = locColor
                         )
                     }
@@ -621,7 +681,7 @@ fun HomeScreen(
                                     icon = "📍",
                                     title = "VỊ TRÍ CỦA TÔI",
                                     statusText = locStatusText,
-                                    subline = "Chạm xem bản đồ",
+                                    subline = locSubline,
                                     titleColor = locColor,
                                     alignment = Alignment.Start
                                 )
@@ -744,7 +804,7 @@ fun HomeScreen(
                     Text(text = loc.explanation, fontSize = 16.sp)
                     if (!loc.remediation.isNullOrBlank()) {
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = loc.remediation, fontSize = 15.sp, color = WarningOrange)
+                        Text(text = "Gợi ý: ${loc.remediation}", fontSize = 15.sp, color = Color(0xFF37474F))
                     }
                 }
             },
@@ -1458,7 +1518,7 @@ private fun PeripheralCardContent(
             fontWeight = FontWeight.Medium,
             color = Color(0xFF37474F),
             textAlign = if (alignment == Alignment.Start) TextAlign.Start else TextAlign.End,
-            maxLines = 1,
+            maxLines = 2,
             softWrap = true
         )
     }

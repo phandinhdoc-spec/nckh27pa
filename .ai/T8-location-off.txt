@@ -1,0 +1,3 @@
+--------- beginning of main
+09-19 08:17:18.959 21574 21574 I FallSafe/Location: playServicesAvailability=0
+09-19 08:17:18.963 21574 21574 I FallSafe/Location: source=null accuracy=null age=null cause=PROVIDER_DISABLED

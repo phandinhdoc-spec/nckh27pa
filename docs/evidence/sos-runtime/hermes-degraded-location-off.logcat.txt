@@ -1,0 +1,13 @@
+--------- beginning of main
+09-19 08:33:52.470 23272 23272 I FallSafe/Location: playServicesAvailability=0
+09-19 08:33:52.472 23272 23272 I FallSafe/Location: source=null accuracy=null age=null cause=PROVIDER_DISABLED
+09-19 08:34:02.527 23272 23272 I FallSafe/SMS: eventId=585bb2cc-ed1e-479a-b5a2-812dc2d2cfba contactId=sos-degraded-1 status=SENDING subscriptionId=1
+09-19 08:34:02.527 23272 23272 I FallSafe/SMS: contactId=sos-degraded-1 status=SENDING
+09-19 08:34:02.530 23272 23272 I FallSafe/CALL: contactId=null status=VOICE_CALL:UNAVAILABLE
+09-19 08:34:02.545 23272 23272 I FallSafe/CALL: status=STARTED
+09-19 08:34:02.545 23272 23272 I FallSafe/CALL: contactId=sos-degraded-1 status=SIM_CALL:SUCCESS
+09-19 08:34:02.546 23272 23272 I FallSafe/SOS: contactId=null status=eventId=585bb2cc-ed1e-479a-b5a2-812dc2d2cfba step=LOCATION status=UNAVAILABLE elapsedMs=71 source=none accuracyM=none calling=true messaging=true location=true detail=Chưa xác định được vị trí.
+09-19 08:34:02.546 23272 23272 I FallSafe/SOS: contactId=null status=eventId=585bb2cc-ed1e-479a-b5a2-812dc2d2cfba step=SMS status=SUCCESS elapsedMs=72 source=none accuracyM=none calling=true messaging=true location=true detail=Đã chuyển toàn bộ tin nhắn cho thiết bị gửi. subscriptionId=1
+09-19 08:34:02.546 23272 23272 I FallSafe/SOS: contactId=null status=eventId=585bb2cc-ed1e-479a-b5a2-812dc2d2cfba step=VOICE_CALL status=UNAVAILABLE elapsedMs=72 source=none accuracyM=none calling=true messaging=true location=true detail=Dịch vụ gọi đã được cấu hình nhưng chưa tiếp nhận yêu cầu.
+09-19 08:34:02.546 23272 23272 I FallSafe/SOS: contactId=null status=eventId=585bb2cc-ed1e-479a-b5a2-812dc2d2cfba step=SIM_CALL status=SUCCESS elapsedMs=72 source=none accuracyM=none calling=true messaging=true location=true detail=Đã gọi SIM tới Mai.
+09-19 08:34:02.546 23272 23272 I FallSafe/SOS: contactId=null status=eventId=585bb2cc-ed1e-479a-b5a2-812dc2d2cfba step=MAP_LINK status=SKIPPED elapsedMs=72 source=none accuracyM=none calling=true messaging=true location=true detail=Không có vị trí để tạo liên kết bản đồ.

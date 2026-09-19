@@ -1,0 +1,64 @@
+Independent review (Level 3) of your T6 change found 0 blockers and 4 major findings.
+Fix exactly these five items, then re-run the tests. Same rules as before: do NOT touch HomeScreen.kt or
+HomeScreenPureUiTest.kt, do NOT commit, keep the frozen contract names, no unrelated refactoring.
+
+## FIX 1 (MAJOR, F-01) — `location/LocationRepository.kt` timeout detection must be deterministic
+`if (nowMs() - before >= remaining) timedOut = true` compares a wall clock against a snapshot budget, so a
+provider that concludes its own budget early is reported as NO_FIX instead of TIMEOUT.
+Replace it with an "attempt completed" flag set INSIDE the `withTimeoutOrNull` lambda, e.g.
+```kotlin
+var completed = false
+val fix = try { withTimeoutOrNull(remaining) { source.current(kind, remaining).also { completed = true } } }
+          catch (_: Exception) { null }
+if (!completed) timedOut = true
+```
+so TIMEOUT means "this attempt's budget fired (or the provider never answered)", never a clock comparison.
+Keep the existing stale-cache and outer-timeout behaviour intact.
+
+## FIX 2 (MAJOR, F-02) — no hidden budget cut; NETWORK must always get its turn
+`AndroidPlatformLocationSource.current` silently halves the timeout it is given for FUSED/GPS
+(lines ~59-63), which the pure repository cannot see. Move the per-kind budget decision into
+`BestAvailableLocationRepository` and pass that explicit budget down: the Android source must use exactly the
+`timeoutMs` it receives (no internal `/2`). Suggested allocation in the repository: FUSED = half of the
+remaining budget, GPS = half of what is left, NETWORK = all of what is left, each at least 1 ms, and never
+exceed the overall budget.
+Add a regression test: FUSED and GPS each consume their full allocated budget and return null while a NETWORK
+fix exists → NETWORK IS attempted and its fix is returned (assert the attempted kinds in order and the
+returned `LocationSource`).
+
+## FIX 3 (MAJOR, F-04) — `AndroidPlatformLocationSource` must never throw
+`lastKnown()` and `enabledProviders()` touch Play Services and `LocationManager`; make their bodies
+exception-safe (a SecurityException or RuntimeException must yield `null` / empty set, not an escape),
+and note in a comment that `BestAvailableLocationRepository` keeps its own catch as a second line of defence.
+Add/extend a test with a source whose `lastKnown()`/`enabledProviders()` throw, asserting a clean failure
+cause (`TIMEOUT`/`NO_FIX`/`PROVIDER_DISABLED`) and no exception.
+
+## FIX 4 (MAJOR, F-09) — `emergency/AndroidSimCallGateway.kt` must not call startActivity off the main thread
+`EmergencyCoordinator.dispatch` is `@Synchronized` and a caller may be on a background thread; starting an
+activity there is unsafe. In the gateway:
+- if `Looper.myLooper() == Looper.getMainLooper()` → keep today's synchronous behaviour and the truthful
+  detail "Đã mở cuộc gọi SIM.";
+- otherwise → `Handler(Looper.getMainLooper()).post { ... }` the same `ACTION_CALL` intent and report
+  `CallStatus.STARTED` with the truthful detail "Đã gửi yêu cầu gọi SIM." (a queued request, not a completed call);
+- if the post itself cannot be scheduled, return `CallStatus.FAILED` with a truthful detail.
+One attempt only, never a retry, and no more than one dial per SOS event.
+
+## FIX 5 (MINOR, F-07) — `SosDispatchReport.allSucceeded` must not be false for a deliberate skip
+A step with `SKIPPED` is not a failure: `allSucceeded` should be true when every step is `SUCCESS` or
+`SKIPPED`. Update `emergency/SosDispatchReportTest.kt` accordingly (`assertTrue(report.allSucceeded)` in the
+all-steps test) and keep `failedSteps` semantics unchanged.
+
+## Explicitly DECLINED findings — do NOT change these
+- F-05: Play Services `Task` exposes no cancellation API; the `lastLocation` call is already bounded by
+  `withTimeoutOrNull`. Add a one-line comment saying the task cannot be cancelled, then leave it.
+- F-06: the literal `"fused"` is only used behind `manager.allProviders.contains(platformFused)`, so it is
+  already guarded. No change.
+- F-08: the test clock is an explicit offset over the virtual scheduler, so `assertEquals(8000, elapsedMs)`
+  is deterministic. Keep the exact assertion.
+
+## Verification
+Run, from `/home/pdd/nckh27pa/android` with `JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64` and `--no-daemon`:
+`./gradlew testDebugUnitTest assembleDebug --rerun-tasks` — report real counts (read the XML in
+`app/build/test-results/testDebugUnitTest` if you need them) and the APK path.
+Reply with the same short format: DONE / CHANGED / TEST / NEXT / BLOCKER, plus one line per finding stating
+fixed or declined.

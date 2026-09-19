@@ -48,6 +48,7 @@ data class SosReadiness(
 
 interface CapabilityPlatform {
     fun isGranted(capability: Capability): Boolean
+    fun isSupported(capability: Capability): Boolean = true
     fun shouldShowRationale(capability: Capability): Boolean
     fun locationPrecision(): LocationPrecision =
         if (isGranted(Capability.LOCATION)) LocationPrecision.PRECISE else LocationPrecision.NONE
@@ -89,6 +90,7 @@ class CapabilityAccessController(
 ) {
     fun display(capability: Capability): CapabilityDisplay {
         val state = when {
+            !platform.isSupported(capability) -> CapabilityDisplayState.NEEDS_SETTINGS
             platform.isGranted(capability) -> CapabilityDisplayState.GRANTED
             !attempts.wasAttempted(capability) -> CapabilityDisplayState.CAN_REQUEST
             platform.shouldShowRationale(capability) -> CapabilityDisplayState.CAN_REQUEST
@@ -98,7 +100,7 @@ class CapabilityAccessController(
         val remediation = when (state) {
             CapabilityDisplayState.GRANTED -> null
             CapabilityDisplayState.CAN_REQUEST -> copy.requestRemediation
-            CapabilityDisplayState.NEEDS_SETTINGS -> copy.settingsRemediation
+            CapabilityDisplayState.NEEDS_SETTINGS -> if (!platform.isSupported(capability)) "Thiết bị này không hỗ trợ chức năng này." else copy.settingsRemediation
         }
         val precision = if (capability == Capability.LOCATION) platform.locationPrecision() else null
         val note = when {
@@ -114,6 +116,7 @@ class CapabilityAccessController(
     }
 
     fun request(capability: Capability, explanationAcknowledged: Boolean): PermissionRequestResult {
+        if (!platform.isSupported(capability)) return PermissionRequestResult.SETTINGS_REQUIRED
         if (platform.isGranted(capability)) return PermissionRequestResult.GRANTED
         if (!explanationAcknowledged) return PermissionRequestResult.EXPLANATION_REQUIRED
         if (display(capability).state == CapabilityDisplayState.NEEDS_SETTINGS) {
@@ -134,8 +137,8 @@ class CapabilityAccessController(
     )
 
     fun snapshot(): CapabilitySnapshot = CapabilitySnapshot(
-        calling = platform.isGranted(Capability.CALLING),
-        messaging = platform.isGranted(Capability.MESSAGING),
+        calling = platform.isSupported(Capability.CALLING) && platform.isGranted(Capability.CALLING),
+        messaging = platform.isSupported(Capability.MESSAGING) && platform.isGranted(Capability.MESSAGING),
         location = platform.isGranted(Capability.LOCATION),
         locationPrecision = platform.locationPrecision()
     )

@@ -18,7 +18,9 @@ class SosDispatchReportTest {
         coordinator.dispatchManual("all", listOf(contact), "Bà An", fix)
 
         val report = store.get("all")!!.dispatchReport!!
-        SosStep.entries.forEach { assertEquals(SosStepStatus.SUCCESS, report.statusOf(it)) }
+        assertEquals(SosStep.entries.toList(), report.steps.map { it.step })
+        SosStep.entries.filter { it != SosStep.SIM_CALL }.forEach { assertEquals(SosStepStatus.SUCCESS, report.statusOf(it)) }
+        assertEquals(SosStepStatus.SUCCESS, report.statusOf(SosStep.SIM_CALL))
         assertTrue(report.allSucceeded)
         assertTrue(report.failedSteps.isEmpty())
         assertEquals(report, coordinator.report("all"))
@@ -82,7 +84,7 @@ class SosDispatchReportTest {
         assertEquals(SosStepStatus.SUCCESS, report.statusOf(SosStep.SMS))
         assertEquals(SosStepStatus.SUCCESS, report.statusOf(SosStep.VOICE_CALL))
         assertEquals(SosStepStatus.SKIPPED, report.statusOf(SosStep.MAP_LINK))
-        assertTrue(sms.requests.single().message.contains("Chưa xác định được vị trí."))
+        assertTrue(sms.requests.single().message.contains("Hiện chưa xác định được vị trí chính xác."))
         assertFalse(sms.requests.single().message.contains("0.0,0.0"))
     }
 
@@ -127,6 +129,7 @@ class SosDispatchReportTest {
     ) = EmergencyCoordinator(
         sms = sms,
         backend = EmergencyBackendGateway { voice },
+        call = EmergencyCallGateway { CallDispatchState(CallStatus.STARTED) },
         store = store,
         nowMs = { 2_000 },
         capabilities = { snapshot }

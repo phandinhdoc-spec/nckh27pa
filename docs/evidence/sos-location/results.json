@@ -1,0 +1,12 @@
+[
+  {
+    "name": "critical-sos-flow",
+    "passed": true,
+    "elapsedSeconds": 34.81
+  },
+  {
+    "name": "location-card",
+    "passed": true,
+    "elapsedSeconds": 43.66
+  }
+]

@@ -1,0 +1,16 @@
+--------- beginning of main
+09-19 13:59:44.459 32513 32513 I FallSafe/Location: playServicesAvailability=0
+09-19 13:59:44.470 32513 32513 I FallSafe/Location: playServicesAvailability=0
+09-19 13:59:44.638 32513 32513 I FallSafe/Location: playServicesAvailability=0
+09-19 13:59:48.236 32513 32513 I FallSafe/Location: source=FUSED accuracy=5.0 age=43 cause=none
+09-19 13:59:48.236 32513 32513 I FallSafe/Location: source=FUSED accuracy=5.0 age=43 cause=null
+09-19 13:59:54.619 32513 32513 I FallSafe/SMS: eventId=98cce3aa-eb03-49aa-90fc-1799673062c7 contactId=sos-acceptance-1 status=SENDING subscriptionId=1
+09-19 13:59:54.619 32513 32513 I FallSafe/SMS: contactId=sos-acceptance-1 status=SENDING
+09-19 13:59:54.657 32513 32513 I FallSafe/CALL: status=STARTED
+09-19 13:59:54.657 32513 32513 I FallSafe/CALL: contactId=sos-acceptance-1 status=SIM_CALL:SUCCESS
+09-19 13:59:54.661 32513 32513 I FallSafe/CALL: contactId=null status=VOICE_CALL:UNAVAILABLE
+09-19 13:59:54.661 32513 32513 I FallSafe/SOS: contactId=null status=eventId=98cce3aa-eb03-49aa-90fc-1799673062c7 step=LOCATION status=SUCCESS elapsedMs=250 source=FUSED accuracyM=5.0 calling=true messaging=true location=true detail=Đã xác định được vị trí.
+09-19 13:59:54.662 32513 32513 I FallSafe/SOS: contactId=null status=eventId=98cce3aa-eb03-49aa-90fc-1799673062c7 step=SMS status=SUCCESS elapsedMs=251 source=FUSED accuracyM=5.0 calling=true messaging=true location=true detail=Đã chuyển toàn bộ tin nhắn cho thiết bị gửi. subscriptionId=1
+09-19 13:59:54.662 32513 32513 I FallSafe/SOS: contactId=null status=eventId=98cce3aa-eb03-49aa-90fc-1799673062c7 step=VOICE_CALL status=UNAVAILABLE elapsedMs=251 source=FUSED accuracyM=5.0 calling=true messaging=true location=true detail=Dịch vụ gọi đã được cấu hình nhưng chưa tiếp nhận yêu cầu.
+09-19 13:59:54.662 32513 32513 I FallSafe/SOS: contactId=null status=eventId=98cce3aa-eb03-49aa-90fc-1799673062c7 step=SIM_CALL status=SUCCESS elapsedMs=251 source=FUSED accuracyM=5.0 calling=true messaging=true location=true detail=Đã gọi SIM tới Mai.
+09-19 13:59:54.662 32513 32513 I FallSafe/SOS: contactId=null status=eventId=98cce3aa-eb03-49aa-90fc-1799673062c7 step=MAP_LINK status=SUCCESS elapsedMs=251 source=FUSED accuracyM=5.0 calling=true messaging=true location=true detail=Tin nhắn có liên kết bản đồ.

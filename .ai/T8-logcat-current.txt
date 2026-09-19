@@ -1,0 +1,5 @@
+--------- beginning of main
+09-19 08:12:45.525 20621 20621 I FallSafe/Location: playServicesAvailability=0
+09-19 08:12:45.528 20621 20621 I FallSafe/Location: playServicesAvailability=0
+09-19 08:12:45.747 20621 20621 I FallSafe/Location: source=CACHED accuracy=5.0 age=24631 cause=TIMEOUT
+09-19 08:12:45.791 20621 20621 I FallSafe/SMS: eventId=cf77e285-4ae0-4f4a-94d1-c7cc408ca113 contactId=sos-acceptance-1 status=SENDING subscriptionId=1

@@ -1,0 +1,7 @@
+location_mode=0 (0 = off)
+saw cause=PROVIDER_DISABLED: True
+steps observed: {"LOCATION": "UNAVAILABLE", "SMS": "SUCCESS", "VOICE_CALL": "UNAVAILABLE", "SIM_CALL": "SUCCESS", "MAP_LINK": "SKIPPED"}
+SMS log lines: 2
+SIM_CALL lines: 2
+sms/sent rows total: 14
+degraded SMS present: True

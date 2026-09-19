@@ -77,8 +77,10 @@ class DemoApplication : Application() {
         emergencyCoordinator = vn.nckh27pa.fallsafe.emergency.EmergencyCoordinator(
             smsGateway,
             vn.nckh27pa.fallsafe.emergency.EmergencyBackendGateway { eventId -> sync.requestVoice(eventId) },
-            vn.nckh27pa.fallsafe.emergency.SharedPrefsEmergencyStore(this),
-            capabilities = { controller.capabilitySnapshot() }
+            call = vn.nckh27pa.fallsafe.emergency.AndroidSimCallGateway(this),
+            store = vn.nckh27pa.fallsafe.emergency.SharedPrefsEmergencyStore(this),
+            capabilities = { controller.capabilitySnapshot() },
+            logStatus = { tag, contactId, status -> android.util.Log.i(tag, "contactId=$contactId status=$status") }
         )
         locationController = vn.nckh27pa.fallsafe.location.AndroidEmergencyLocationController(
             this, { controller.contacts }, smsGateway,

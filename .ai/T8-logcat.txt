@@ -1,0 +1,5 @@
+--------- beginning of main
+09-19 08:09:41.364 19956 19956 I FallSafe/Location: playServicesAvailability=0
+09-19 08:09:41.367 19956 19956 I FallSafe/Location: playServicesAvailability=0
+09-19 08:09:41.596 19956 19956 I FallSafe/Location: source=CACHED accuracy=5.0 age=24896 cause=TIMEOUT
+09-19 08:09:41.651 19956 19956 I FallSafe/SMS: contactId=sos-acceptance-1 status=SENDING

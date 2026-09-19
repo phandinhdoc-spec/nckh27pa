@@ -32,19 +32,23 @@ class LocationIntentAndProviderTest {
         assertTrue(result.reason!!.contains("Không có ứng dụng"))
     }
 
-    @Test fun coarseOnlyNeverChoosesGpsAndUsesCoarseCapableProvider() {
-        assertEquals(
-            LocationProvider.NETWORK,
-            LocationProviderSelector.choose(hasFine = false, gpsEnabled = true, networkEnabled = true, fusedEnabled = true)
-        )
-        assertEquals(
-            LocationProvider.FUSED,
-            LocationProviderSelector.choose(hasFine = false, gpsEnabled = true, networkEnabled = false, fusedEnabled = true)
-        )
-        assertNull(LocationProviderSelector.choose(hasFine = false, gpsEnabled = true, networkEnabled = false, fusedEnabled = false))
-        assertEquals(
-            LocationProvider.GPS,
-            LocationProviderSelector.choose(hasFine = true, gpsEnabled = true, networkEnabled = true, fusedEnabled = true)
-        )
+    @Test fun bestAvailableUsesFusedBeforeGpsAndSupportsCoarseOnly() = kotlinx.coroutines.test.runTest {
+        for (permission in LocationPermission.entries.filter { it != LocationPermission.DENIED }) {
+            val attempted = mutableListOf<LocationProviderKind>()
+            val source = object : PlatformLocationSource {
+                override fun permission() = permission
+                override fun enabledProviders() = if (permission == LocationPermission.PRECISE)
+                    LocationProviderKind.entries.toSet() else setOf(LocationProviderKind.FUSED, LocationProviderKind.NETWORK)
+                override suspend fun lastKnown(): vn.nckh27pa.fallsafe.emergency.LocationFix? = null
+                override suspend fun current(kind: LocationProviderKind, timeoutMs: Long): vn.nckh27pa.fallsafe.emergency.LocationFix? {
+                    attempted += kind
+                    return vn.nckh27pa.fallsafe.emergency.LocationFix.validated(10.5, 106.5, 150f, 1000,
+                        vn.nckh27pa.fallsafe.emergency.LocationSource.UNKNOWN)
+                }
+            }
+            val result = BestAvailableLocationRepository(source) { 1000 }.getBestAvailableLocation()
+            assertEquals(listOf(LocationProviderKind.FUSED), attempted)
+            assertEquals(vn.nckh27pa.fallsafe.emergency.LocationSource.FUSED, result.fix!!.source)
+        }
     }
 }

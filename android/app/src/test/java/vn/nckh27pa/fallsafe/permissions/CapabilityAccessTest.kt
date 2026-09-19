@@ -61,13 +61,23 @@ class CapabilityAccessTest {
         assertEquals(before, platform.requests.toList() to platform.settingsOpens.toList())
     }
 
+    @Test fun grantedPermissionDoesNotClaimSmsReadinessOnADeviceWithoutSmsHardware() {
+        val platform = FakePlatform(granted = Capability.entries.toMutableSet()).apply { unsupported += Capability.MESSAGING }
+        val access = CapabilityAccessController(platform, MemoryCapabilityAttemptStore())
+        assertFalse(access.snapshot().messaging)
+        assertFalse(access.checkSosReadiness(1).allCapabilitiesGranted)
+        assertEquals(PermissionRequestResult.SETTINGS_REQUIRED, access.request(Capability.MESSAGING, true))
+    }
+
     private class FakePlatform(
         val granted: MutableSet<Capability> = mutableSetOf(),
         val rationale: MutableSet<Capability> = mutableSetOf()
     ) : CapabilityPlatform {
         val requests = mutableListOf<Capability>()
         val settingsOpens = mutableListOf<Capability>()
+        val unsupported = mutableSetOf<Capability>()
         override fun isGranted(capability: Capability) = capability in granted
+        override fun isSupported(capability: Capability) = capability !in unsupported
         override fun shouldShowRationale(capability: Capability) = capability in rationale
         override fun request(capability: Capability) { requests += capability }
         override fun openSettings(capability: Capability) { settingsOpens += capability }

@@ -1,0 +1,46 @@
+Bạn là reviewer (Level 3). Nhiệm vụ: REVIEW, KHÔNG sửa code. Không chạy Gradle build (một worker khác đang giữ lượt build);
+nếu cần bằng chứng, chỉ đọc file và git diff.
+
+Bối cảnh: đây là ứng dụng SOS phát hiện ngã (Android, Kotlin/Compose), an toàn tính mạng. Chủ dự án báo lỗi:
+app đã xin quyền Location/CALL_PHONE/SEND_SMS nhưng chức năng không chạy đúng — khi cần vị trí thì báo
+"Ra chỗ thoáng và thử lại". Yêu cầu: SOS không được phụ thuộc satellite fix, không nhánh nào của SOS (SMS/CALL/backend)
+bị chặn bởi nhánh khác, không hardcode số điện thoại/tọa độ, không crash khi thiếu quyền.
+
+Ticket implementation: .ai/T6-codex-location-sos.md (đọc để biết acceptance). Contract đã chốt trong
+android/app/src/main/java/vn/nckh27pa/fallsafe/emergency/EmergencyCore.kt.
+
+Phạm vi review (chỉ những file này):
+- android/app/src/main/java/vn/nckh27pa/fallsafe/location/LocationRepository.kt (mới)
+- android/app/src/main/java/vn/nckh27pa/fallsafe/location/AndroidPlatformLocationSource.kt (mới)
+- android/app/src/main/java/vn/nckh27pa/fallsafe/location/AndroidEmergencyLocationController.kt
+- android/app/src/main/java/vn/nckh27pa/fallsafe/location/LocationResolution.kt
+- android/app/src/main/java/vn/nckh27pa/fallsafe/emergency/EmergencyCore.kt
+- android/app/src/main/java/vn/nckh27pa/fallsafe/emergency/AndroidSimCallGateway.kt (mới)
+- android/app/src/main/java/vn/nckh27pa/fallsafe/emergency/AndroidSmsManagerGateway.kt
+- android/app/src/main/java/vn/nckh27pa/fallsafe/DemoApplication.kt
+- các test: app/src/test/java/vn/nckh27pa/fallsafe/location/BestAvailableLocationRepositoryTest.kt,
+  LocationIntentAndProviderTest.kt, app/src/test/.../emergency/SosCallStepTest.kt,
+  SosDispatchReportTest.kt, EmergencyLogicTest.kt
+
+Câu hỏi bắt buộc phải trả lời, mỗi câu kèm file:line và mức độ (BLOCKER / MAJOR / MINOR / OK):
+1. Còn đường nào khiến SOS phụ thuộc GPS_PROVIDER đơn độc hoặc chờ satellite fix không?
+2. Nếu GPS không có fix nhưng fused/Wi-Fi/cell có fix, code có trả về fix dùng được không? Chỉ ra đường đi cụ thể.
+3. `BestAvailableLocationRepository` có thật sự bị chặn trên theo timeout, không throw, và không bỏ qua cache cũ không?
+   Tìm lỗi ở logic `withTimeoutOrNull` lồng nhau, `timedOut` heuristic, và budget chia cho từng provider
+   (FUSED/GPS nửa budget, NETWORK full) — có trường hợp nào provider sau không bao giờ được thử không?
+4. `AndroidPlatformLocationSource`: `awaitLocation()` resume có nguy cơ double-resume / leak CancellationTokenSource không?
+   `enabledProviders()` có đúng khi chỉ có quyền COARSE, khi máy không có Google Play Services, và khi API < 31?
+   `lastKnown()` có thể ném SecurityException ra ngoài không (nó chỉ catch RuntimeException)?
+5. `EmergencyCoordinator.dispatch`: SIM_CALL có thể gọi quá một lần, gọi số sai, hoặc chặn SMS/backend không?
+   Thứ tự bước có đúng LOCATION, SMS, VOICE_CALL, SIM_CALL, MAP_LINK không? `EmergencyRecord.dispatchReport`
+   khi dispatch lại lần hai có bị gọi lại SIM_CALL không?
+6. `HomeScreen.kt` có bị sửa không (không được phép)? Có file nào ngoài phạm vi bị sửa không?
+7. Log có lộ số điện thoại/nội dung tin nhắn không?
+8. Test có thật sự kiểm chứng hành vi (không phải chỉ hằng số), và có test nào bị làm yếu/ xóa để suite xanh không?
+   (BoundedLocationResolutionTest.kt đã bị xóa — kiểm tra xem coverage thay thế có tương đương không.)
+9. Có rủi ro crash/ANR khi dispatch (startActivity trong hàm @Synchronized, gọi trên thread nào)?
+10. Link bản đồ: có đúng một helper `https://maps.google.com/?q={lat},{lon}` và đúng tọa độ ở SMS, UI, backend không?
+
+Đầu ra: danh sách finding đánh số, ngắn gọn. Mỗi finding: mức độ, file:line, hành vi sai, vì sao vi phạm contract,
+cách sửa tối thiểu, và test hồi quy cần thêm. Nếu không có vấn đề ở một câu, ghi rõ OK kèm bằng chứng.
+Không đề xuất refactor ngoài phạm vi. Không khen. Không sửa file.

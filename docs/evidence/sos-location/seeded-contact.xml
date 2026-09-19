@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+<string name="contacts_list_json">[{&quot;id&quot;: &quot;sos-acceptance-1&quot;, &quot;name&quot;: &quot;Mai&quot;, &quot;relationship&quot;: &quot;Con gái&quot;, &quot;phone&quot;: &quot;0901234567&quot;, &quot;receiveSos&quot;: true, &quot;isPrimary&quot;: true, &quot;callPriority&quot;: 1}]</string>
+</map>

@@ -1,6 +1,7 @@
 package vn.nckh27pa.fallsafe.emergency
 
 import vn.nckh27pa.fallsafe.EmergencyContact
+import vn.nckh27pa.fallsafe.ContactValidator
 import vn.nckh27pa.fallsafe.permissions.CapabilitySnapshot
 import vn.nckh27pa.fallsafe.permissions.CapabilitySnapshotProvider
 import vn.nckh27pa.fallsafe.permissions.LocationPrecision
@@ -12,7 +13,14 @@ import java.util.UUID
 
 const val LOCATION_FRESH_MS = 120_000L
 
-enum class LocationSource { PHONE, ESP32_GNSS }
+/**
+ * Where a fix came from. PHONE/ESP32_GNSS keep their original meaning; the rest were added with the
+ * best-available location pipeline. No satellite fix is required for any source to be usable.
+ */
+enum class LocationSource { PHONE, ESP32_GNSS, FUSED, GPS, NETWORK, CACHED, UNKNOWN }
+
+/** Bounded budget for [LocationRepository.getBestAvailableLocation]; never blocks SOS longer than this. */
+const val SOS_LOCATION_TIMEOUT_MS = 8_000L
 enum class LocationFreshness { FRESH, STALE, UNAVAILABLE }
 enum class LocationFailureCause { PERMISSION_DENIED, PROVIDER_DISABLED, TIMEOUT, NO_FIX, INVALID_FIX }
 
@@ -23,7 +31,10 @@ class LocationFix private constructor(
     val fixTimeMs: Long,
     val source: LocationSource
 ) {
-    val mapsUrl: String get() = "https://www.google.com/maps/search/?api=1&query=$latitude,$longitude"
+    /** Single source of truth for the shared location link (SMS, backend, UI). */
+    val mapsUrl: String get() = "https://maps.google.com/?q=$latitude,$longitude"
+    /** Single source of truth for the platform geo: URI used when opening a map app. */
+    val geoUri: String get() = "geo:$latitude,$longitude?q=$latitude,$longitude"
     fun freshness(nowMs: Long): LocationFreshness =
         if (nowMs >= fixTimeMs && nowMs - fixTimeMs <= LOCATION_FRESH_MS) LocationFreshness.FRESH else LocationFreshness.STALE
     companion object {
@@ -36,30 +47,33 @@ class LocationFix private constructor(
     }
 }
 
+/**
+ * Outcome of a bounded best-available-location lookup. Always completes; never throws.
+ * [cause] is null when the returned fix is fresh and current; otherwise it explains why the
+ * fallback/absence happened while [fix] may still be usable.
+ */
+data class LocationLookup(
+    val fix: LocationFix?,
+    val cause: LocationFailureCause?,
+    val fromCache: Boolean,
+    val elapsedMs: Long
+)
+
+/**
+ * Single entry point for SOS location. Implementations MUST combine cached/last-known, fused,
+ * Wi-Fi/cell and GNSS sources and MUST NOT require a satellite fix to return a usable fix.
+ */
+interface LocationRepository {
+    suspend fun getBestAvailableLocation(timeoutMs: Long = SOS_LOCATION_TIMEOUT_MS): LocationLookup
+}
+
 data class LocationState(
     val fix: LocationFix? = null,
     val freshness: LocationFreshness = LocationFreshness.UNAVAILABLE,
     val cause: LocationFailureCause? = LocationFailureCause.NO_FIX,
-    val explanation: String = "Chưa có vị trí GPS.",
-    val remediation: String? = "Di chuyển ra nơi thoáng và thử lại."
+    val explanation: String = "Đang xác định vị trí...",
+    val remediation: String? = null
 )
-
-data class LocationResolution(val fix: LocationFix?, val cause: LocationFailureCause?)
-
-/** Completes once. Failures use a validated last-known fix when one is available. */
-class BoundedLocationResolutionAttempt(
-    private val lastKnown: () -> LocationFix?,
-    private val onComplete: (LocationResolution) -> Unit
-) {
-    private var completed = false
-    @Synchronized fun current(fix: LocationFix) = complete(LocationResolution(fix, null))
-    @Synchronized fun fail(cause: LocationFailureCause) = complete(LocationResolution(lastKnown(), cause))
-    private fun complete(resolution: LocationResolution) {
-        if (completed) return
-        completed = true
-        onComplete(resolution)
-    }
-}
 
 data class ManualShareConfirmation(val token: String, val contactId: String, val preview: String)
 
@@ -80,10 +94,17 @@ interface EmergencySmsGateway { fun send(request: SmsRequest): SmsDispatchState 
 enum class VoiceDispatchStatus { CONFIGURED, STARTED, UNAVAILABLE, DISABLED }
 fun interface EmergencyBackendGateway { fun startVoice(eventId: String): VoiceDispatchStatus }
 
+enum class CallStatus { STARTED, PERMISSION_MISSING, UNAVAILABLE, FAILED }
+data class CallDispatchState(val status: CallStatus, val detail: String? = null)
+
+/** Direct handset call path (ACTION_CALL). Independent of the backend voice adapter. */
+fun interface EmergencyCallGateway { fun call(phone: String): CallDispatchState }
+
 enum class SosStep(val vietnameseLabel: String) {
     LOCATION("Vị trí"),
     SMS("Tin nhắn"),
     VOICE_CALL("Cuộc gọi trợ giúp"),
+    SIM_CALL("Cuộc gọi SIM"),
     MAP_LINK("Liên kết bản đồ")
 }
 enum class SosStepStatus { SUCCESS, PARTIAL, PERMISSION_MISSING, UNAVAILABLE, FAILED, SKIPPED }
@@ -93,7 +114,7 @@ data class SosDispatchReport(val eventId: String, val steps: List<SosStepResult>
     val failedSteps: List<SosStepResult>
         get() = steps.filter { it.status !in setOf(SosStepStatus.SUCCESS, SosStepStatus.SKIPPED) }
     val allSucceeded: Boolean
-        get() = SosStep.entries.all { statusOf(it) == SosStepStatus.SUCCESS }
+        get() = SosStep.entries.all { statusOf(it) in setOf(SosStepStatus.SUCCESS, SosStepStatus.SKIPPED) }
     fun labelOf(step: SosStep): String = step.vietnameseLabel
 }
 
@@ -104,19 +125,24 @@ object EmergencyFailureMessages {
 }
 
 object EmergencyMessageFormatter {
+    private fun sourceLabel(source: LocationSource) = when (source) {
+        LocationSource.ESP32_GNSS -> "ESP32 GNSS"
+        LocationSource.UNKNOWN -> "không xác định"
+        else -> "điện thoại"
+    }
     private fun time(value: Long): String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss 'UTC'", Locale.ROOT).apply { timeZone=TimeZone.getTimeZone("UTC") }.format(Date(value))
     fun emergency(displayName: String?, eventTimeMs: Long, fix: LocationFix?, nowMs: Long): String {
         val name=displayName?.trim().takeUnless { it.isNullOrEmpty() } ?: "Người dùng FallSafe"
-        val header="CẢNH BÁO SOS: Tôi có thể đã bị ngã. Người cần trợ giúp: $name. Thời điểm sự kiện: ${time(eventTimeMs)}."
-        if (fix==null) return "$header Chưa xác định được vị trí."
-        val source=when(fix.source){LocationSource.PHONE->"điện thoại";LocationSource.ESP32_GNSS->"ESP32 GNSS"}
+        val header="CẢNH BÁO SOS: Tôi có thể đã bị ngã và cần hỗ trợ. Người cần trợ giúp: $name. Thời điểm sự kiện: ${time(eventTimeMs)}."
+        if (fix==null) return "$header Hiện chưa xác định được vị trí chính xác. Vui lòng gọi lại hoặc kiểm tra ứng dụng theo dõi."
+        val source=sourceLabel(fix.source)
         val fixDescription=if(fix.freshness(nowMs)==LocationFreshness.STALE)
             " Vị trí gần nhất, cập nhật lúc ${time(fix.fixTimeMs)}." else " Thời điểm fix: ${time(fix.fixTimeMs)}."
         val accuracy=fix.accuracyM?.let { " Độ chính xác: ${it.toInt()} m." } ?: ""
         return "$header Tọa độ: ${fix.latitude},${fix.longitude}. ${fix.mapsUrl}.$fixDescription$accuracy Nguồn vị trí: $source."
     }
     fun locationSupplement(displayName: String?, fix: LocationFix, nowMs: Long): String {
-        val source=if(fix.source==LocationSource.PHONE)"điện thoại" else "ESP32 GNSS"
+        val source=sourceLabel(fix.source)
         val accuracy=fix.accuracyM?.let { " Độ chính xác: ${it.toInt()} m." } ?: ""
         return "Bổ sung vị trí cho cảnh báo của ${displayName?.trim().takeUnless { it.isNullOrEmpty() } ?: "Người dùng FallSafe"}: ${fix.latitude},${fix.longitude}. ${fix.mapsUrl}. Thời điểm fix: ${time(fix.fixTimeMs)}.$accuracy Nguồn vị trí: $source."
     }
@@ -134,12 +160,12 @@ class SmsPartAggregation(private val total: Int) {
     private val delivered = mutableSetOf<Int>()
     private val deliveryFailed = mutableSetOf<Int>()
     @Synchronized fun recordSent(index: Int, successful: Boolean): SmsAggregationResult {
-        require(index in 0 until total)
+        if (index !in 0 until total) return result()
         if (successful) sent += index else sentFailed += index
         return result()
     }
     @Synchronized fun recordDelivery(index: Int, successful: Boolean): SmsAggregationResult {
-        require(index in 0 until total)
+        if (index !in 0 until total) return result()
         if (successful) { delivered += index; deliveryFailed -= index }
         else if (index !in delivered) deliveryFailed += index
         return result()
@@ -154,10 +180,24 @@ class SmsPartAggregation(private val total: Int) {
     }
 }
 
+/** Selection policy deliberately falls back to Android's default SMS subscription during an SOS. */
+object SmsSubscriptionChoice {
+    fun resolve(requestedId: Int?, defaultId: Int?): Int? = requestedId ?: defaultId
+}
+
+object SosDiagnostic {
+    fun line(eventId: String, result: SosStepResult, elapsedMs: Long, capabilities: CapabilitySnapshot, fix: LocationFix?): String =
+        "eventId=$eventId step=${result.step} status=${result.status} elapsedMs=$elapsedMs " +
+            "source=${fix?.source ?: "none"} accuracyM=${fix?.accuracyM ?: "none"} " +
+            "calling=${capabilities.calling} messaging=${capabilities.messaging} location=${capabilities.location}" +
+            (result.detail?.let { " detail=$it" } ?: "")
+}
+
 data class EmergencyRecord(
     val eventId: String,
     var cancelled: Boolean = false,
     var dispatched: Boolean = false,
+    var dispatchedWithFix: Boolean = false,
     var voiceStarted: Boolean = false,
     var fix: LocationFix? = null,
     var displayName: String = "Người dùng FallSafe",
@@ -177,12 +217,24 @@ class MemoryEmergencyStore : EmergencyStore {
 class EmergencyCoordinator(
     private val sms: EmergencySmsGateway,
     private val backend: EmergencyBackendGateway,
+    private val call: EmergencyCallGateway = EmergencyCallGateway { CallDispatchState(CallStatus.UNAVAILABLE, "Chưa cấu hình cuộc gọi SIM") },
     private val store: EmergencyStore,
     private val nowMs: () -> Long = System::currentTimeMillis,
     private val capabilities: CapabilitySnapshotProvider = CapabilitySnapshotProvider {
         CapabilitySnapshot(true, true, true, LocationPrecision.PRECISE)
-    }
+    },
+    private val logStatus: (tag: String, contactId: String?, status: String) -> Unit = { _, _, _ -> }
 ) {
+    constructor(
+        sms: EmergencySmsGateway,
+        backend: EmergencyBackendGateway,
+        store: EmergencyStore,
+        nowMs: () -> Long = System::currentTimeMillis,
+        capabilities: CapabilitySnapshotProvider = CapabilitySnapshotProvider {
+            CapabilitySnapshot(true, true, true, LocationPrecision.PRECISE)
+        }
+    ) : this(sms, backend, EmergencyCallGateway { CallDispatchState(CallStatus.UNAVAILABLE, "Chưa cấu hình cuộc gọi SIM") }, store, nowMs, capabilities)
+
     @Volatile var latestReport: SosDispatchReport? = null; private set
     fun newEventId(): String = UUID.randomUUID().toString()
     fun report(eventId: String): SosDispatchReport? = store.get(eventId)?.dispatchReport?.also { latestReport = it }
@@ -196,16 +248,24 @@ class EmergencyCoordinator(
         beginVerifying(eventId);dispatch(eventId,contacts,displayName,fix);return eventId
     }
     private fun dispatch(eventId:String,contacts:List<EmergencyContact>,displayName:String,fix:LocationFix?) {
+        val dispatchStarted = nowMs()
         val record=store.get(eventId)?:EmergencyRecord(eventId,eventTimeMs=nowMs())
         if(record.cancelled)return
-        record.fix=fix?:record.fix;record.contacts=contacts.filter{it.receiveSos};record.displayName=displayName.ifBlank{"Người dùng FallSafe"}
         if(record.dispatched){record.dispatchReport?.let{latestReport=it};return}
+        record.fix=fix?:record.fix
+        record.dispatchedWithFix=record.fix!=null
+        record.contacts=contacts.filter{it.receiveSos}.map { it.copy(phone = ContactValidator.normalize(it.phone)) }
+            .sortedWith(compareByDescending<EmergencyContact> { it.isPrimary }.thenBy { it.callPriority })
+        record.displayName=displayName.ifBlank{"Người dùng FallSafe"}
         record.dispatched=true;store.save(record)
         val permissionFacts=try{capabilities.snapshot()}catch(_:Exception){CapabilitySnapshot(false,false,false)}
         val steps=mutableListOf<SosStepResult>()
         steps += if(record.fix!=null) SosStepResult(SosStep.LOCATION,SosStepStatus.SUCCESS,"Đã xác định được vị trí.")
             else SosStepResult(SosStep.LOCATION,SosStepStatus.UNAVAILABLE,"Chưa xác định được vị trí.")
 
+        val smsOutcome=dispatchSms(record,permissionFacts)
+        // Handset rescue must not depend on the backend accepting a voice request.
+        val simResult=dispatchSimCall(record, permissionFacts)
         val voiceResult=if(!record.voiceStarted){
             record.voiceStarted=true;store.save(record)
             val status=try{backend.startVoice(eventId)}catch(_:Exception){VoiceDispatchStatus.UNAVAILABLE}
@@ -219,35 +279,65 @@ class EmergencyCoordinator(
         } else record.dispatchReport?.steps?.firstOrNull{it.step==SosStep.VOICE_CALL}
             ?:SosStepResult(SosStep.VOICE_CALL,SosStepStatus.UNAVAILABLE,"Chưa có kết quả cuộc gọi trợ giúp.")
 
-        val smsOutcome=dispatchSms(record,permissionFacts)
         steps += smsOutcome.result
         steps += voiceResult
+        logStatus("FallSafe/CALL", null, "VOICE_CALL:${voiceResult.status}")
+        steps += simResult
         steps += when {
             record.fix==null -> SosStepResult(SosStep.MAP_LINK,SosStepStatus.SKIPPED,"Không có vị trí để tạo liên kết bản đồ.")
             smsOutcome.mapLinkSubmitted -> SosStepResult(SosStep.MAP_LINK,SosStepStatus.SUCCESS,"Tin nhắn có liên kết bản đồ.")
             else -> SosStepResult(SosStep.MAP_LINK,SosStepStatus.FAILED,"Chưa gửi được liên kết bản đồ cho người thân.")
         }
         record.dispatchReport=SosDispatchReport(eventId,steps).also{latestReport=it}
+        steps.forEach { logStatus("FallSafe/SOS", null, SosDiagnostic.line(eventId, it, (nowMs() - dispatchStarted).coerceAtLeast(0), permissionFacts, record.fix)) }
         store.save(record)
+    }
+
+    private fun dispatchSimCall(
+        record: EmergencyRecord,
+        permissionFacts: CapabilitySnapshot
+    ): SosStepResult {
+        val primary = record.contacts.firstOrNull { it.receiveSos && it.phone.isNotBlank() }
+        fun result(status: SosStepStatus, detail: String) = SosStepResult(SosStep.SIM_CALL, status, detail).also {
+            logStatus("FallSafe/CALL", primary?.id, "SIM_CALL:$status")
+        }
+        if (!permissionFacts.calling) return result(SosStepStatus.PERMISSION_MISSING, EmergencyFailureMessages.callPermissionMissing)
+        if (primary == null) return result(SosStepStatus.UNAVAILABLE, "Chưa có người thân để gọi.")
+        val state = try { call.call(primary.phone) }
+            catch (_: SecurityException) { CallDispatchState(CallStatus.PERMISSION_MISSING, EmergencyFailureMessages.callPermissionMissing) }
+            catch (_: Exception) { CallDispatchState(CallStatus.FAILED, "Không thể thực hiện cuộc gọi SIM.") }
+        return when (state.status) {
+            CallStatus.STARTED -> result(SosStepStatus.SUCCESS, "Đã gọi SIM tới ${primary.name}.")
+            CallStatus.PERMISSION_MISSING -> result(SosStepStatus.PERMISSION_MISSING, state.detail ?: EmergencyFailureMessages.callPermissionMissing)
+            CallStatus.UNAVAILABLE -> result(SosStepStatus.UNAVAILABLE, state.detail ?: "Cuộc gọi SIM không khả dụng.")
+            CallStatus.FAILED -> result(SosStepStatus.FAILED, state.detail ?: "Không thể thực hiện cuộc gọi SIM.")
+        }
     }
 
     private data class SmsStepOutcome(val result:SosStepResult,val mapLinkSubmitted:Boolean)
     private fun dispatchSms(record:EmergencyRecord,permissionFacts:CapabilitySnapshot):SmsStepOutcome {
         if(!permissionFacts.messaging)return SmsStepOutcome(SosStepResult(SosStep.SMS,SosStepStatus.PERMISSION_MISSING,EmergencyFailureMessages.messagingPermissionMissing),false)
         if(record.contacts.isEmpty())return SmsStepOutcome(SosStepResult(SosStep.SMS,SosStepStatus.UNAVAILABLE,"Chưa có người thân nhận cảnh báo."),false)
-        var succeeded=0;var failed=0;val details=mutableListOf<String>()
+        var succeeded=0;var failed=0;var skipped=0;val details=mutableListOf<String>()
         for(contact in record.contacts) if(record.smsSentContacts.add(contact.id)) {
+            if(contact.phone.isBlank()){skipped++;details += "Số điện thoại của ${contact.name} để trống nên chưa gửi.";continue}
             store.save(record)
             val state=try {
                 sms.send(SmsRequest(record.eventId,contact.id,contact.phone,EmergencyMessageFormatter.emergency(record.displayName,record.eventTimeMs,record.fix,nowMs())))
             } catch (_:Exception) {
                 SmsDispatchState(record.eventId,contact.id,SmsDeliveryStatus.FAILED,"Không thể gửi SMS trên thiết bị.")
             }
-            if(state.status==SmsDeliveryStatus.FAILED){failed++;state.detail?.let(details::add)}else succeeded++
+            logStatus("FallSafe/SMS", contact.id, state.status.name)
+            state.detail?.let(details::add)
+            if(state.status==SmsDeliveryStatus.FAILED){failed++}else succeeded++
         }
         val result=when {
-            failed==0 && succeeded==record.contacts.size -> SosStepResult(SosStep.SMS,SosStepStatus.SUCCESS,"Đã chuyển toàn bộ tin nhắn cho thiết bị gửi.")
+            failed==0 && succeeded==record.contacts.size -> SosStepResult(SosStep.SMS,SosStepStatus.SUCCESS,
+                "Đã chuyển toàn bộ tin nhắn cho thiết bị gửi." + details.firstOrNull()?.let { " $it" }.orEmpty())
+            failed==0 && succeeded>0 -> SosStepResult(SosStep.SMS,SosStepStatus.SUCCESS,
+                "Đã gửi tin nhắn cho $succeeded người; bỏ qua $skipped người chưa có số điện thoại.")
             succeeded>0 -> SosStepResult(SosStep.SMS,SosStepStatus.PARTIAL,details.firstOrNull()?:"Một số tin nhắn chưa gửi được.")
+            skipped>0 -> SosStepResult(SosStep.SMS,SosStepStatus.FAILED,"Không thể gửi tin nhắn: chưa có số điện thoại hợp lệ.")
             else -> SosStepResult(SosStep.SMS,SosStepStatus.FAILED,details.firstOrNull()?:"Không thể gửi tin nhắn.")
         }
         return SmsStepOutcome(result,record.fix!=null&&succeeded>0)
@@ -258,7 +348,7 @@ class EmergencyCoordinator(
         record.fix=fix
         val canMessage=try{capabilities.snapshot().messaging}catch(_:Exception){false}
         var supplementSent=false
-        if(record.dispatched&&canMessage) for(contact in record.contacts) if(record.supplementSentContacts.add(contact.id)) {
+        if(record.dispatched&&!record.dispatchedWithFix&&canMessage) for(contact in record.contacts) if(contact.phone.isNotBlank()&&record.supplementSentContacts.add(contact.id)) {
             store.save(record)
             try {
                 val state=sms.send(SmsRequest(eventId,contact.id,contact.phone,EmergencyMessageFormatter.locationSupplement(record.displayName,fix,nowMs()),supplement=true))

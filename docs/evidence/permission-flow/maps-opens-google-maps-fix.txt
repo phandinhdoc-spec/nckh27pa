@@ -1,33 +1,29 @@
- 
- 
- 
- 
- 
- 
- 
- Trạng thái SOS: Vị trí: Thành công • Tin nhắn: Không khả dụng • Cuộc gọi trợ giúp: Không khả dụng • Liên kết bản đồ: Bỏ qua. Chạm để xem chi tiết từng bước.
-🚨 
-Vị trí: Thành công • Tin nhắn: Không khả dụng • Cuộc gọi trợ giúp: Không khả dụng • Liên kết bản đồ: Bỏ qua 
- 
-CHI TIẾT 
- 
- 
- Vị trí của tôi: Vị trí mới. Chạm để mở bản đồ.
-📍 
-VỊ TRÍ CỦA TÔI 
-Vị trí mới 
-Chạm xem bản đồ 
- 
- 
+
+
+
+
+
+
+
+ Trạng thái SOS: Vị trí: Thành công • Tin nhắn: Không khả dụng • Cuộc gọi trợ giúp: Không khả dụng • Cuộc gọi SIM: Không khả dụng • Liên kết bản đồ: Bỏ qua. Chạm để xem chi tiết từng bước.
+🚨
+Vị trí: Thành công • Tin nhắn: Không khả dụng • Cuộc gọi trợ giúp: Không khả dụng • Cuộc gọi SIM: Không khả dụng • Liên kết bản đồ: Bỏ qua
+
+CHI TIẾT
+
+
+ Vị trí của tôi: Đã xác định. Chạm để mở bản đồ.
+📍
+VỊ TRÍ CỦA TÔI
+Đã xác định
+± 5 m • vừa xong
+
+
  Gửi vị trí: Sẵn sàng gửi. Chạm để chọn người nhận.
-GỬI VỊ TRÍ 
-📤 
-Sẵn sàng gửi 
-Gửi SMS tọa độ 
- 
- 
- Gọi người thân: Chưa có liên hệ. Chạm để mở danh bạ gọi.
-📞 
-GỌI NGƯỜI THÂN 
-Chưa có liên hệ 
-Cuộc 
+GỬI VỊ TRÍ
+📤
+Sẵn sàng gửi
+Gửi SMS tọa độ
+
+
+ Gọi người thân: Chưa có liên hệ.

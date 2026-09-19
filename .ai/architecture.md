@@ -134,7 +134,7 @@ Hệ thống hỗ trợ phát hiện té ngã, choáng váng và kích hoạt c�
   - BLE GATT: Theo `docs/interface-contract.md`.
 
 ## 8. Build & Verification Commands
-- **Environment Requirement**: JDK 21 (`export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64`). Host system default is Java 25.0.3, which is incompatible với Gradle 8.13.
+- **Environment Requirement**: JDK 17 hoặc 21 (`export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64` hoặc `/usr/lib/jvm/java-17-openjdk-amd64`). Host system default is Java 25.0.3, which is incompatible với Gradle 8.13 và fail ngay trước khi cấu hình project. Lượt T8 (2026-09-19) đã kiểm chứng lại bằng JDK 17: `--rerun-tasks` → 175 test PASS, `assembleDebug` PASS.
 - **Android Unit Tests**:
   ```bash
   JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew testDebugUnitTest --no-daemon
@@ -181,7 +181,12 @@ Hệ thống hỗ trợ phát hiện té ngã, choáng váng và kích hoạt c�
 - `docs/api-contract.md`: Canonical REST API v1 contract cho Android, ESP32, và Backend.
 - `docs/esp32-api.md`: Hướng dẫn tích hợp REST API cho firmware ESP32.
 - `docs/interface-contract.md`: Formal schema và packet contract giữa Android và ESP32 (BLE GATT).
-- `docs/decisions.md`: Project constraints, decisions (D01–D04), and protocol gaps (C01–C07).
+- `android/app/src/main/java/vn/nckh27pa/fallsafe/location/LocationRepository.kt`: pure `PlatformLocationSource` port + `BestAvailableLocationRepository` (cached-first, FUSED→GPS→NETWORK budgets, bounded, never throws).
+- `android/app/src/main/java/vn/nckh27pa/fallsafe/location/AndroidPlatformLocationSource.kt`: `FusedLocationProviderClient` first, `LocationManager` fallback; per-provider budget honoured exactly.
+- `android/app/src/main/java/vn/nckh27pa/fallsafe/emergency/AndroidSimCallGateway.kt`: `ACTION_CALL` gateway, `CALL_PHONE` pre-check, main-looper posting when off the UI thread.
+- `android/scripts/sos-location-acceptance.py`: emulator-only SOS acceptance (seeded contact, injected geo fix, real sensor fall, SMS/CALL evidence).
+- `docs/evidence/sos-location/`: evidence for the SOS flow (results.json, logcats, sent-SMS row, UI dumps).
+- `docs/decisions.md`: Project constraints, decisions (D01–D10), and protocol gaps (C01–C07).
 - `docs/next-gate.md`: Pending gates requiring project owner approval.
 
 ## 10. Constraints, Decisions & Gaps
@@ -197,3 +202,33 @@ Hệ thống hỗ trợ phát hiện té ngã, choáng váng và kích hoạt c�
   2. **Android Field Verification**: Permission center, request/denied/permanent-denial, App Settings round trip, grant-on-resume, approximate-only location, location-service-off degradation, Google Maps opens/absent fallback and crash-free SOS degradation are verified on the project emulator (see `docs/evidence/permission-flow/`). Still unverified on a physical device: OEM permission dialogs, multi-SIM selection, carrier SMS delivery reports, real SIM calls, outdoor GPS fix time, lock-screen behaviour and device-specific FGS/background limits.
   3. **ESP32 BLE Transport**: Giao thức framing phân mảnh nhị phân (IF-003) mới chỉ ở mức lab prototype trên host, chưa được phê duyệt tích hợp vào BLE GATT stack thật trên ESP32 hay Android.
   4. **Event & Status Decoders**: Android mới chỉ triển khai `Esp32PacketDecoder.decodeSensor`; chưa có parser cho `Esp32DeviceStatus`, `Esp32EventPacket`, hay `Esp32CommandAck`.
+
+## 11. Target Location & SOS Pipeline (owner-directed, D08–D10)
+
+Mục tiêu: SOS không phụ thuộc satellite fix và không nhánh nào của SOS bị chặn bởi nhánh khác.
+
+### Ports (contract, đã chốt trong `emergency/EmergencyCore.kt`)
+- `LocationRepository.getBestAvailableLocation(timeoutMs = SOS_LOCATION_TIMEOUT_MS): LocationLookup`
+- `LocationLookup(fix, cause, fromCache, elapsedMs)` — luôn hoàn tất, không bao giờ throw.
+- `LocationSource { PHONE, ESP32_GNSS, FUSED, GPS, NETWORK, CACHED, UNKNOWN }`
+- `EmergencyCallGateway.call(phone): CallDispatchState` + `CallStatus { STARTED, PERMISSION_MISSING, UNAVAILABLE, FAILED }`
+- `SosStep { LOCATION, SMS, VOICE_CALL, SIM_CALL, MAP_LINK }`
+- `LocationFix.mapsUrl` (`https://maps.google.com/?q={lat},{lon}`) và `LocationFix.geoUri` là helper DUY NHẤT cho link/URI.
+
+### Luồng lấy vị trí (`location/`)
+1. `PlatformLocationSource` (port thuần Kotlin, JVM-testable): `permission()`, `enabledProviders()`,
+   `suspend lastKnown()`, `suspend current(kind, timeoutMs)` với `LocationProviderKind { FUSED, GPS, NETWORK }`.
+2. `BestAvailableLocationRepository` (thuần Kotlin): permission → cached-fresh dùng ngay → current theo
+   FUSED/GPS/NETWORK → cache cũ (`cause=TIMEOUT`) → thất bại rõ ràng. Không ngưỡng accuracy.
+3. `AndroidPlatformLocationSource` (Android): `FusedLocationProviderClient` (`play-services-location 21.4.0`)
+   là nguồn chính — `lastLocation` cho cache, `getCurrentLocation` với `PRIORITY_HIGH_ACCURACY` rồi
+   `PRIORITY_BALANCED_POWER_ACCURACY` (Wi-Fi/cell). Máy không có Google Play Services →
+   `LocationManager` (`GPS_PROVIDER`, `NETWORK_PROVIDER`, `fused` API ≥ 31).
+4. `AndroidEmergencyLocationController` giữ nguyên interface `EmergencyLocationController` nhưng chỉ publish
+   `LocationState` từ repository. Vị trí ESP32/GNSS (`acceptEsp32Gnss`) vẫn là nguồn BỔ SUNG, không bắt buộc.
+
+### Nhánh SOS độc lập
+`EmergencyCoordinator.dispatch` phát 5 bước: LOCATION, SMS, VOICE_CALL (adapter thoại máy chủ), SIM_CALL
+(`ACTION_CALL` một lần tới người nhận ưu tiên — nhánh ĐỘC LẬP, không bị chặn bởi backend/SMS/vị trí; backend
+`STARTED` không suppress handset call, D09), MAP_LINK. Thiếu vị trí chỉ
+đổi nội dung tin nhắn; SMS/CALL/backend luôn được thử. Không log số điện thoại, chỉ `contactId`.

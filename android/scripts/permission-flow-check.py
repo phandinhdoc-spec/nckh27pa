@@ -80,6 +80,19 @@ def scroll(down=True):
     time.sleep(0.6)
 
 
+# The location card was reworded in the best-available-location change, so "no fix" must be detected by any
+# of the current card texts; matching only the old placeholder silently made this check vacuous.
+NO_FIX_MARKERS = ('Chưa có vị trí', 'Đang xác định', 'Chưa cấp quyền vị trí', 'Vị trí đang tắt')
+
+
+def has_no_fix(body):
+    return any(marker in body for marker in NO_FIX_MARKERS)
+
+
+def clean_dump(body, limit=600):
+    """UI dumps legitimately contain trailing spaces; normalise them so evidence keeps diff --check clean."""
+    return '\n'.join(line.rstrip() for line in body[:limit].split('\n')) + '\n'
+
 def match(nodes, label, exact=False):
     return [n for n in nodes
             if (n.get('text') or '') == label
@@ -372,7 +385,12 @@ def sos_degradation(name):
     dialog = snapshot(name + '-report-dialog')
     body = text(dialog)
     require(dialog, 'Tiến trình gửi SOS', name)
-    for phrase in ('Vị trí', 'Tin nhắn', 'Cuộc gọi trợ giúp', 'Liên kết bản đồ'):
+    # The report now has FIVE rows (SIM call was added) inside a scrollable 400dp dialog, so a single dump
+    # cannot see the last row; accumulate the text across scroll positions before asserting.
+    for extra in range(3):
+        scroll(down=True)
+        body += '\n' + text(snapshot(f'{name}-report-dialog-{extra}'))
+    for phrase in ('Vị trí', 'Tin nhắn', 'Cuộc gọi trợ giúp', 'Cuộc gọi SIM', 'Liên kết bản đồ'):
         assert phrase in body, f'missing step {phrase}: ' + body[:400]
     assert 'không thể tự động gọi' in body, 'auto-call failure not reported truthfully: ' + body[:400]
     tap_label('ĐÓNG', name + '-close', tries=3)
@@ -466,11 +484,11 @@ def acquire_fix(name):
         pass
     time.sleep(1.0)
     body = text(snapshot(name + '-fix-state'))
-    if 'Chưa có vị trí' in body:
+    if has_no_fix(body):
         # the countdown may still be running; let it expire so the dispatch keeps the acquired fix
         time.sleep(11)
         body = text(snapshot(name + '-fix-state-late'))
-    assert 'Chưa có vị trí' not in body, 'no location fix acquired on the emulator: ' + body[:400]
+    assert not has_no_fix(body), 'no location fix acquired on the emulator: ' + body[:400]
     # cancel any pending countdown with the documented 2s hold, then return to the home tab
     try:
         hold_label('TÔI VẪN ỔN', name + '-cancel')
@@ -547,8 +565,8 @@ def ensure_fix(name):
             pass
         time.sleep(1.0)
         body = text(snapshot(f'{name}-fix-{attempt}'))
-        if 'Chưa có vị trí' not in body:
-            (OUT / (name + '-fix.txt')).write_text(body[:600] + '\n')
+        if not has_no_fix(body):
+            (OUT / (name + '-fix.txt')).write_text(clean_dump(body))
             return
     raise AssertionError('the app never published a location fix on the emulator')
 

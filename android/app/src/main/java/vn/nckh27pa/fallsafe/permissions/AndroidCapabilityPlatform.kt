@@ -35,6 +35,12 @@ class AndroidCapabilityPlatform(
         Capability.LOCATION -> granted(Manifest.permission.ACCESS_FINE_LOCATION) || granted(Manifest.permission.ACCESS_COARSE_LOCATION)
     }
 
+    override fun isSupported(capability: Capability): Boolean = when (capability) {
+        Capability.CALLING -> activity.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
+        Capability.MESSAGING -> activity.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
+        Capability.LOCATION -> true
+    }
+
     override fun locationPrecision(): LocationPrecision = when {
         granted(Manifest.permission.ACCESS_FINE_LOCATION) -> LocationPrecision.PRECISE
         granted(Manifest.permission.ACCESS_COARSE_LOCATION) -> LocationPrecision.APPROXIMATE

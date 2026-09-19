@@ -1,21 +1,5 @@
 package vn.nckh27pa.fallsafe.location
 
-enum class LocationProvider { GPS, NETWORK, FUSED }
-
-object LocationProviderSelector {
-    fun choose(
-        hasFine: Boolean,
-        gpsEnabled: Boolean,
-        networkEnabled: Boolean,
-        fusedEnabled: Boolean
-    ): LocationProvider? = when {
-        hasFine && gpsEnabled -> LocationProvider.GPS
-        networkEnabled -> LocationProvider.NETWORK
-        fusedEnabled -> LocationProvider.FUSED
-        else -> null
-    }
-}
-
 enum class MapTarget { GOOGLE_MAPS, GENERIC_MAPS, BROWSER }
 data class MapOpenResult(val opened: Boolean, val target: MapTarget? = null, val reason: String? = null)
 fun interface MapTargetLauncher { fun launch(target: MapTarget): Boolean }
