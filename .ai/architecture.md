@@ -226,6 +226,23 @@ Mục tiêu: SOS không phụ thuộc satellite fix và không nhánh nào của
    `LocationManager` (`GPS_PROVIDER`, `NETWORK_PROVIDER`, `fused` API ≥ 31).
 4. `AndroidEmergencyLocationController` giữ nguyên interface `EmergencyLocationController` nhưng chỉ publish
    `LocationState` từ repository. Vị trí ESP32/GNSS (`acceptEsp32Gnss`) vẫn là nguồn BỔ SUNG, không bắt buộc.
+5. **Phục hồi theo lifecycle (LOC-01, 2026-09-20)**: permission và "Location Services đang bật" là HAI sự thật
+   độc lập; app chỉ đánh giá lại availability (không được cache trạng thái `PROVIDER_DISABLED` mãi).
+   - `LocationRecovery.kt` (thuần Kotlin): `LocationSignal { FOREGROUND_RESUMED, SYSTEM_LOCATION_CHANGED,
+     EMERGENCY_STARTED }`, `LocationAvailability(permission, providers)`, `LocationRecoveryDecision
+     { None, PermissionDenied, ProviderDisabled, Acquire }`, `LocationRecoveryPolicy` (15 s cooldown).
+   - `LocationRecoveryEngine.kt` (thuần Kotlin): lấy availability hiện tại, so với lần trước để tính
+     `availabilityChanged` (lần đánh giá đầu tiên = changed), rồi giao cho policy quyết định.
+   - `AndroidEmergencyLocationController.refreshPermissionTruth()` = re-check đầy đủ, đã nối sẵn vào
+     `MainActivity.onResume` → `DemoController.refreshCapabilityTruth()`; thêm `onSystemLocationChanged()` và
+     `close()`; `requestInFlight = activeRequest?.isActive == true` là nguồn DUY NHẤT (không bao giờ có 2 lookup
+     song song); `onVerifyingStarted()` giữ nguyên hành vi + `policy.markAttempt()`.
+   - `SystemLocationAvailabilityObserver.kt`: `ContentObserver` best-effort trên `LOCATION_PROVIDERS_ALLOWED` và
+     `"location_mode"`, đăng ký idempotent, `close()` ở `DemoApplication.onTerminate()`. Đây chỉ là tăng cường cho
+     đường Quick Settings; đường tin cậy là resume.
+   - Kết quả mong đợi: bật Location sau khi app đang chạy → `decision=Acquire` → có fix mà KHÔNG cần khởi động lại;
+     resume khi đã có fix mới (≤120 s) → `decision=None` (không tạo lookup trùng). Bằng chứng emulator:
+     `docs/evidence/loc01/` (6/6 PASS) + runner `android/scripts/loc01-location-recovery-acceptance.py`.
 
 ### Nhánh SOS độc lập
 `EmergencyCoordinator.dispatch` phát 5 bước: LOCATION, SMS, VOICE_CALL (adapter thoại máy chủ), SIM_CALL

@@ -57,6 +57,8 @@ class DemoApplication : Application() {
     lateinit var smsGateway: vn.nckh27pa.fallsafe.emergency.AndroidSmsManagerGateway; private set
     lateinit var emergencyCoordinator: vn.nckh27pa.fallsafe.emergency.EmergencyCoordinator; private set
     lateinit var locationController: vn.nckh27pa.fallsafe.emergency.EmergencyLocationController; private set
+    private var locationControllerImpl: vn.nckh27pa.fallsafe.location.AndroidEmergencyLocationController? = null
+    private var systemLocationObserver: vn.nckh27pa.fallsafe.location.SystemLocationAvailabilityObserver? = null
     val deviceDetails = vn.nckh27pa.fallsafe.device.DeviceDetailsStore()
     private lateinit var apiClient: vn.nckh27pa.fallsafe.api.ApiClient
     private lateinit var sync: vn.nckh27pa.fallsafe.api.SyncCoordinator
@@ -82,11 +84,17 @@ class DemoApplication : Application() {
             capabilities = { controller.capabilitySnapshot() },
             logStatus = { tag, contactId, status -> android.util.Log.i(tag, "contactId=$contactId status=$status") }
         )
-        locationController = vn.nckh27pa.fallsafe.location.AndroidEmergencyLocationController(
+        val locationControllerImpl = vn.nckh27pa.fallsafe.location.AndroidEmergencyLocationController(
             this, { controller.contacts }, smsGateway,
             onFix = { fix -> controller.snapshot.eventId.takeIf { it > 0 }?.let { emergencyCoordinator.updateLocation(identity.id(it), fix) } },
             displayName = { displayNameSettings.value }
         )
+        this.locationControllerImpl = locationControllerImpl
+        locationController = locationControllerImpl
+        systemLocationObserver = vn.nckh27pa.fallsafe.location.SystemLocationAvailabilityObserver(this) {
+            locationControllerImpl.onSystemLocationChanged()
+        }
+        systemLocationObserver?.register()
         controller.emergencyCoordinator = emergencyCoordinator
         controller.emergencyEventIdentityStore = identity
         controller.emergencyLocationController = locationController
@@ -116,6 +124,8 @@ class DemoApplication : Application() {
     }
     override fun onTerminate() {
         androidx.lifecycle.ProcessLifecycleOwner.get().lifecycle.removeObserver(sync)
+        systemLocationObserver?.close()
+        locationControllerImpl?.close()
         sync.close(); apiClient.close(); smsGateway.close(); controller.close()
         super.onTerminate()
     }

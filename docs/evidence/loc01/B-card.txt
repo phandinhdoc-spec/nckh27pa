@@ -1,0 +1,68 @@
+ 
+ 
+ 
+ 
+ 
+ 
+ Trạng thái bảo vệ: Cần kiểm tra • Mất kết nối thiết bị
+❗ 
+BẢO VỆ: Cần kiểm tra • Mất kết nối thiết bị 
+ 
+ Vị trí của tôi: Vị trí đang tắt. Chạm để mở bản đồ.
+📍 
+VỊ TRÍ CỦA TÔI 
+Vị trí đang tắt 
+Dịch vụ vị trí của máy đang tắt 
+ 
+ 
+ Gửi vị trí: Chưa có GPS. Chạm để chọn người nhận.
+GỬI VỊ TRÍ 
+📤 
+Chưa có GPS 
+Gửi SMS tọa độ 
+ 
+ 
+ Gọi người thân: Con gái. Chạm để mở danh bạ gọi.
+📞 
+GỌI NGƯỜI THÂN 
+Con gái 
+Cuộc gọi SIM 
+ 
+ 
+ Thiết bị: Chưa có trạng thái ESP32 từ máy chủ. Chạm để xem chi tiết.
+THIẾT BỊ 
+📟 
+Chưa có trạng thái ESP32 từ máy chủ 
+Chạm xem chi tiết 
+ 
+ Nút SOS khẩn cấp. Nhấn và giữ 3 giây để gọi trợ giúp.
+SOS 
+GIỮ 3 GIÂY 
+ĐỂ GỌI GIÚP 
+ 
+ 
+ 
+ 
+ 
+Trang chủ 
+ 
+ 
+ 
+ 
+ 
+Sự kiện 
+ 
+ 
+ 
+ 
+ 
+Người thân 
+ 
+ 
+ 
+ 
+ 
+Cài đặt 
+ 
+ 
+ 

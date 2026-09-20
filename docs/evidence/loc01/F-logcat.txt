@@ -1,0 +1,5 @@
+--------- beginning of main
+09-20 07:17:01.401  7023  7023 I FallSafe/Location: playServicesAvailability=0
+09-20 07:17:01.403  7023  7023 I FallSafe/Location: recovery signal=FOREGROUND_RESUMED availability=LocationAvailability(permission=DENIED, providers=[FUSED]) changed=true decision=PermissionDenied
+09-20 07:17:01.434  7023  7023 I FallSafe/Location: playServicesAvailability=0
+09-20 07:17:01.434  7023  7023 I FallSafe/Location: recovery signal=FOREGROUND_RESUMED availability=LocationAvailability(permission=DENIED, providers=[FUSED]) changed=false decision=PermissionDenied

@@ -1,0 +1,32 @@
+[
+  {
+    "name": "A-startup-location-on",
+    "passed": true,
+    "elapsedSeconds": 12.09
+  },
+  {
+    "name": "B-startup-location-off",
+    "passed": true,
+    "elapsedSeconds": 11.74
+  },
+  {
+    "name": "C-off-to-on-without-restart",
+    "passed": true,
+    "elapsedSeconds": 52.25
+  },
+  {
+    "name": "D-resume-with-fresh-fix",
+    "passed": true,
+    "elapsedSeconds": 8.64
+  },
+  {
+    "name": "E-repeated-resume",
+    "passed": true,
+    "elapsedSeconds": 16.32
+  },
+  {
+    "name": "F-permission-denied-then-granted",
+    "passed": true,
+    "elapsedSeconds": 22.68
+  }
+]

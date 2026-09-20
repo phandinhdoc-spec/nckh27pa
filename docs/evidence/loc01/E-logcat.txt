@@ -1,0 +1,7 @@
+--------- beginning of main
+09-20 07:16:42.303  6664  6664 I FallSafe/Location: playServicesAvailability=0
+09-20 07:16:42.305  6664  6664 I FallSafe/Location: recovery signal=FOREGROUND_RESUMED availability=LocationAvailability(permission=PRECISE, providers=[FUSED, GPS]) changed=false decision=None
+09-20 07:16:47.681  6664  6664 I FallSafe/Location: playServicesAvailability=0
+09-20 07:16:47.684  6664  6664 I FallSafe/Location: recovery signal=FOREGROUND_RESUMED availability=LocationAvailability(permission=PRECISE, providers=[FUSED, GPS]) changed=false decision=None
+09-20 07:16:53.020  6664  6664 I FallSafe/Location: playServicesAvailability=0
+09-20 07:16:53.028  6664  6664 I FallSafe/Location: recovery signal=FOREGROUND_RESUMED availability=LocationAvailability(permission=PRECISE, providers=[FUSED, GPS]) changed=false decision=None

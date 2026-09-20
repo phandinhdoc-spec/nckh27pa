@@ -1,13 +1,10 @@
 package vn.nckh27pa.fallsafe.location
 
 import android.content.ActivityNotFoundException
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.core.content.ContextCompat
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -22,47 +19,75 @@ class AndroidEmergencyLocationController(
     private val sms: EmergencySmsGateway,
     private val onFix: (LocationFix) -> Unit = {},
     private val nowMs: () -> Long = System::currentTimeMillis,
-    private val displayName: () -> String = { DEFAULT_USER_DISPLAY_NAME }
+    private val displayName: () -> String = { DEFAULT_USER_DISPLAY_NAME },
+    private val source: PlatformLocationSource = AndroidPlatformLocationSource(context)
 ) : EmergencyLocationController {
     override var locationState: LocationState by mutableStateOf(LocationState()); private set
     @Volatile override var lastMapOpenReason:String?=null; private set
 
-    override fun refreshPermissionTruth() {
-        val current = locationState
-        if (current.fix == null && current.cause == LocationFailureCause.PERMISSION_DENIED && locationPermissionGranted()) {
-            locationState = LocationState()
-        }
-    }
-    private fun locationPermissionGranted(): Boolean =
-        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val confirmations=mutableMapOf<String,Pair<EmergencyContact,LocationFix>>()
     private var generation=0L
     private var activeRequest: Job? = null
+    private val policy = LocationRecoveryPolicy(nowMs)
+    private val recovery = LocationRecoveryEngine(source, policy, nowMs)
+
+    override fun refreshPermissionTruth() = recheck(LocationSignal.FOREGROUND_RESUMED)
+    fun onSystemLocationChanged() = recheck(LocationSignal.SYSTEM_LOCATION_CHANGED)
+    fun close() {
+        activeRequest?.cancel()
+        recovery.reset()
+    }
+    private fun recheck(signal: LocationSignal) {
+        val current = locationState
+        val evaluation = recovery.evaluate(
+            signal,
+            requestInFlight = activeRequest?.isActive == true,
+            hasFix = current.fix != null,
+            fixIsFresh = current.freshness == LocationFreshness.FRESH
+        )
+        Log.i(TAG, "recovery signal=$signal availability=${evaluation.availability} changed=${evaluation.availabilityChanged} decision=${evaluation.decision}")
+        when (evaluation.decision) {
+            LocationRecoveryDecision.PermissionDenied -> locationState = LocationState(
+                cause = LocationFailureCause.PERMISSION_DENIED,
+                explanation = explanation(LocationFailureCause.PERMISSION_DENIED),
+                remediation = remediation(LocationFailureCause.PERMISSION_DENIED)
+            )
+            LocationRecoveryDecision.ProviderDisabled -> locationState = LocationState(
+                cause = LocationFailureCause.PROVIDER_DISABLED,
+                explanation = explanation(LocationFailureCause.PROVIDER_DISABLED),
+                remediation = remediation(LocationFailureCause.PROVIDER_DISABLED)
+            )
+            LocationRecoveryDecision.Acquire -> launchLookup()
+            LocationRecoveryDecision.None -> {}
+        }
+    }
 
     override fun onVerifyingStarted() {
-        val requestGeneration = ++generation
-        activeRequest?.cancel()
+        policy.markAttempt()
         locationState = LocationState()
         // TEMPORARY DIAGNOSTIC
         vn.nckh27pa.fallsafe.AndroidTrace.logLocation(entered = true, providerEnabled = "checking", requestStarted = true, result = "STARTED", exception = "none")
+        launchLookup()
+    }
+    private fun launchLookup() {
+        val requestGeneration = ++generation
+        activeRequest?.cancel()
         activeRequest = scope.launch {
             var publishedFix: LocationFix? = null
-            val repository = BestAvailableLocationRepository(AndroidPlatformLocationSource(context), onCached = { cached ->
+            val lookup = recovery.lookup(onCached = { cached ->
                 if (requestGeneration == generation && isActive) {
                     publishedFix = cached.fix
                     publish(cached)
                 }
-            }, nowMs = nowMs)
-            val lookup = repository.getBestAvailableLocation(SOS_LOCATION_TIMEOUT_MS)
+            })
             if (requestGeneration != generation || !isActive) return@launch
             if (lookup.fix !== publishedFix || publishedFix == null) publish(lookup)
         }
     }
     private fun publish(lookup: LocationLookup) {
         val fix = lookup.fix
-        val cause = resolveDisplayedCause(lookup.cause, locationPermissionGranted())
+        val cause = resolveDisplayedCause(lookup.cause, source.permission() != LocationPermission.DENIED)
         // TEMPORARY DIAGNOSTIC
         if (fix == null) {
             vn.nckh27pa.fallsafe.AndroidTrace.logBlocked("LOCATION", "fix_null_cause=${cause?.name}")
@@ -126,5 +151,6 @@ class AndroidEmergencyLocationController(
     }
     private companion object {
         const val GOOGLE_MAPS_PACKAGE="com.google.android.apps.maps"
+        const val TAG = "FallSafe/Location"
     }
 }

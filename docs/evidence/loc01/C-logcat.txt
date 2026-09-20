@@ -1,0 +1,18 @@
+--------- beginning of main
+09-20 07:15:39.745  6664  6664 I FallSafe/Location: playServicesAvailability=0
+09-20 07:15:39.751  6664  6664 I FallSafe/Location: recovery signal=SYSTEM_LOCATION_CHANGED availability=LocationAvailability(permission=PRECISE, providers=[FUSED, GPS]) changed=true decision=Acquire
+09-20 07:15:39.753  6664  6664 I FallSafe/Location: playServicesAvailability=0
+09-20 07:15:39.754  6664  6664 I FallSafe/Location: playServicesAvailability=0
+09-20 07:15:39.931  6664  6664 I FallSafe/Location: playServicesAvailability=0
+09-20 07:15:43.074  6664  6664 I FallSafe/Location: playServicesAvailability=0
+09-20 07:15:43.075  6664  6664 I FallSafe/Location: recovery signal=FOREGROUND_RESUMED availability=LocationAvailability(permission=PRECISE, providers=[FUSED, GPS]) changed=false decision=None
+09-20 07:15:43.844  6664  6664 I FallSafe/Location: playServicesAvailability=0
+09-20 07:15:45.808  6664  6664 I FallSafe/Location: source=null accuracy=null age=null cause=TIMEOUT
+09-20 07:16:24.658  6664  6664 I FallSafe/Location: playServicesAvailability=0
+09-20 07:16:24.660  6664  6664 I FallSafe/Location: recovery signal=FOREGROUND_RESUMED availability=LocationAvailability(permission=PRECISE, providers=[FUSED, GPS]) changed=false decision=Acquire
+09-20 07:16:24.662  6664  6664 I FallSafe/Location: playServicesAvailability=0
+09-20 07:16:24.669  6664  6664 I FallSafe/Location: playServicesAvailability=0
+09-20 07:16:24.763  6664  6664 I FallSafe/Location: playServicesAvailability=0
+09-20 07:16:28.717  6664  6664 I FallSafe/Location: playServicesAvailability=0
+09-20 07:16:28.790  6664  6664 I FallSafe/Location: source=GPS accuracy=5.0 age=14 cause=none
+09-20 07:16:28.797  6664  6664 I FallSafe/Location: source=GPS accuracy=5.0 age=21 cause=null

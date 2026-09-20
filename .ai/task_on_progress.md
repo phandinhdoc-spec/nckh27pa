@@ -221,3 +221,33 @@ DO_NOT_REPEAT: Không dùng Java 25 cho Gradle (fail trước khi cấu hình pr
 handset là nhánh ĐỘC LẬP, backend chỉ là phụ trợ best-effort.
 Không để worker dừng khi suite còn đỏ. Giữ nguyên thay đổi chưa commit của người dùng.
 
+## T11 — LOC-01: Location OFF→ON phải tự phục hồi không cần khởi động lại app
+ROOT_CAUSE: Quyền vị trí (FINE/COARSE) và trạng thái "Location Services" là hai sự thật độc lập. App cũ chỉ đánh giá
+lại đúng một chuyển tiếp PERMISSION_DENIED→đã cấp trong `refreshPermissionTruth()`; cache `PROVIDER_DISABLED`
+(hoặc TIMEOUT/NO_FIX) không bao giờ được đánh giá lại nên khi người dùng bật Vị trí từ Quick Settings/Settings rồi
+quay lại app, state vẫn là "Vị trí đang tắt"/"Chưa có GPS" cho tới khi khởi động lại app.
+FILES_INSPECTED: `location/AndroidEmergencyLocationController.kt`, `location/AndroidPlatformLocationSource.kt`,
+`location/LocationRepository.kt`, `emergency/EmergencyCore.kt`, `DemoApplication.kt`, `MainActivity.kt`,
+`api/SyncCoordinator.kt`, `location/BestAvailableLocationRepositoryTest.kt`, `location/LocationIntentAndProviderTest.kt`.
+FILES_CHANGED: thêm `location/LocationRecovery.kt` (pure: LocationSignal/LocationAvailability/LocationRecoveryDecision/
+LocationRecoveryInput/LocationRecoveryPolicy), `location/LocationRecoveryEngine.kt` (pure re-check + lookup),
+`location/SystemLocationAvailabilityObserver.kt` (ContentObserver best-effort); sửa
+`location/AndroidEmergencyLocationController.kt` (refreshPermissionTruth = full re-check, onSystemLocationChanged,
+close, markAttempt, source injectable), `DemoApplication.kt` (wiring observer + close). Thêm test
+`location/LocationRecoveryPolicyTest.kt` (11) + `location/LocationRecoveryEngineTest.kt` (6).
+TESTS_RUN: `JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ./gradlew testDebugUnitTest --tests
+'vn.nckh27pa.fallsafe.location.*' --rerun-tasks --no-daemon` (red trước, xanh sau); full
+`testDebugUnitTest assembleDebug --rerun-tasks --no-daemon`.
+TEST_RESULTS: **30 suite / 206 test / 0 failure / 0 error / 0 skip** đọc từ `TEST-*.xml`; APK debug assembleDebug PASS.
+Baseline thực tế trên repo hiện tại (đã có thêm test telephony từ commit trước) = 28 suite / 189 test; task mô tả
+"27/175" là snapshot cũ. Không test cũ nào bị yếu/xoá. Test mới: 6 (engine: startupWithLocationOnAcquiresAndPublishesFix,
+startupWithLocationOffIsProviderDisabledWithZeroProviderCalls, offToOnRecoversWithSingleAcquireAndLookup,
+resumeAfterSettingsChangeRecovers, repeatedResumeHasNoOverlapAndRespectsCooldown, permissionDeniedThenGrantedRecovers)
++ 11 (policy).
+CURRENT_FAILURE: KHÔNG — unit + build xanh. Hành vi emulator/thiết bị thật chưa được kiểm chứng bởi worker này (không
+dùng adb/emulator theo quy tắc).
+NEXT_ACTION: Coordinator chạy acceptance OFF→ON trên `emulator-5554`; chủ dự án chạy trên điện thoại thật (GPS thật,
+app Cài đặt thật, toggle Quick Settings thật).
+DO_NOT_REPEAT: Không đặt case `requestInFlight` làm lần đánh giá đầu tiên trong test (nó "ăn" trạng thái first-changed);
+mô hình đúng thứ tự: khởi động (changed=true → Acquire) rồi mới resume khi in-flight. Không dùng Java 25 cho Gradle.
+
