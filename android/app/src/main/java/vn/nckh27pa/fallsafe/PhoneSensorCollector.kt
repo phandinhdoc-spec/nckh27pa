@@ -32,12 +32,14 @@ class PhoneSensorCollector(context: Context, private val onPacket: (PhoneSensorP
             } catch (_: SecurityException) { false }
             if (registered) kind else null
         }.toSet()
+        Fall01Trace.sessionStart(SystemClock.elapsedRealtimeNanos(), System.currentTimeMillis(), activeSensors.joinToString("+") { it.name })
     }
     fun stop() {
         running = false
         manager.unregisterListener(this)
         pipeline.clear()
         activeSensors = emptySet()
+        Fall01Trace.sessionStop(SystemClock.elapsedRealtimeNanos(), System.currentTimeMillis())
     }
     fun latest(): PhoneSensorPacket? = pipeline.latest(SystemClock.elapsedRealtimeNanos(), System.currentTimeMillis())
     override fun onSensorChanged(event: SensorEvent) {

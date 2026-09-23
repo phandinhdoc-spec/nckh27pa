@@ -57,19 +57,19 @@ Các yêu cầu cốt lõi:
 
 ### 3.2. Chọn ESP32
 
-Chưa có mã bo mạch cụ thể được chốt trong tài liệu Android. Đề xuất dùng bo ESP32-S3 có BLE để làm mẫu nếu cần mua mới; nếu đã có bo ESP32 hỗ trợ BLE thì ưu tiên tận dụng để thử cảm biến và giao thức. ESP32-S3 tích hợp Wi-Fi 2,4 GHz và Bluetooth LE theo [datasheet Espressif](https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf).
+Bo vi điều khiển cho sản phẩm đích chính thức (**TARGET_PRODUCT**) được chọn là **ESP32-S3 (Super Mini)** tích hợp Wi-Fi 2,4 GHz và Bluetooth 5 (LE) theo [datasheet Espressif](https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf), đáp ứng yêu cầu kích thước nhỏ gọn để đeo ở thắt lưng. Trong giai đoạn thử nghiệm thuật toán hiện tại, bộ test (**TEST_RIG**) sử dụng bo **ESP32-WROOM-32** sẵn có để kiểm tra sớm logic phát hiện ngã và thu thập dữ liệu qua cổng nối tiếp.
 
-Trước khi cố định sơ đồ chân, ghi rõ mã module, mã bo, dung lượng bộ nhớ, sơ đồ nguồn và chân đã bị ngoại vi trên bo sử dụng. Không áp dụng một bảng GPIO cho mọi loại ESP32. Khả năng tiết kiệm điện của chip không đại diện cho dòng tiêu thụ của cả bo phát triển.
+Trước khi cố định sơ đồ chân, ghi rõ mã module, mã bo, dung lượng bộ nhớ, sơ đồ nguồn và chân đã bị ngoại vi trên bo sử dụng. Tuyệt đối không áp dụng một bảng GPIO cho mọi loại ESP32. Đặc biệt, sơ đồ chân của ESP32-S3 Super Mini không được dùng cho ESP32-WROOM-32 (xem mục 3.6). Khả năng tiết kiệm điện của chip không đại diện cho dòng tiêu thụ của cả bo phát triển.
 
 ### 3.3. IMU và khí áp kế không thay thế nhau
 
-- IMU là nguồn chuyển động chính. Có thể dùng MPU6050 đang có để tạo nguyên mẫu; mã IMU cuối cùng còn cần chốt theo linh kiện thực tế.
-- Khí áp kế BMP390 là hướng đã trao đổi, dùng bổ sung biến đổi độ cao. BMP388 hoặc DPS310 là các ứng viên thay cho khối khí áp, chưa mặc định đã được chọn.
-- Không dùng BMP390/DPS310 để thay chức năng gia tốc kế và con quay của MPU.
+- IMU là nguồn chuyển động chính: Bo sản phẩm đích (**TARGET_PRODUCT**) sử dụng **MPU6050** (GY-521); trong khi bộ test thuật toán hiện tại (**TEST_RIG**) sử dụng **MPU9250** (tận dụng linh kiện sẵn có để kiểm tra logic và thu dữ liệu; MPU9250 không phải cảm biến sản phẩm cuối).
+- Khí áp kế thực tế được tích hợp trên phần cứng hiện nay là **GY-63 / MS5611-01BA03** (sử dụng cho cả node thử nghiệm và bộ test). Khí áp kế BMP390 trước đây là hướng đã trao đổi, nay chỉ còn là phương án thay thế tiềm năng trong tương lai (cùng BMP388 hoặc DPS310), không phải lựa chọn chính của đợt triển khai hiện tại.
+- Không dùng MS5611 hay BMP390/DPS310 để thay chức năng gia tốc kế và con quay của MPU.
 - Khi thay linh kiện, driver phải đưa ra cùng đơn vị chuẩn; ghi lại mã cảm biến, dải đo, tần số thực, bộ lọc và kết quả hiệu chuẩn.
 - Với IMU thay thế, yêu cầu có cả gia tốc và tốc độ góc, đáp ứng 50–100 Hz, có tài liệu rõ và driver kiểm chứng được. Dải đo phải đủ tránh bão hòa trong các thử nghiệm va chạm; ghi cờ bão hòa thay vì xem số bị cắt là đỉnh thật.
 
-BMP390 đo áp suất tuyệt đối, hỗ trợ theo dõi độ cao. Bosch công bố độ chính xác tương đối điển hình ±0,03 hPa, tương đương khoảng ±25 cm trong điều kiện chỉ định; mức nhiễu rất thấp được công bố ở cấu hình băng thông thấp nhất. Không suy diễn các số này thành bảo đảm đo chính xác quãng rơi vài cm lúc ngã. Xem [thông số BMP390 của Bosch](https://www.bosch-sensortec.com/en/products/environmental-sensors/pressure-sensors/bmp390).
+BMP390 đo áp suất tuyệt đối, hỗ trợ theo dõi độ cao (phương án dự phòng tương lai). Bosch công bố độ chính xác tương đối điển hình ±0,03 hPa, tương đương khoảng ±25 cm trong điều kiện chỉ định; mức nhiễu rất thấp được công bố ở cấu hình băng thông thấp nhất. Không suy diễn các số này thành bảo đảm đo chính xác quãng rơi vài cm lúc ngã. Xem [thông số BMP390 của Bosch](https://www.bosch-sensortec.com/en/products/environmental-sensors/pressure-sensors/bmp390).
 
 ### 3.4. Pin, sạc và hiển thị năng lượng
 
@@ -97,6 +97,25 @@ MAX17048 là ứng viên đã trao đổi để ước lượng dung lượng pi
 | `PIN_MODEM_RX`, `PIN_MODEM_TX`, `PIN_MODEM_PWRKEY` | 4G tùy chọn |
 
 Chỉ gán chân sau khi kiểm tra sơ đồ bo, chân khởi động, USB, flash/PSRAM, điện áp logic và xung đột địa chỉ I²C. Sơ đồ nguồn phải hoàn thành trước khi gắn pin hoặc modem.
+
+### 3.6. Hai cấu hình phần cứng: sản phẩm đích và bộ test
+
+Dự án phân định rõ ràng hai cấu hình phần cứng phục vụ hai mục đích khác nhau:
+
+| Tiêu chí | Cấu hình sản phẩm đích (TARGET_PRODUCT) | Cấu hình bộ test thử nghiệm (TEST_RIG) |
+|---|---|---|
+| **Mục đích** | Thiết bị đeo thắt lưng hoàn chỉnh, tiết kiệm điện, kết nối BLE tới Android | Kiểm thử sớm thuật toán ngã, thu thập dữ liệu, tinh chỉnh ngưỡng qua Serial |
+| **Vi điều khiển** | ESP32-S3 (Super Mini) | ESP32-WROOM-32 (NodeMCU-32S / Dev Module) |
+| **Cảm biến IMU** | MPU6050 (GY-521), WHO_AM_I = `0x68` | MPU9250 (GY-9250), WHO_AM_I = `0x71` (không dùng AK8963) |
+| **Cảm biến khí áp** | GY-63 / MS5611-01BA03 | GY-63 / MS5611-01BA03 |
+| **Giao tiếp I2C** | 2 bus độc lập: Bus 0 (SDA=7, SCL=6), Bus 1 (SDA=3, SCL=2) | 1 bus chung an toàn: SDA=GPIO21, SCL=GPIO22 |
+| **Năng lượng & BLE** | Tối ưu pin 48–72h, BLE GATT Server hoạt động liên tục | Cấp nguồn qua cáp USB, không bật BLE/Wi-Fi, chưa tối ưu pin |
+| **Giao diện người dùng** | Nút SOS, nút an toàn, còi buzzer, LED trạng thái/pin | Cổng nối tiếp Serial Monitor (chế độ HUMAN và chế độ CSV) |
+
+> **CẢNH BÁO AN TOÀN PHẦN CỨNG — TUYỆT ĐỐI KHÔNG TRỘN LẪN:**
+> 1. **Chân I2C:** Trên ESP32-WROOM-32, các chân GPIO 6 đến 11 được nối trực tiếp với chip SPI Flash tích hợp bên trong module. Gán GPIO 6 hoặc 7 làm I2C trên WROOM-32 sẽ làm chip gặp lỗi bộ nhớ (Crash / Panic / Reboot loop) ngay lập tức. Sơ đồ chân của ESP32-S3 Super Mini tuyệt đối không được sao chép sang ESP32-WROOM-32.
+> 2. **Cảm biến IMU:** MPU9250 chỉ là giải pháp tạm thời cho bộ test do linh kiện sẵn có; không phải cảm biến của sản phẩm đích. Driver MPU9250 dùng địa chỉ WHO_AM_I `0x71` và dải đo `±16g` / `±2000 dps` để tránh bão hòa khi thử va đập.
+> 3. **Từ kế AK8963:** Khối từ kế tích hợp bên trong MPU9250 không được kích hoạt vì nhiễu từ trường trong nhà và thiết bị đeo rất lớn, không cần thiết cho phát hiện ngã và gây nghẽn bus I2C 100 Hz.
 
 ## 4. Trải nghiệm sử dụng gọn và thuận tiện
 
@@ -234,6 +253,8 @@ SOS hoặc chuỗi đủ điều kiện khẩn được phép đi trực tiếp 
 - Mất Internet nhưng BLE còn: Android quyết định kênh khả dụng; ESP32 không tự coi mạng đã hoạt động chỉ vì BLE kết nối.
 
 ## 8. Hợp đồng API giữ nguyên với Android
+
+> **LƯU Ý:** Bộ test thuật toán (`esp32-test`) chỉ phục vụ thử nghiệm cảm biến, quan sát trạng thái và tinh chỉnh tham số cục bộ qua cổng nối tiếp Serial; bộ test **KHÔNG** triển khai hợp đồng BLE/HTTP dưới đây. Các hợp đồng này áp dụng cho firmware sản phẩm đích (`esp/node` và phiên bản hoàn chỉnh).
 
 ### 8.1. Định danh BLE
 
@@ -489,3 +510,195 @@ Không đặt lịch cố định khi chưa biết linh kiện nhóm đang có. 
 - Hướng dẫn đeo, sạc, SOS, xác nhận an toàn và nhận biết mất kết nối bằng ngôn ngữ người dùng.
 
 **Tiêu chí trọng tâm:** ESP32 đo được, giao tiếp đúng hợp đồng, cảnh báo không phụ thuộc thao tác của người mất khả năng phản hồi, và biểu thị trung thực giới hạn của bản BLE. Các mục về frame, thời gian chưa đồng bộ, pin lỗi và tham số điều khiển là khoảng trống tích hợp đã được chỉ rõ để hai nhóm hoàn thiện trước khi tuyên bố tương thích.
+
+## 15. Bộ test thuật toán phát hiện té ngã (esp32-test)
+
+Nhằm xác minh sớm thuật toán phát hiện ngã trước khi hoàn thiện bo mạch sản phẩm đích, dự án thiết lập một bộ thử nghiệm độc lập đặt tại thư mục `esp32-test/`. Bộ test sử dụng phần cứng sẵn có (**TEST_RIG**: ESP32-WROOM-32 + MPU9250 + GY-63/MS5611) tập trung vào khâu cảm biến và thuật toán.
+
+### 15.1. Mục tiêu thử nghiệm
+Bộ test giải quyết 4 mục tiêu tuần tự:
+1. **Kiểm tra phần cứng (Hardware bring-up):** Xác nhận giao tiếp I2C ổn định với cả MPU9250 và MS5611 trên cùng một bus, không bị treo bus hoặc tràn bộ nhớ.
+2. **Thu thập dữ liệu thực nghiệm (Data collection):** Xuất luồng dữ liệu cảm biến chuẩn hóa thời gian thực qua cổng Serial (chế độ CSV raw có nhãn thời gian) để xây dựng tập dataset đối chứng.
+3. **Quan sát hành vi thuật toán (Algorithm observation):** Theo dõi chuỗi chuyển trạng thái của máy trạng thái phát hiện ngã qua cổng Serial (chế độ HUMAN đọc được) dưới các tác động vận động mô phỏng.
+4. **Hiệu chỉnh ngưỡng (Threshold tuning):** Tinh chỉnh các tham số trong `FallProfile` để cân bằng giữa độ nhạy (Sensitivity) và khả năng chống báo giả (False Positive Rejection).
+*Ghi chú:* Bộ test này chưa đặt mục tiêu tối ưu hóa tiêu thụ năng lượng hay kết nối không dây (không bật BLE/Wi-Fi).
+
+### 15.2. Bảng ánh xạ (Mapping) tham số Android ↔ ESP
+Kế thừa từ phân tích đối chiếu mã nguồn Android (`vn.nckh27pa.fallsafe.DemoLogic` và `FallDetectionProfiles.kt`):
+
+| Đại lượng | Nguồn sự thật Android | Giá trị Android | Đơn vị Android | Quy ước trên ESP (TEST_RIG) | Đơn vị ESP | Nguồn gốc & Lý do kỹ thuật |
+|---|---|---|---|---|---|---|
+| `impactAccelerationMs2` | `FallDetectionProfiles.kt:56` | `25.0f` | $m/s^2$ | `25.0` ($\approx 2.55 g$) | $m/s^2$ | Kế thừa Android. Ngưỡng gia tốc tổng nhận diện va chạm mạnh. |
+| `stillnessTargetAccelerationMs2` | `FallDetectionProfiles.kt:56` | `9.81f` | $m/s^2$ | `9.81` ($1.0 g$) | $m/s^2$ | Kế thừa Android. Trọng lực Trái Đất khi đứng/nằm yên. |
+| `stillnessToleranceMs2` | `FallDetectionProfiles.kt:56` | `1.0f` | $m/s^2$ | `1.0` | $m/s^2$ | Kế thừa Android. Dung sai kiểm tra tĩnh ($|a - 9.81| \le 1.0$). |
+| `postImpactWindowMs` | `FallDetectionProfiles.kt:56` | `3000L` | ms | `3000` | ms | Kế thừa Android. Cửa sổ tối đa sau va đập để xác nhận bất động. |
+| `postImpactStillnessDurationMs` | `FallDetectionProfiles.kt:56` | `1000L` | ms | `1000` | ms | Kế thừa Android. Thời lượng bất động liên tục tối thiểu. |
+| `minimumStillnessSamples` | `FallDetectionProfiles.kt:56` | `6` | mẫu | `6` (tối thiểu) | mẫu | Kế thừa Android (ở 100 Hz, điều kiện 1000 ms tương đương ~100 mẫu, tự chi phối độ tin cậy). |
+| `maximumSampleGapMs` | `FallDetectionProfiles.kt:56` | `250L` | ms | `250` (hủy chuỗi) | ms | Kế thừa Android. ESP bổ sung watchdog 100 ms cảnh báo bus trễ. |
+| `phonePressureEvidenceEnabled` | `FallDetectionProfiles.kt:23` | `false` | boolean | `false` (không bắt buộc) | boolean | Kế thừa Android. Áp suất là bằng chứng phụ/ghi log, KHÔNG phủ quyết ngã. |
+| `phonePressureMinimumRisePa` | `FallDetectionProfiles.kt:54` | `12.0f` | Pa | `12.0` (ngưỡng log) | Pa | Kế thừa Android ($12 Pa \approx 1 m$ độ cao tại mực nước biển). |
+| `freeFallThresholdMs2` | `NOT_FOUND` (Android không có) | Không có | - | `4.90` ($0.5 g$) | $m/s^2$ | Suy luận kỹ thuật (bằng chứng phụ/log, không bắt buộc để chốt ngã). |
+| `freeFallMinDurationMs` | `NOT_FOUND` | Không có | - | `80` | ms | Suy luận kỹ thuật (tránh rung lắc nhẹ tức thời làm kích hoạt nhầm). |
+| `gyroTurnThresholdDps` | `NOT_FOUND` (Android không dùng) | Không có | dps | `120.0` | °/s | Suy luận kỹ thuật (tốc độ góc xoay thân lúc ngã; bằng chứng phụ). |
+| `altitudeDeltaM` | `DemoLogic.kt:75` (không dùng chốt) | Tính độ cao | m | Tính theo công thức khí áp | m | Âm khi ngã xuống thấp; chỉ dùng làm bằng chứng đối chứng. |
+
+### 15.3. Pipeline đọc cảm biến và xử lý lỗi
+- **Bus I2C:** Sử dụng 1 bus I2C duy nhất (`TwoWire Wire`), cấu hình chân an toàn cho ESP32-WROOM-32: `SDA = GPIO21`, `SCL = GPIO22`, tần số chuẩn 400 kHz (`Wire.setClock(400000)`).
+- **Địa chỉ cảm biến:**
+  - MPU9250: Địa chỉ chính `0x68` (AD0 nối GND), địa chỉ dự phòng `0x69` (AD0 nối VCC).
+  - MS5611: Địa chỉ chính `0x77` (CSB nối GND), địa chỉ dự phòng `0x76` (CSB nối VCC). Hai cảm biến khác địa chỉ nên hoạt động trơn tru trên cùng bus.
+- **Trình tự chu kỳ đọc:**
+  1. *Đọc IMU (100 Hz - mỗi 10 ms):* Đọc burst 14 byte qua I2C bắt đầu từ thanh ghi `0x3B` (`ACCEL_XOUT_H`) để thu thập đồng thời 3 trục gia tốc, nhiệt độ và 3 trục con quay.
+  2. *Đọc Khí áp kế (25 Hz - máy trạng thái không chặn):* Điều khiển MS5611 theo chu kỳ OSR 4096 (yêu cầu chờ chuyển đổi tối đa 9.1 ms). Máy trạng thái chuyển tiếp: Gửi lệnh D1 → Chờ 9.1 ms không chặn (`micros()`) → Đọc ADC D1 → Gửi lệnh D2 → Chờ 9.1 ms không chặn → Đọc ADC D2 → Bù nhiệt độ bậc 2 thu được Pa và °C.
+- **Xử lý lỗi đọc:**
+  - Nếu đọc MPU9250 thất bại: Ghi nhận cờ lỗi `IMU_READ_FAILED`, tăng biến đếm lỗi, giữ nguyên trạng thái hoặc hủy chuỗi va đập dở dang nếu mất mẫu > 100 ms. Tuyệt đối không điền giá trị 0 giả tạo (tránh hiểu lầm là rơi tự do). Nếu lỗi kéo dài lúc khởi động, thiết bị dừng ở trạng thái lỗi `[ERROR]`.
+  - Nếu đọc MS5611 thất bại: Ghi nhận cờ cảnh báo `BARO_READ_FAILED`, giữ giá trị áp suất cũ hoặc để trống, thuật toán phát hiện ngã vẫn tiếp tục dựa trên IMU.
+
+### 15.4. Tần số lấy mẫu (Sampling Rate)
+- **IMU:** Cố định **100 Hz** (chu kỳ 10 ms). Lý do: Cú va đập cơ học khi người chạm sàn có thời gian đỉnh xung lực (impact spike) rất hẹp (khoảng 20–50 ms). Tần số 100 Hz đảm bảo bắt trọn vẹn đỉnh gia tốc $> 25 m/s^2$ mà không bị hiện tượng lướt đỉnh (undersampling).
+- **Khí áp kế:** Cố định **25 Hz** (chu kỳ 40 ms) với OSR 4096. Lý do: MS5611 ở OSR 4096 có độ phân giải cao nhất (~0.012 hPa ≈ 10 cm), thời gian chuyển đổi kép D1+D2 mất ~18.2 ms. Chu kỳ 40 ms để lại đủ băng thông cho bus I2C phục vụ luồng IMU 100 Hz mà không gây xung đột hay trễ ngắt.
+
+### 15.5. Chiến lược lọc dữ liệu (Filtering: Hai nhánh độc lập)
+Firmware phân tách rõ hai luồng xử lý tín hiệu nhằm tránh làm méo đặc tính chuyển động:
+1. **Nhánh đỉnh va đập (Impact Peak Branch - Raw):**
+   - Sử dụng trực tiếp giá trị gia tốc thô từ thanh ghi cảm biến, chỉ qua bộ lọc phần cứng DLPF 184 Hz nội bộ của MPU.
+   - Tính toán độ lớn gia tốc tức thời: $a_{mag} = \sqrt{a_x^2 + a_y^2 + a_z^2}$.
+   - Không áp dụng bất kỳ bộ lọc trung bình trượt (Moving Average) hay làm mượt nào tại nhánh này để bảo toàn đỉnh va đập $a_{mag} \ge 25 m/s^2$.
+2. **Nhánh tư thế và bất động (Posture & Stillness Branch - Filtered):**
+   - Áp dụng bộ lọc thông thấp (IIR Filter) hoặc cửa sổ trượt trung bình ngắn ($N=5$ mẫu) để triệt tiêu các rung động vi mô.
+   - Dùng để xác định hướng vector trọng lực tĩnh $\vec{g}$ và kiểm tra điều kiện bất động: $|a_{filtered} - 9.81| \le 1.0 m/s^2$ kết hợp với độ lớn vận tốc góc $|\vec{\omega}| < 20^\circ/s$.
+
+### 15.6. Đường chuẩn áp suất (Pressure Baseline)
+- **Thu thập mốc khởi động:** Khi khởi động, sau khi IMU sẵn sàng, thiết bị giữ yên và đọc liên tục các mẫu MS5611 hợp lệ trong 3 giây.
+- **Tính toán mốc $P_0$:** Lấy trung vị (median) của tập mẫu thu thập được (tối thiểu 20 mẫu, tối đa 40 mẫu) để loại bỏ nhiễu đột biến, sau đó "đóng băng" giá trị này làm `baselinePa`.
+- **Nguyên tắc bất biến:** Mốc $P_0$ tuyệt đối không được tự động cập nhật hoặc trôi dạt trong suốt phiên hoạt động, đặc biệt là khi đang trong cửa sổ nghi ngờ có va đập/ngã (tránh triệt tiêu độ chênh áp khi người hạ thấp độ cao).
+
+### 15.7. Tính toán chênh lệch độ cao (Altitude Delta)
+- Công thức hypsometric chuẩn quốc tế (chuẩn hóa giống `node_math.cpp`):
+  $$\Delta H = 44330.77 \times \left(1 - \left(\frac{P_{hiện\_tại}}{P_{baseline}}\right)^{0.190263}\right) \quad (\text{mét})$$
+- **Quy ước dấu:** Dương ($+$) khi lên cao (áp suất giảm), Âm ($-$) khi hạ thấp xuống sàn (áp suất tăng). Khi ngã xuống đất từ thắt lưng, $\Delta H$ dự kiến giảm từ $-0.40$ m đến $-0.80$ m (áp suất tăng tương ứng $\approx 5 - 10$ Pa).
+
+### 15.8. Trích xuất đặc trưng (Feature Extraction)
+Mỗi chu kỳ tính toán, firmware trích xuất các đặc trưng:
+- `accelMagnitudeMs2`: Độ lớn gia tốc tổng $\sqrt{a_x^2 + a_y^2 + a_z^2}$ ($m/s^2$).
+- `gyroMagnitudeDps`: Độ lớn tốc độ góc tổng $\sqrt{g_x^2 + g_y^2 + g_z^2}$ ($^\circ/s$).
+- `impactPeakMs2`: Đỉnh gia tốc lớn nhất ghi nhận được trong pha va đập ($m/s^2$).
+- `altitudeDeltaM`: Độ cao tương đối so với baseline khởi động (m).
+- `pressureDeltaPa`: Độ chênh áp suất so với đầu cửa sổ quan sát (Pa).
+- `isStationary` (motionIndicator): Cờ boolean báo hiệu tĩnh, đạt khi $|accelMagnitudeMs2 - 9.81| \le 1.0$ và $gyroMagnitudeDps < 20^\circ/s$.
+- `stillnessDurationMs`: Thời lượng duy trì trạng thái tĩnh liên tục (ms).
+- `freeFallDurationMs`: Thời lượng gia tốc tổng giảm sâu $< 4.9 m/s^2$ (ms).
+
+### 15.9. Máy trạng thái phát hiện ngã (Fall Detection State Machine)
+Máy trạng thái vận hành trên ESP32 gồm các pha nối tiếp:
+
+```
+[BOOT] ──> [CALIBRATING] ──(Hiệu chuẩn xong 3s)──> [NORMAL]
+                                                      │
+                       ┌──────────────────────────────┴──────────────────────────────┐
+                       │ (a < 4.9 m/s² liên tục ≥ 80ms)                             │ (a ≥ 25 m/s²)
+                       ▼                                                             ▼
+             [POSSIBLE_FREE_FALL] ──(a ≥ 25 m/s²)───────────────────────────> [IMPACT]
+                       │                                                             │
+                       │ (hết 500ms không va đập)                                    │ (mẫu kế tiếp)
+                       ▼                                                             ▼
+                   [NORMAL] <────(Hết hạn cửa sổ 3000ms hoặc Gap > 250ms)──── [POST_IMPACT]
+                                                                                     │
+                                                                                     │ (Tĩnh liên tục ≥ 1000ms
+                                                                                     │  và số mẫu tĩnh ≥ 6)
+                                                                                     ▼
+                                                                             [FALL_CONFIRMED]
+                                                                                     │
+                                                                                     │ (Sau báo động / lệnh reset)
+                                                                                     ▼
+                                                                                 [NORMAL]
+```
+
+**Chi tiết điều kiện chuyển trạng thái:**
+1. `NORMAL → POSSIBLE_FREE_FALL`: Khi $accelMagnitudeMs2 < 4.90 m/s^2$ duy trì liên tục $\ge 80 ms$. Ghi log `[EVENT] FREE FALL detected`. Tăng điểm rủi ro. Nếu sau 500 ms không xảy ra va đập, tự động quay về `NORMAL`.
+2. `NORMAL → IMPACT` hoặc `POSSIBLE_FREE_FALL → IMPACT`: Khi $accelMagnitudeMs2 \ge 25.0 m/s^2$. Đánh dấu thời điểm `impactTimeMs`, reset bộ đếm mẫu tĩnh và chuyển sang `POST_IMPACT`. Ghi log `[EVENT] IMPACT ...`.
+3. `IMPACT → POST_IMPACT`: Bước đệm theo dõi hành vi sau va đập.
+4. `POST_IMPACT → NORMAL` (Hủy bỏ / Báo giả):
+   - Nếu $t - impactTimeMs > 3000 ms$ (hết hạn `postImpactWindowMs`) mà chưa đạt tiêu chí tĩnh.
+   - Hoặc khoảng cách giữa hai mẫu liên tiếp $> 250 ms$ (`maximumSampleGapMs`).
+   Ghi log `[EVENT] POST-IMPACT window expired, false alarm`.
+5. `POST_IMPACT → FALL_CONFIRMED` (XÁC NHẬN NGÃ):
+   - Mẫu thỏa mãn $|accelMagnitudeMs2 - 9.81| \le 1.0 m/s^2$.
+   - Thời gian duy trì liên tục đạt $t_{quiet} \ge 1000 ms$ (`postImpactStillnessDurationMs`).
+   - Số lượng mẫu tĩnh tích lũy liên tục $\ge 6$ mẫu (`minimumStillnessSamples`).
+   - **QUY TẮC CỐT LÕI:** Bám sát tuyệt đối logic Android. Sự kiện rơi tự do và áp suất chỉ là bằng chứng củng cố (corroboration) in ra log, **KHÔNG** bắt buộc phải có để chuyển sang `FALL_CONFIRMED`.
+   - Ghi log cảnh báo mức cao: `[ALERT] FALL CONFIRMED`.
+
+### 15.10. Định dạng Serial Logging
+Hỗ trợ hai chế độ xuất dữ liệu qua cổng nối tiếp (tốc độ baud: **115200**):
+1. **HUMAN MODE (Mặc định):**
+   - Tần số in 2–5 dòng/giây (mỗi 250–500 ms in một nhịp trạng thái) giúp người kiểm thử dễ đọc màn hình:
+     ```
+     [OK] MPU9250 | Acc=1.02g | Gyro=12°/s
+     [OK] GY63   | P=1008.42 hPa | ΔH=+0.08 m
+     [STATE] NORMAL
+     [RISK] Fall score: 12%
+     ```
+   - Khi có sự kiện xảy ra, in ngay lập tức một dòng sự kiện chuyên biệt:
+     - `[EVENT] FREE FALL detected (Acc=3.21 m/s^2, dur=90 ms)`
+     - `[EVENT] IMPACT 27.50 m/s^2 (2.80g)`
+     - `[EVENT] POST-IMPACT low motion (count=10, dur=100 ms)`
+     - `[ALERT] FALL CONFIRMED (impact=27.50 m/s^2, stillness=1050 ms, deltaP=+14.2 Pa, deltaH=-0.72 m)`
+2. **CSV RAW MODE (Thu thập dữ liệu nghiên cứu):**
+   - Xuất dữ liệu ở đúng tốc độ lấy mẫu (100 Hz).
+   - Dòng đầu tiên là tiêu đề cột (Header):
+     `timestamp_ms,ax_ms2,ay_ms2,az_ms2,acc_mag,gx_dps,gy_dps,gz_dps,gyro_mag,p_pa,temp_c,alt_m,state,event`
+   - Khi bật chế độ CSV, tuyệt đối không in xen kẽ các dòng chữ văn bản để thuận tiện cho các script Python/MATLAB phân tích trực tiếp.
+   - Điều khiển chế độ qua Serial Command: gõ phím `r` để bật/tắt chế độ Raw CSV, `c` để hiệu chuẩn lại, `t` để in cấu hình profile, `h` để xem trợ giúp.
+
+### 15.11. Bảng cấu hình ngưỡng thử nghiệm (FallProfile)
+Toàn bộ tham số thuật toán được gom vào một cấu trúc `struct FallProfile`:
+
+| Trường tham số | Kiểu dữ liệu | Giá trị khởi điểm | Đơn vị | Ý nghĩa & Nguồn gốc |
+|---|---|---|---|---|
+| `impactAccelerationMs2` | `float` | `25.0f` | $m/s^2$ | Ngưỡng gia tốc va đập (sao chép từ Android `FallDetectionConfig.DEFAULT`) |
+| `stillnessTargetAccelerationMs2` | `float` | `9.81f` | $m/s^2$ | Mốc trọng lực tĩnh (sao chép từ Android) |
+| `stillnessToleranceMs2` | `float` | `1.0f` | $m/s^2$ | Biên dung sai tĩnh (sao chép từ Android) |
+| `postImpactWindowMs` | `uint32_t` | `3000` | ms | Cửa sổ quan sát sau va đập (sao chép từ Android) |
+| `postImpactStillnessDurationMs` | `uint32_t` | `1000` | ms | Thời lượng tĩnh yêu cầu (sao chép từ Android) |
+| `minimumStillnessSamples` | `uint16_t` | `6` | mẫu | Số mẫu tĩnh tối thiểu (sao chép từ Android) |
+| `maximumSampleGapMs` | `uint32_t` | `250` | ms | Ngưỡng đứt đoạn mẫu để reset (sao chép từ Android) |
+| `freeFallThresholdMs2` | `float` | `4.90f` | $m/s^2$ | Ngưỡng rơi tự do ($0.5 g$, suy luận kỹ thuật) |
+| `freeFallMinDurationMs` | `uint32_t` | `80` | ms | Thời lượng rơi tự do tối thiểu (suy luận kỹ thuật) |
+| `gyroTurnThresholdDps` | `float` | `120.0f` | °/s | Ngưỡng xoay thân mạnh (suy luận kỹ thuật) |
+| `pressureEvidenceMinRisePa` | `float` | `12.0f` | Pa | Ngưỡng đối chứng tăng áp suất (sao chép từ Android) |
+| `altitudeDropMinM` | `float` | `-0.40f` | m | Ngưỡng đối chứng giảm độ cao (suy luận kỹ thuật) |
+
+### 15.12. Quy trình hiệu chuẩn lúc khởi động (Boot Calibration)
+Trình tự thực thi tuần tự trong `setup()`:
+1. Thiết lập cổng nối tiếp Serial ở baud rate 115200, in thông tin phiên bản firmware và cấu hình phần cứng.
+2. Khởi tạo bus I2C (SDA=21, SCL=22, 400 kHz).
+3. Thử kết nối và kiểm tra ID của MPU9250 (đọc thanh ghi `WHO_AM_I` = `0x71`). Nếu thất bại, thử lại địa chỉ phụ `0x69`. Nếu cả hai đều thất bại, in `[ERROR] MPU9250 not found` và dừng chương trình trong vòng lặp cảnh báo.
+4. Thử kết nối và đọc PROM của MS5611 (địa chỉ `0x77` hoặc `0x76`), tính toán và kiểm tra CRC-4. Nếu lỗi, in cảnh báo nhưng cho phép tiếp tục chạy ở chế độ giảm cấp (chỉ IMU).
+5. In thông báo: `[CAL] Keep device still... (3 seconds)`.
+6. Giữ yên thiết bị trong 3 giây:
+   - Thu thập ~300 mẫu gyro để tính trung bình độ lệch tĩnh (bias offset: `gx_offset`, `gy_offset`, `gz_offset`).
+   - Thu thập ~75 mẫu áp suất MS5611 hợp lệ, tính trung vị (median) đóng băng làm mốc `baselinePa`.
+7. In thông báo xác nhận: `[READY] Monitoring started`. Thiết bị chính thức chuyển sang trạng thái `NORMAL`.
+
+### 15.13. Quy trình kiểm thử nghiệm thu (Testing Protocol)
+Kế hoạch thử nghiệm chi tiết 13 kịch bản vận động (T0 đến T12) được trình bày độc lập tại tài liệu:
+`esp32-test/TEST_PLAN.md`
+Các ca kiểm thử bao gồm kiểm tra tĩnh, hoạt động sinh hoạt thường ngày (ADL) như đi bộ, ngồi mạnh, nằm xuống giường, cúi nhặt đồ, nhảy rung lắc, đi thang máy (chống báo giả); và các thử nghiệm ngã mô phỏng có đệm mút bảo hộ như ngã trước, ngã sau, ngã nghiêng, trượt ngã từ ghế ngồi, bám vật trượt chân.
+
+### 15.14. Hướng dẫn chuyển đổi sang sản phẩm thật (TARGET_PRODUCT)
+Khi chuyển thuật toán đã kiểm chứng từ bộ test (`esp32-test`) sang firmware sản phẩm chính thức (`esp/node` và phiên bản hoàn thiện trên ESP32-S3 Super Mini), nhóm phát triển bắt buộc phải thực hiện các thay đổi kỹ thuật sau:
+
+1. **Thay đổi driver IMU (MPU9250 → MPU6050):**
+   - Thanh ghi `WHO_AM_I` (`0x75`): MPU9250 trả về `0x71` (hoặc `0x73`), trong khi MPU6050 trả về `0x68`. Cần đổi giá trị kiểm tra sang `0x68`.
+   - Vô hiệu hóa mã xử lý AK8963: Loại bỏ hoàn toàn các đoạn code cấu hình I2C Bypass hoặc thanh ghi liên quan đến từ kế nội bộ của MPU9250.
+   - Thang đo gia tốc và hệ số đổi đơn vị: Đảm bảo cấu hình thanh ghi `ACCEL_CONFIG` trên MPU6050 đạt dải đo tối thiểu $\pm 8g$ hoặc $\pm 16g$ (thay vì mặc định $\pm 2g$) để không bị bão hòa khi va đập; đồng thời chia lại hệ số raw tương ứng.
+2. **Thay đổi cấu hình chân GPIO (WROOM-32 → ESP32-S3 Super Mini):**
+   - Tuyệt đối không dùng cặp chân `SDA=21, SCL=22` trên ESP32-S3 Super Mini.
+   - Chuyển sang cấu hình 2 bus I2C riêng biệt của bo S3:
+     - Bus 0 (MPU6050): `SDA = GPIO7`, `SCL = GPIO6`.
+     - Bus 1 (MS5611): `SDA = GPIO3`, `SCL = GPIO2`.
+3. **Tích hợp các giao thức sản phẩm:**
+   - Chuyển cấu trúc `FallProfile` vào lưu trữ NVS (`Preferences`) để có thể cập nhật động từ ứng dụng Android thông qua BLE.
+   - Bổ sung các service GATT BLE và cấu trúc gói tin `Esp32EventPacket` / `Esp32SensorPacket` theo đúng quy định tại Mục 8 của tài liệu này.
+

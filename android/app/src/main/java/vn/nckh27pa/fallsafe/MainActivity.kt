@@ -30,6 +30,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import core.State
 import core.Status
 
@@ -109,10 +112,10 @@ class MainActivity : ComponentActivity() {
         controller.foreground = true
         controller.onMonitoringChanged = {
             ownership.update(controller.foreground, controller.backgroundMonitoring)
-            sensorSummary = collector.activeSensors.joinToString().ifEmpty { "Không có cảm biến khả dụng" }
+            sensorSummary = collector.activeSensors.joinToString().ifEmpty { NO_SENSOR_SUMMARY }
         }
         ownership.update(true, controller.backgroundMonitoring)
-        sensorSummary = if (controller.backgroundMonitoring) controller.backgroundSensors else collector.activeSensors.joinToString().ifEmpty { "Không có cảm biến khả dụng" }
+        sensorSummary = if (controller.backgroundMonitoring) controller.backgroundSensors else collector.activeSensors.joinToString().ifEmpty { NO_SENSOR_SUMMARY }
         AndroidTrace.logPermission(this) // TEMPORARY DIAGNOSTIC
         controller.refreshCapabilityTruth()
         controller.resumed()
@@ -410,6 +413,92 @@ private fun SettingsScreen(
 
         Action("Dùng cảm biến điện thoại thật", c::usePhone, c.snapshot.state == State.MONITORING)
         Text("Cảm biến đã đăng ký: ${if (c.backgroundMonitoring) c.backgroundSensors else sensorSummary}", fontSize = 16.sp)
+        SensorDiagnosticsSection(
+            controller = c,
+            sensorsAvailable = sensorSummary.isNotBlank() && sensorSummary != NO_SENSOR_SUMMARY
+        )
+    }
+}
+
+private const val NO_SENSOR_SUMMARY = "Không có cảm biến khả dụng"
+
+/**
+ * Diagnostics only: reads the SAME packet/observation the fall detector consumes.
+ * No new sensor listener; no detection logic; updates at ~4 Hz so the page does not jump.
+ */
+@Composable
+private fun SensorDiagnosticsSection(
+    controller: DemoController,
+    sensorsAvailable: Boolean
+) {
+    var diagnostics by remember {
+        mutableStateOf(
+            settingsSensorDiagnostics(controller.packet, controller.observation, sensorsAvailable)
+        )
+    }
+    LaunchedEffect(sensorsAvailable) {
+        while (isActive) {
+            diagnostics = settingsSensorDiagnostics(controller.packet, controller.observation, sensorsAvailable)
+            delay(250L)
+        }
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outlineVariant),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp)
+    ) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(
+                "DỮ LIỆU CẢM BIẾN",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            // Gia tốc kế
+            Text("Gia tốc kế", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+            DiagnosticAxisRow("X", formatDiagnosticNumber(diagnostics.accelX, 2) + " m/s²")
+            DiagnosticAxisRow("Y", formatDiagnosticNumber(diagnostics.accelY, 2) + " m/s²")
+            DiagnosticAxisRow("Z", formatDiagnosticNumber(diagnostics.accelZ, 2) + " m/s²")
+            DiagnosticAxisRow("Độ lớn", formatDiagnosticNumber(diagnostics.accelMagnitudeMs2, 2) + " m/s²")
+
+            // Con quay hồi chuyển
+            Text("Con quay hồi chuyển", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+            DiagnosticAxisRow("X", formatDiagnosticNumber(diagnostics.gyroXRadS, 3) + " rad/s")
+            DiagnosticAxisRow("Y", formatDiagnosticNumber(diagnostics.gyroYRadS, 3) + " rad/s")
+            DiagnosticAxisRow("Z", formatDiagnosticNumber(diagnostics.gyroZRadS, 3) + " rad/s")
+            DiagnosticAxisRow("Độ lớn", formatDiagnosticNumber(diagnostics.gyroMagnitudeRadS, 3) + " rad/s")
+
+            Text("Nguồn cảm biến: ${diagnostics.source}", fontSize = 15.sp)
+            Text(
+                "Trạng thái dữ liệu: ${sensorDataStateVietnamese(diagnostics.dataState)} (${diagnostics.dataState.name})",
+                fontSize = 15.sp
+            )
+            Text(
+                "FALL state: ${diagnostics.fallPhase.name} · ${detectionPhaseVietnamese(diagnostics.fallPhase)}",
+                fontSize = 15.sp
+            )
+            Text(
+                "Hệ thống: ${controller.snapshot.state.name}",
+                fontSize = 15.sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun DiagnosticAxisRow(label: String, value: String) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(label, modifier = Modifier.weight(0.35f), fontSize = 16.sp)
+        Text(
+            value,
+            modifier = Modifier.weight(0.65f),
+            fontSize = 16.sp,
+            textAlign = TextAlign.End,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 

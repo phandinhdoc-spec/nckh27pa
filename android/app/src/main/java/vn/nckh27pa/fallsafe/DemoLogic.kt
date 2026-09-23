@@ -17,7 +17,8 @@ data class PhoneSensorPacket(
     val pressureWindowDeltaPa: Float? = null,
     val stepCount: Long? = null, val stepDetected: Boolean? = null,
     val phoneMotionState: String = "UNKNOWN", val phonePlacementConfidence: Int = 0,
-    val sensorQuality: Int = 0
+    val sensorQuality: Int = 0,
+    val gyroTimestampNs: Long? = null   // gyroscope sample's own SensorEvent timestamp (ns)
 )
 enum class SensorKind { ACCEL, LINEAR, GYRO, ORIENTATION, PRESSURE }
 class PhoneNormalizer {
@@ -66,6 +67,7 @@ class PhoneNormalizer {
         val a = fresh(SensorKind.ACCEL) ?: return null
         val l = fresh(SensorKind.LINEAR)?.values
         val g = fresh(SensorKind.GYRO)?.values
+        val gyroNs = fresh(SensorKind.GYRO)?.ns
         val o = fresh(SensorKind.ORIENTATION)?.values
         val pressure = fresh(SensorKind.PRESSURE)?.values?.get(0)
         val altitudeDelta = pressure?.let { current ->
@@ -79,7 +81,8 @@ class PhoneNormalizer {
         }
         return PhoneSensorPacket(a.ns, wallMs, a.values[0], a.values[1], a.values[2],
             l?.get(0), l?.get(1), l?.get(2), g?.get(0), g?.get(1), g?.get(2),
-            o?.get(0), o?.get(1), o?.get(2), pressure, altitudeDelta, pressureWindowDelta)
+            o?.get(0), o?.get(1), o?.get(2), pressure, altitudeDelta, pressureWindowDelta,
+            gyroTimestampNs = gyroNs)
     }
 
     private companion object {
@@ -127,26 +130,36 @@ class DemoDetector(
     fun observation(): FallDetectionObservation = currentObservation
 
     fun accept(p: PhoneSensorPacket): Boolean {
+        val previousPhase = currentObservation.phase
         val profile = activeProfileProvider()
         if (profile.id != observedProfile.id || profile.config != observedProfile.config) {
             clearEvidence()
             observedProfile = profile
             currentObservation = normalObservation(profile)
+            Fall01Trace.transition(previousPhase, currentObservation, "PROFILE_CHANGED", p)
+            Fall01Trace.decision(p, currentObservation, false, "PROFILE_CHANGED")
         }
         val config = profile.config
         val t = p.timestampNs
         val acceleration = listOf(p.accelXMs2, p.accelYMs2, p.accelZMs2)
         if (t < 0 || acceleration.any { !it.isFinite() }) {
             reset()
+            Fall01Trace.transition(previousPhase, currentObservation, "INVALID_SAMPLE_INPUT", p)
+            Fall01Trace.decision(p, currentObservation, false, "INVALID_SAMPLE_INPUT")
             return false
         }
         val magnitude = sqrt(acceleration.sumOf { it.toDouble() * it.toDouble() })
         val previous = last
         val maximumGapNs = config.maximumSampleGapMs * 1_000_000L
         if (previous != null && (t <= previous || t - previous > maximumGapNs)) {
+            val hadActiveImpact = impact != null
             clearEvidence()
             last = t
             currentObservation = observationFor(profile, magnitude, DetectionPhase.NORMAL)
+            Fall01Trace.transition(previousPhase, currentObservation, "SAMPLE_GAP_RESET", p)
+            if (hadActiveImpact) {
+                Fall01Trace.decision(p, currentObservation, false, "SAMPLE_GAP_ABORTED_IMPACT_EPISODE")
+            }
             return false
         }
         last = t
@@ -158,11 +171,13 @@ class DemoDetector(
             currentObservation = observationFor(
                 profile, magnitude, DetectionPhase.IMPACT_DETECTED, impactOverThreshold = true
             )
+            Fall01Trace.transition(previousPhase, currentObservation, "IMPACT_THRESHOLD_REACHED", p)
             return false
         }
         val hit = impact
         if (hit == null) {
             currentObservation = observationFor(profile, magnitude, DetectionPhase.NORMAL)
+            Fall01Trace.transition(previousPhase, currentObservation, "NO_ACTIVE_IMPACT", p)
             return false
         }
         if (t - hit > config.postImpactWindowMs * 1_000_000L) {
@@ -170,6 +185,8 @@ class DemoDetector(
             quiet = null
             count = 0
             currentObservation = observationFor(profile, magnitude, DetectionPhase.NORMAL)
+            Fall01Trace.transition(previousPhase, currentObservation, "POST_IMPACT_WINDOW_EXPIRED", p)
+            Fall01Trace.decision(p, currentObservation, false, "POST_IMPACT_WINDOW_EXPIRED")
             return false
         }
         val still = abs(magnitude - config.stillnessTargetAccelerationMs2) <= config.stillnessToleranceMs2
@@ -177,6 +194,8 @@ class DemoDetector(
             quiet = null
             count = 0
             currentObservation = observationFor(profile, magnitude, DetectionPhase.IMPACT_DETECTED)
+            Fall01Trace.transition(previousPhase, currentObservation, "STILLNESS_INTERRUPTED", p)
+            Fall01Trace.decision(p, currentObservation, false, "STILLNESS_INTERRUPTED")
             return false
         }
         if (quiet == null) quiet = t
@@ -196,6 +215,8 @@ class DemoDetector(
                 (p.pressureWindowDeltaPa ?: Float.NEGATIVE_INFINITY) >= config.phonePressureMinimumRisePa
             } else null
         )
+        Fall01Trace.transition(previousPhase, currentObservation, if (confirmed) "STILLNESS_CONFIRMED" else "STILLNESS_IN_PROGRESS", p)
+        Fall01Trace.decision(p, currentObservation, confirmed, if (confirmed) "STILLNESS_CONFIRMED" else "STILLNESS_IN_PROGRESS")
         if (confirmed) clearEvidence()
         return confirmed
     }
@@ -284,19 +305,25 @@ class DemoSession(
     private val core = AlertCore(clock, sink)
     private val detector = if (profileRepository == null) DemoDetector()
         else DemoDetector(activeProfileProvider = { profileRepository.activeProfile() })
+    private fun alertStep(reason: String, packet: PhoneSensorPacket?, step: () -> Unit) {
+        val before = core.snapshot().state
+        step()
+        Fall01Trace.alertState(before, core.snapshot().state, reason, detector.observation(), packet)
+    }
     fun resetDetection() = detector.reset()
     fun observation() = detector.observation()
     fun accept(packet: PhoneSensorPacket) {
         if (core.snapshot().state == State.MONITORING && detector.accept(packet)) {
-            core.suspected(); core.evidenceConfirmed()
+            alertStep("FALL_CONFIRMED_BY_DETECTOR", packet) { core.suspected() }
+            alertStep("FALL_EVIDENCE_CONFIRMED", packet) { core.evidenceConfirmed() }
         }
     }
     fun snapshot() = core.snapshot()
     fun events() = core.events()
-    fun tick() = core.tick()
-    fun safe() { core.safe(); detector.reset() }
-    fun needHelp() { core.needHelp(); detector.reset() }
-    fun complete() { core.complete(); detector.reset() }
+    fun tick() = alertStep("VERIFICATION_TICK", null) { core.tick() }
+    fun safe() { alertStep("USER_SAFE", null) { core.safe() }; detector.reset() }
+    fun needHelp() { alertStep("USER_NEED_HELP", null) { core.needHelp() }; detector.reset() }
+    fun complete() { alertStep("EVENT_COMPLETE", null) { core.complete() }; detector.reset() }
 }
 class SosHold(val requiredMs: Long = 2000L) {
     private var started: Long? = null
@@ -335,7 +362,14 @@ class DemoInputAdapter(
     fun acceptPhone(packet: PhoneSensorPacket?) {
         if (!phoneOnly()) return
         display(packet)
-        if (packet != null) session.accept(packet) else session.resetDetection()
+        if (packet != null) {
+            val observed = session.snapshot().state == State.MONITORING
+            session.accept(packet)
+            Fall01Trace.sample(packet, session.observation(), session.snapshot().state.name, observed)
+        } else {
+            session.resetDetection()
+            Fall01Trace.event("PIPELINE_STALE_RESET")
+        }
     }
     fun acceptReplay(packet: PhoneSensorPacket) { display(packet); session.accept(packet) }
     fun paused(backgroundMonitoring: Boolean = false) {
