@@ -31,6 +31,13 @@
 #include <Wire.h>
 #include <math.h>
 #include <stdint.h>
+#include <vector>
+#include <stdlib.h>
+#include <string.h>
+#include <BLEDevice.h>
+#include <BLEServer.h>
+#include <BLEUtils.h>
+#include <BLE2902.h>
 
 // ============================================================================
 // 1. CẤU HÌNH PHẦN CỨNG & CHÂN KẾT NỐI (PIN DEFINITIONS)
@@ -107,6 +114,147 @@ struct SensorSnapshot {
 // Khai báo trước hàm hiệu chuẩn
 void performBootCalibration();
 
+// ============================================================================
+// MÁY TRẠNG THÁI PHÁT HIỆN NGÃ (STATE MACHINE) — khai báo sớm để prototype
+// của Arduino (tự động chèn trước hàm đầu tiên) thấy được các kiểu này.
+// ============================================================================
+enum DetectionState {
+  STATE_CALIBRATING = 0,
+  STATE_NORMAL,
+  STATE_POSSIBLE_FREE_FALL,
+  STATE_IMPACT,
+  STATE_POST_IMPACT,
+  STATE_FALL_CONFIRMED
+};
+
+const char* fallStateToString(DetectionState s) {
+  switch (s) {
+    case STATE_CALIBRATING:        return "CALIBRATING";
+    case STATE_NORMAL:             return "NORMAL";
+    case STATE_POSSIBLE_FREE_FALL: return "POSSIBLE_FREE_FALL";
+    case STATE_IMPACT:             return "IMPACT";
+    case STATE_POST_IMPACT:        return "POST_IMPACT";
+    case STATE_FALL_CONFIRMED:     return "FALL_CONFIRMED";
+    default:                       return "UNKNOWN";
+  }
+}
+
+// BLE transport: IF-003 frame version 1, service UUIDs from interface-contract.md.
+static const char* BLE_DEVICE_NAME = "ble_server";
+static const char* BLE_SERVICE_UUID = "7d2a0001-6f45-4c2b-9a1e-38a8f5c10001";
+static const char* BLE_TELEMETRY_UUID = "7d2a0002-6f45-4c2b-9a1e-38a8f5c10001";
+static const char* BLE_EVENT_UUID = "7d2a0003-6f45-4c2b-9a1e-38a8f5c10001";
+static const char* BLE_REQUEST_UUID = "7d2a0005-6f45-4c2b-9a1e-38a8f5c10001";
+static const char* BLE_PROFILE_UUID = "7d2a0006-6f45-4c2b-9a1e-38a8f5c10001";
+constexpr uint16_t IF003_DEFAULT_MTU = 23;
+constexpr uint8_t IF003_KIND_SENSOR = 1, IF003_KIND_EVENT = 2, IF003_KIND_COMMAND = 4, IF003_KIND_ACK = 5;
+BLEServer* bleServer = nullptr;
+BLECharacteristic* telemetryNotify = nullptr;
+BLECharacteristic* eventNotify = nullptr;
+BLECharacteristic* requestChar = nullptr;
+BLECharacteristic* profileWrite = nullptr;
+bool bleConnected = false;
+volatile uint16_t blePeerMtu = 23;
+uint32_t bleMessageId = 1;
+uint32_t bleSequence = 0;
+uint32_t lastTelemetryMs = 0;
+
+static uint32_t nextMessageId() {
+  if (++bleMessageId == 0) bleMessageId = 1;
+  return bleMessageId;
+}
+
+static void putLe(uint8_t* p, uint32_t v, uint8_t n) {
+  for (uint8_t i = 0; i < n; ++i) p[i] = static_cast<uint8_t>(v >> (8 * i));
+}
+
+// IF-003 encoder: FS/version/kind/id/index/count/total/offset + UTF-8 bytes.
+static void notifyFramed(BLECharacteristic* characteristic, uint8_t kind, const String& payload) {
+  if (!bleConnected || characteristic == nullptr || payload.length() == 0 || payload.length() > 1024) return;
+  size_t chunk = (blePeerMtu >= 27) ? (static_cast<size_t>(blePeerMtu) - 19) : 4; // ATT hdr 3 + frame hdr 16.
+  if (chunk > 200) chunk = 200; // Cap ATT cho stack NimBLE cu.
+  const size_t total = payload.length();
+  const uint16_t count = static_cast<uint16_t>((total - 1) / chunk + 1);
+  const uint32_t id = nextMessageId();
+  for (uint16_t index = 0; index < count; ++index) {
+    if (count > 20 && index >= 20) return; // MTU thap: khong chan loop qua lau.
+    const size_t offset = index * chunk;
+    const size_t length = min(chunk, total - offset);
+    std::vector<uint8_t> frame(16 + length);
+    frame[0] = 0x46; frame[1] = 0x53; frame[2] = 1; frame[3] = kind;
+    putLe(frame.data() + 4, id, 4); putLe(frame.data() + 8, index, 2);
+    putLe(frame.data() + 10, count, 2); putLe(frame.data() + 12, total, 2);
+    putLe(frame.data() + 14, offset, 2);
+    memcpy(frame.data() + 16, payload.c_str() + offset, length);
+    characteristic->setValue(frame.data(), frame.size());
+    characteristic->notify();
+    delay(1);
+  }
+}
+
+#if 0
+static bool jsonNumber(const String& json, const char* key, double& out) {
+  int p = json.indexOf(String("\"") + key + "\"");
+  if (p < 0) return false;
+  p = json.indexOf(':', p); if (p < 0) return false; ++p;
+  while (p < json.length() && (json[p] == ' ' || json[p] == '\t')) ++p;
+  char* end = nullptr; out = strtod(json.c_str() + p, &end);
+  return end != json.c_str() + p;
+}
+
+static bool applyProfileJson(const String& json, String& error) {
+  const char* keys[] = {"impactAccelerationMs2", "stillnessTargetAccelerationMs2", "stillnessToleranceMs2",
+    "postImpactWindowMs", "postImpactStillnessDurationMs", "minimumStillnessSamples", "maximumSampleGapMs",
+    "freeFallThresholdMs2", "freeFallMinDurationMs", "gyroTurnThresholdDps", "pressureEvidenceMinRisePa",
+    "pressureWindowMs", "altitudeDropMinM", "sampleWatchdogMs"};
+  double v[14];
+  for (uint8_t i = 0; i < 14; ++i) if (!jsonNumber(json, keys[i], v[i])) { error = String("missing ") + keys[i]; return false; }
+  if (v[0] <= 0 || v[1] <= 0 || v[2] <= 0 || v[3] < 1 || v[4] < 1 || v[5] < 1 || v[5] > 65535 ||
+      v[6] < 1 || v[7] <= 0 || v[8] < 1 || v[9] < 0 || v[10] < 0 || v[11] < 1 || v[12] >= 0 || v[13] < 1) {
+    error = "profile value out of range"; return false;
+  }
+  profile.impactAccelerationMs2=v[0]; profile.stillnessTargetAccelerationMs2=v[1]; profile.stillnessToleranceMs2=v[2];
+  profile.postImpactWindowMs=v[3]; profile.postImpactStillnessDurationMs=v[4]; profile.minimumStillnessSamples=v[5];
+  profile.maximumSampleGapMs=v[6]; profile.freeFallThresholdMs2=v[7]; profile.freeFallMinDurationMs=v[8];
+  profile.gyroTurnThresholdDps=v[9]; profile.pressureEvidenceMinRisePa=v[10]; profile.pressureWindowMs=v[11];
+  profile.altitudeDropMinM=v[12]; profile.sampleWatchdogMs=v[13];
+  return true;
+}
+
+static String telemetryJson() {
+  String s = "{\"protocolVersion\":1,\"sensorSource\":\"ESP32\",\"deviceId\":\"ble_server\",\"sequenceNumber\":";
+  s += String(++bleSequence); s += ",\"timestampMs\":"; s += String(currentSample.timestampMs);
+  s += ",\"accelXMs2\":"; s += String(currentSample.ax, 3); s += ",\"accelYMs2\":"; s += String(currentSample.ay, 3);
+  s += ",\"accelZMs2\":"; s += String(currentSample.az, 3); s += ",\"gyroXDps\":"; s += String(currentSample.gx, 3);
+  s += ",\"gyroYDps\":"; s += String(currentSample.gy, 3); s += ",\"gyroZDps\":"; s += String(currentSample.gz, 3);
+  s += ",\"pressurePa\":"; s += String(currentSample.pressurePa, 2); s += ",\"temperatureC\":"; s += String(currentSample.temperatureC, 2);
+  s += ",\"altitudeDeltaM\":"; s += String(currentSample.altitudeDeltaM, 3); s += ",\"sensorQuality\":100}"; return s;
+}
+
+class BleServerCallbacks : public BLEServerCallbacks {
+  void onConnect(BLEServer*) override { bleConnected = true; }
+  void onDisconnect(BLEServer* server) override { bleConnected = false; server->getAdvertising()->start(); }
+};
+class RequestCallbacks : public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic* c) override { String token = c->getValue().c_str(); String ack = "{\"ok\":true,\"token\":\"" + token + "\"}"; notifyFramed(requestChar, IF003_KIND_ACK, ack); }
+};
+class ProfileCallbacks : public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic* c) override { String error; String json = c->getValue().c_str(); bool ok = applyProfileJson(json, error); String ack = ok ? "{\"ok\":true,\"profile\":\"updated\"}" : (String("{\"ok\":false,\"error\":\"") + error + "\"}"); notifyFramed(requestChar, IF003_KIND_ACK, ack); }
+};
+
+static void setupBle() {
+  BLEDevice::init(BLE_DEVICE_NAME); bleServer = BLEDevice::createServer(); bleServer->setCallbacks(new BleServerCallbacks());
+  BLEService* service = bleServer->createService(BLE_SERVICE_UUID);
+  telemetryNotify = service->createCharacteristic(BLE_TELEMETRY_UUID, BLECharacteristic::PROPERTY_NOTIFY);
+  eventNotify = service->createCharacteristic(BLE_EVENT_UUID, BLECharacteristic::PROPERTY_NOTIFY);
+  requestChar = service->createCharacteristic(BLE_REQUEST_UUID, BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_NOTIFY);
+  profileWrite = service->createCharacteristic(BLE_PROFILE_UUID, BLECharacteristic::PROPERTY_WRITE);
+  telemetryNotify->addDescriptor(new BLE2902()); eventNotify->addDescriptor(new BLE2902()); requestChar->addDescriptor(new BLE2902());
+  requestChar->setCallbacks(new RequestCallbacks()); profileWrite->setCallbacks(new ProfileCallbacks()); service->start();
+  bleServer->getAdvertising()->addServiceUUID(BLE_SERVICE_UUID); bleServer->getAdvertising()->start();
+}
+#endif
+
 #define PROFILE_NAME "TEST_RIG_EXP_V1"
 
 struct FallProfile {
@@ -132,26 +280,8 @@ struct FallProfile {
 // ============================================================================
 // 3. MÁY TRẠNG THÁI PHÁT HIỆN NGÃ (STATE MACHINE)
 // ============================================================================
-enum DetectionState {
-  STATE_CALIBRATING = 0,
-  STATE_NORMAL,
-  STATE_POSSIBLE_FREE_FALL,
-  STATE_IMPACT,
-  STATE_POST_IMPACT,
-  STATE_FALL_CONFIRMED
-};
-
-const char* stateToString(DetectionState s) {
-  switch (s) {
-    case STATE_CALIBRATING:        return "CALIBRATING";
-    case STATE_NORMAL:             return "NORMAL";
-    case STATE_POSSIBLE_FREE_FALL: return "POSSIBLE_FREE_FALL";
-    case STATE_IMPACT:             return "IMPACT";
-    case STATE_POST_IMPACT:        return "POST_IMPACT";
-    case STATE_FALL_CONFIRMED:     return "FALL_CONFIRMED";
-    default:                       return "UNKNOWN";
-  }
-}
+// enum DetectionState + fallStateToString được khai báo sớm ở đầu file
+// (trước phần BLE transport) để prototype tự động của Arduino thấy kiểu.
 
 // ============================================================================
 // 4. BIẾN TOÀN CỤC VÀ DỮ LIỆU CẢM BIẾN
@@ -185,6 +315,42 @@ uint32_t rawD1 = 0, rawD2 = 0;
 
 // Dữ liệu đo tức thời
 SensorSnapshot currentSample;
+
+static bool jsonNumber(const String& json, const char* key, double& out) {
+  int p = json.indexOf(String("\"") + key + "\""); if (p < 0) return false;
+  p = json.indexOf(':', p); if (p < 0) return false; ++p;
+  while (p < json.length() && (json[p] == ' ' || json[p] == '\t')) ++p;
+  char* end = nullptr; out = strtod(json.c_str() + p, &end); return end != json.c_str() + p;
+}
+static bool applyProfileJson(const String& json, String& error) {
+  const char* k[] = {"impactAccelerationMs2","stillnessTargetAccelerationMs2","stillnessToleranceMs2","postImpactWindowMs","postImpactStillnessDurationMs","minimumStillnessSamples","maximumSampleGapMs","freeFallThresholdMs2","freeFallMinDurationMs","gyroTurnThresholdDps","pressureEvidenceMinRisePa","pressureWindowMs","altitudeDropMinM","sampleWatchdogMs"};
+  double v[14]; bool present[14] = {};
+  for (uint8_t i=0;i<14;++i) present[i] = jsonNumber(json,k[i],v[i]);
+  if (!present[0] && !present[1] && !present[2] && !present[3] && !present[4] && !present[5] && !present[6] && !present[7] && !present[8] && !present[9] && !present[10] && !present[11] && !present[12] && !present[13]) { error="no profile fields"; return false; }
+  if (!present[0]) v[0]=profile.impactAccelerationMs2; if (!present[1]) v[1]=profile.stillnessTargetAccelerationMs2; if (!present[2]) v[2]=profile.stillnessToleranceMs2; if (!present[3]) v[3]=profile.postImpactWindowMs; if (!present[4]) v[4]=profile.postImpactStillnessDurationMs; if (!present[5]) v[5]=profile.minimumStillnessSamples; if (!present[6]) v[6]=profile.maximumSampleGapMs; if (!present[7]) v[7]=profile.freeFallThresholdMs2; if (!present[8]) v[8]=profile.freeFallMinDurationMs; if (!present[9]) v[9]=profile.gyroTurnThresholdDps; if (!present[10]) v[10]=profile.pressureEvidenceMinRisePa; if (!present[11]) v[11]=profile.pressureWindowMs; if (!present[12]) v[12]=profile.altitudeDropMinM; if (!present[13]) v[13]=profile.sampleWatchdogMs;
+  if (v[0]<=0||v[1]<=0||v[2]<=0||v[3]<1||v[4]<1||v[5]<1||v[5]>65535||v[6]<1||v[7]<=0||v[8]<1||v[9]<0||v[10]<0||v[11]<1||v[12]>=0||v[13]<1) { error="profile value out of range"; return false; }
+  profile.impactAccelerationMs2=v[0]; profile.stillnessTargetAccelerationMs2=v[1]; profile.stillnessToleranceMs2=v[2]; profile.postImpactWindowMs=v[3]; profile.postImpactStillnessDurationMs=v[4]; profile.minimumStillnessSamples=v[5]; profile.maximumSampleGapMs=v[6]; profile.freeFallThresholdMs2=v[7]; profile.freeFallMinDurationMs=v[8]; profile.gyroTurnThresholdDps=v[9]; profile.pressureEvidenceMinRisePa=v[10]; profile.pressureWindowMs=v[11]; profile.altitudeDropMinM=v[12]; profile.sampleWatchdogMs=v[13]; return true;
+}
+static String telemetryJson() {
+  String s="{\"protocolVersion\":1,\"sensorSource\":\"ESP32\",\"deviceId\":\"ble_server\",\"sequenceNumber\":"; s+=String(++bleSequence); s+=",\"timestampMs\":"; s+=String(currentSample.timestampMs); s+=",\"accelXMs2\":"; s+=String(currentSample.ax,3); s+=",\"accelYMs2\":"; s+=String(currentSample.ay,3); s+=",\"accelZMs2\":"; s+=String(currentSample.az,3); s+=",\"gyroXDps\":"; s+=String(currentSample.gx,3); s+=",\"gyroYDps\":"; s+=String(currentSample.gy,3); s+=",\"gyroZDps\":"; s+=String(currentSample.gz,3); s+=",\"pressurePa\":"; s+=String(currentSample.pressurePa,2); s+=",\"temperatureC\":"; s+=String(currentSample.temperatureC,2); s+=",\"altitudeDeltaM\":"; s+=String(currentSample.altitudeDeltaM,3); s+=",\"batteryPercent\":100,\"batteryVoltageMv\":3300,\"isCharging\":true,\"sosButtonPressed\":false,\"sensorQuality\":100}"; return s;
+}
+class BleServerCallbacks : public BLEServerCallbacks {
+  void onConnect(BLEServer* pServer) override {
+    bleConnected = true;
+    uint16_t connId = pServer->getConnId();
+    uint16_t mtu = pServer->getPeerMTU(connId);
+    if (mtu < 23) mtu = 23; else if (mtu > 517) mtu = 517;
+    blePeerMtu = mtu;
+  }
+  void onDisconnect(BLEServer* s) override { bleConnected = false; blePeerMtu = 23; s->getAdvertising()->start(); }
+};
+class RequestCallbacks : public BLECharacteristicCallbacks { void onWrite(BLECharacteristic*) override { notifyFramed(telemetryNotify,IF003_KIND_SENSOR,telemetryJson()); } };
+class ProfileCallbacks : public BLECharacteristicCallbacks { void onWrite(BLECharacteristic* c) override { String e,j=c->getValue().c_str(); bool ok=applyProfileJson(j,e); notifyFramed(telemetryNotify,IF003_KIND_ACK,ok?"{\"status\":\"OK\",\"updated\":true}":String("{\"status\":\"ERROR\",\"updated\":false,\"error\":\"")+e+"\"}"); } };
+static void setupBle() {
+  BLEDevice::init(BLE_DEVICE_NAME); BLEDevice::setMTU(517); bleServer=BLEDevice::createServer(); bleServer->setCallbacks(new BleServerCallbacks()); BLEService* svc=bleServer->createService(BLE_SERVICE_UUID);
+  telemetryNotify=svc->createCharacteristic(BLE_TELEMETRY_UUID,BLECharacteristic::PROPERTY_NOTIFY); eventNotify=svc->createCharacteristic(BLE_EVENT_UUID,BLECharacteristic::PROPERTY_NOTIFY); requestChar=svc->createCharacteristic(BLE_REQUEST_UUID,BLECharacteristic::PROPERTY_WRITE|BLECharacteristic::PROPERTY_NOTIFY); profileWrite=svc->createCharacteristic(BLE_PROFILE_UUID,BLECharacteristic::PROPERTY_WRITE);
+  telemetryNotify->addDescriptor(new BLE2902()); eventNotify->addDescriptor(new BLE2902()); requestChar->addDescriptor(new BLE2902()); requestChar->setCallbacks(new RequestCallbacks()); profileWrite->setCallbacks(new ProfileCallbacks()); svc->start(); bleServer->getAdvertising()->addServiceUUID(BLE_SERVICE_UUID); bleServer->getAdvertising()->start();
+}
 
 // Biến theo dõi của thuật toán
 uint32_t lastSampleTimeMs = 0;
@@ -860,7 +1026,7 @@ void outputCsvRow(const SensorSnapshot& s, const char* eventTag) {
                 s.timestampMs, s.ax, s.ay, s.az, s.accelMagnitude,
                 s.gx, s.gy, s.gz, s.gyroMagnitude,
                 s.pressurePa, s.temperatureC, s.altitudeDeltaM,
-                stateToString(currentState), eventTag);
+                fallStateToString(currentState), eventTag);
 }
 
 void outputHumanLog(const SensorSnapshot& s) {
@@ -876,7 +1042,7 @@ void outputHumanLog(const SensorSnapshot& s) {
     Serial.println("[--] GY63   | UNAVAILABLE");
   }
 
-  Serial.printf("[STATE] %s\n", stateToString(currentState));
+  Serial.printf("[STATE] %s\n", fallStateToString(currentState));
   Serial.printf("[RISK] Fall score: %d%%\n", calculateFallRiskScore());
 }
 
@@ -1063,6 +1229,8 @@ void setup() {
   // Khởi tạo MS5611
   initMS5611();
 
+  setupBle();
+
   // In bảng tham số profile
   printProfileTable();
 
@@ -1101,6 +1269,19 @@ void loop() {
 
       // Xử lý thuật toán phát hiện ngã (cập nhật pendingEventTag nếu có sự kiện)
       processFallDetection(currentSample);
+
+      if (bleConnected && pendingEventTag[0] != 'N') {
+        String event = "{\"protocolVersion\":1,\"eventId\":\"evt-" + String(currentSample.timestampMs) + "\",\"deviceId\":\"ble_server\",\"sequenceNumber\":";
+        event += String(bleSequence + 1); event += ",\"timestampMs\":"; event += String(currentSample.timestampMs);
+        event += ",\"eventType\":\""; event += pendingEventTag; event += "\",\"severity\":\"CRITICAL\",\"alertState\":\"";
+        event += fallStateToString(currentState); event += "\",\"peakAccelerationMs2\":"; event += String(impactPeakMs2, 3);
+        event += ",\"altitudeDeltaM\":"; event += String(currentSample.altitudeDeltaM, 3); event += "}";
+        notifyFramed(eventNotify, IF003_KIND_EVENT, event);
+      }
+      if (bleConnected && (nowMs - lastTelemetryMs) >= 100) {
+        lastTelemetryMs = nowMs;
+        notifyFramed(telemetryNotify, IF003_KIND_SENSOR, telemetryJson());
+      }
 
       // Nếu ở chế độ CSV raw, xuất đúng nhịp 100 Hz kèm event tag nếu có
       if (rawCsvMode) {

@@ -10,6 +10,7 @@
 
 #include <Arduino.h>
 #include <Wire.h>
+#include <WiFi.h>
 #include <math.h>
 #include <esp_task_wdt.h>
 #include <esp_timer.h>
@@ -48,10 +49,10 @@ enum DeviceState {
 // 1. PINMAP & HARDWARE DEFINITIONS
 // ============================================================================
 // --- Confirmed hardware pins (from node_config.h on ESP32-S3) ---
-static const int PIN_I2C0_SDA = 7;     // MPU6050 SDA (Bus 0) - CONFIRMED
-static const int PIN_I2C0_SCL = 6;     // MPU6050 SCL (Bus 0) - CONFIRMED
-static const int PIN_I2C1_SDA = 3;     // MS5611 SDA (Bus 1)  - CONFIRMED
-static const int PIN_I2C1_SCL = 2;     // MS5611 SCL (Bus 1)  - CONFIRMED
+static const int PIN_I2C0_SDA = 8;     // MPU6050 SDA (Bus 0) - CONFIRMED
+static const int PIN_I2C0_SCL = 9;     // MPU6050 SCL (Bus 0) - CONFIRMED
+static const int PIN_I2C1_SDA = 7;     // MS5611 SDA (Bus 1)  - CONFIRMED
+static const int PIN_I2C1_SCL = 6;     // MS5611 SCL (Bus 1)  - CONFIRMED
 
 // --- Peripherals without official schematic: marked TODO(HW) ---
 static const int PIN_BUTTON_SOS    = 4;   // TODO(HW): Active LOW, internal pull-up assumed
@@ -80,6 +81,10 @@ static const int PIN_BAT_ADC       = 12;  // TODO(HW): Battery voltage divider a
 #define UUID_CHAR_STATUS     "7d2a0004-6f45-4c2b-9a1e-38a8f5c10001" // Read/Notify
 #define UUID_CHAR_COMMAND    "7d2a0005-6f45-4c2b-9a1e-38a8f5c10001" // Write
 #define UUID_CHAR_ACK        "7d2a0006-6f45-4c2b-9a1e-38a8f5c10001" // Notify
+
+// WiFi station credentials (runs in parallel with BLE, non-blocking connect)
+#define WIFI_SSID "Pdmq"
+#define WIFI_PASS "12345678"
 
 // Global device identification and sequence counter (§8.6: shared for sensor/event)
 static char s_bleDeviceName[24] = "FALLSAFE-0000";
@@ -213,7 +218,7 @@ static bool s_lowBatWarned = false;
 static bool s_criticalBatWarned = false;
 
 // ============================================================================
-// 5. MPU6050 REGISTER-LEVEL DRIVER (Bus 0: Wire, GPIO 7 / GPIO 6)
+// 5. MPU6050 REGISTER-LEVEL DRIVER (Bus 0: Wire, GPIO 8 / GPIO 9)
 // ============================================================================
 #define MPU6050_ADDR_A       0x68
 #define MPU6050_ADDR_B       0x69
@@ -262,6 +267,22 @@ static bool i2cReadBytes(TwoWire &wire, uint8_t devAddr, uint8_t regAddr, uint8_
         buffer[i] = wire.read();
     }
     return true;
+}
+
+// Boot-time I2C bus scanner: prints every responding address as 0xNN.
+// Never halts; callers decide PASS/FAIL policy per bus.
+static void scanI2C(TwoWire &wire, const char *busLabel) {
+    Serial.printf("[I2C] Scan %s: ", busLabel);
+    bool anyFound = false;
+    for (uint8_t addr = 1; addr < 127; addr++) {
+        wire.beginTransmission(addr);
+        if (wire.endTransmission() == 0) {
+            Serial.printf("0x%02X ", addr);
+            anyFound = true;
+        }
+    }
+    if (!anyFound) Serial.print("(none)");
+    Serial.println();
 }
 
 static bool initMPU6050() {
@@ -332,7 +353,7 @@ static bool readMPU6050(float &ax, float &ay, float &az, float &gx, float &gy, f
 }
 
 // ============================================================================
-// 6. MS5611 REGISTER-LEVEL NON-BLOCKING DRIVER (Bus 1: Wire1, GPIO 3 / GPIO 2)
+// 6. MS5611 REGISTER-LEVEL NON-BLOCKING DRIVER (Bus 1: Wire1, GPIO 7 / GPIO 6)
 // ============================================================================
 #define MS5611_ADDR_A       0x77
 #define MS5611_ADDR_B       0x76
@@ -577,6 +598,7 @@ static uint16_t s_buzzerPatternId = 0;
 
 static bool s_bleConnected = false;
 static bool s_bleStreaming = false;
+static volatile uint16_t s_blePeerMtu = 23;
 
 // ============================================================================
 // 8. BLE GATT SERVER IMPLEMENTATION (Plan §8)
@@ -601,11 +623,19 @@ static uint32_t s_currentEventSeq = 0;
 class ServerCallbacks : public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) override {
         s_bleConnected = true;
+        uint16_t mtu = pServer->getPeerMTU(pServer->getConnId());
+        if (mtu < 23) mtu = 23;
+        if (mtu > 517) mtu = 517;
+        s_blePeerMtu = mtu;
+        Serial.printf("[BLE] Connected (connId=%u, peerMTU=%u)\n",
+                      pServer->getConnId(), s_blePeerMtu);
     }
     void onDisconnect(BLEServer* pServer) override {
         s_bleConnected = false;
         s_bleStreaming = false;
+        s_blePeerMtu = 23;
         BLEDevice::startAdvertising();
+        Serial.println(F("[BLE] Disconnected, advertising restarted (MTU reset to 23)"));
     }
 };
 
@@ -652,6 +682,10 @@ static void sendBleAck(const char* cmdId, const char* commandStatus, const char*
              msgBuf);
 
     if (strlen(buffer) > 512) {
+        s_counters.blePacketsDropped++;
+        return;
+    }
+    if (strlen(buffer) > (size_t)(s_blePeerMtu - 3)) {
         s_counters.blePacketsDropped++;
         return;
     }
@@ -723,6 +757,10 @@ static void sendBleEvent(const char* eventType, const char* severity, int confid
         s_counters.blePacketsDropped++;
         return;
     }
+    if (strlen(buffer) > (size_t)(s_blePeerMtu - 3)) {
+        s_counters.blePacketsDropped++;
+        return;
+    }
     s_pCharEvent->setValue((uint8_t*)buffer, strlen(buffer));
     s_pCharEvent->indicate();
 }
@@ -774,6 +812,10 @@ static void sendBleDeviceStatus() {
              errBuf);
 
     if (strlen(buffer) > 512) {
+        s_counters.blePacketsDropped++;
+        return;
+    }
+    if (strlen(buffer) > (size_t)(s_blePeerMtu - 3)) {
         s_counters.blePacketsDropped++;
         return;
     }
@@ -840,6 +882,10 @@ static void sendBleSensorStream(float ax, float ay, float az, float gx, float gy
         s_counters.blePacketsDropped++;
         return;
     }
+    if (strlen(buffer) > (size_t)(s_blePeerMtu - 3)) {
+        s_counters.blePacketsDropped++;
+        return;
+    }
     s_pCharStream->setValue((uint8_t*)buffer, strlen(buffer));
     s_pCharStream->notify();
 }
@@ -880,7 +926,12 @@ static void printSystemStatus() {
     Serial.printf("Barometer MS5611: %s (addr: 0x%02X, CRC: %s, ref: %.1f Pa)\n",
                   s_baro.online ? (s_baro.hasReadError ? "ERROR" : "ONLINE") : "UNAVAILABLE",
                   s_baro.address, s_baro.crcValid ? "VALID" : "INVALID", s_referencePressurePa);
-    Serial.printf("BLE: %s (Streaming: %s)\n", s_bleConnected ? "CONNECTED" : "DISCONNECTED", s_bleStreaming ? "ON" : "OFF");
+    Serial.printf("BLE: %s (Streaming: %s) | MTU: %u\n", s_bleConnected ? "CONNECTED" : "DISCONNECTED", s_bleStreaming ? "ON" : "OFF", s_blePeerMtu);
+    if (WiFi.status() == WL_CONNECTED) {
+        Serial.printf("WiFi: CONNECTED (SSID: %s, RSSI: %d dBm, IP: %s)\n", WIFI_SSID, WiFi.RSSI(), WiFi.localIP().toString().c_str());
+    } else {
+        Serial.printf("WiFi: DISCONNECTED (SSID: %s)\n", WIFI_SSID);
+    }
     Serial.printf("Buffer Usage: %u/%u samples (%d%%) | Drops: %u\n",
                   s_ringCount, RING_BUFFER_SIZE, (int)((s_ringCount * 100UL) / RING_BUFFER_SIZE), s_sampleDropCount);
     Serial.printf("Counters: IMU=%u, Baro=%u, LateSlots=%u, Falls=%u, SOS=%u, BLE Drops=%u\n",
@@ -904,11 +955,11 @@ static void performSelfTestAndCalibration() {
     Serial.println(F("[BOOT] Starting Hardware Self-Test..."));
 
     bool imuOk = initMPU6050();
-    Serial.printf("[BOOT] IMU MPU6050 on I2C0 (SDA 7, SCL 6): %s (addr: 0x%02X)\n",
+    Serial.printf("[BOOT] IMU MPU6050 on I2C0 (SDA 8, SCL 9): %s (addr: 0x%02X)\n",
                   imuOk ? "PASS" : "FAIL", s_mpu.address);
 
     bool baroOk = initMS5611();
-    Serial.printf("[BOOT] Barometer MS5611 on I2C1 (SDA 3, SCL 2): %s (addr: 0x%02X, CRC: %s)\n",
+    Serial.printf("[BOOT] Barometer MS5611 on I2C1 (SDA 7, SCL 6): %s (addr: 0x%02X, CRC: %s)\n",
                   baroOk ? "PASS" : "UNAVAILABLE", s_baro.address, s_baro.crcValid ? "PASS" : "FAIL/UNVERIFIED");
 
     // FIX 6: Emit SENSOR_ERROR if critical sensor self-test fails
@@ -1422,13 +1473,30 @@ void setup() {
     digitalWrite(PIN_BUZZER, LOW);
     digitalWrite(PIN_LED_STATUS, LOW);
 
-    // Initialize I2C Bus 0 for MPU6050 (SDA = GPIO 7, SCL = GPIO 6, 400kHz)
+    // Initialize I2C Bus 0 for MPU6050 (SDA = GPIO 8, SCL = GPIO 9, 400kHz)
     Wire.begin(PIN_I2C0_SDA, PIN_I2C0_SCL, 400000);
     Wire.setTimeOut(25); // 25ms timeout prevents bus lockup from blocking SOS button
 
-    // Initialize I2C Bus 1 for MS5611 (SDA = GPIO 3, SCL = GPIO 2, 400kHz)
+    // Initialize I2C Bus 1 for MS5611 (SDA = GPIO 7, SCL = GPIO 6, 400kHz)
     Wire1.begin(PIN_I2C1_SDA, PIN_I2C1_SCL, 400000);
     Wire1.setTimeOut(25);
+
+    // Boot-time I2C scan on both buses (log-only, never halts)
+    scanI2C(Wire, "bus0/Wire");
+    scanI2C(Wire1, "bus1/Wire1");
+    {
+        bool mpuFound = false, gy63Found = false;
+        for (uint8_t a : {(uint8_t)0x68, (uint8_t)0x69}) {
+            Wire.beginTransmission(a);
+            if (Wire.endTransmission() == 0) mpuFound = true;
+        }
+        for (uint8_t a : {(uint8_t)0x76, (uint8_t)0x77}) {
+            Wire1.beginTransmission(a);
+            if (Wire1.endTransmission() == 0) gy63Found = true;
+        }
+        Serial.printf("[BOOT] I2C bus0 MPU6050 (0x68/0x69): %s\n", mpuFound ? "PASS" : "FAIL (continuing, sensor marked OFFLINE if init fails)");
+        Serial.printf("[BOOT] I2C bus1 GY63 (0x76/0x77): %s\n", gy63Found ? "PASS" : "FAIL (continuing, sensor marked OFFLINE if init fails)");
+    }
 
     // Print Profile and Thresholds
     printProfile();
@@ -1438,6 +1506,7 @@ void setup() {
 
 #if ENABLE_BLE
     BLEDevice::init(s_bleDeviceName);
+    BLEDevice::setMTU(517);
     s_pServer = BLEDevice::createServer();
     s_pServer->setCallbacks(new ServerCallbacks());
 
@@ -1484,6 +1553,11 @@ void setup() {
 
     Serial.printf("[BLE] GATT Server initialized. Device name: %s\n", s_bleDeviceName);
 #endif
+
+    // WiFi station in parallel with BLE (non-blocking connect)
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
+    Serial.printf("[WIFI] Connecting to SSID: %s (non-blocking, BLE unaffected)\n", WIFI_SSID);
 
     // Watchdog Timer Initialization (5 seconds timeout)
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
@@ -1607,6 +1681,22 @@ void loop() {
 
     // 5. Buzzer & LED Rhythm
     updateBuzzer(nowMs);
+
+    // 5b. WiFi reconnect management (non-blocking, every 5s)
+    {
+        static uint32_t s_lastWifiCheckMs = 0;
+        static bool s_wifiWasConnected = false;
+        bool connected = (WiFi.status() == WL_CONNECTED);
+        if (connected && !s_wifiWasConnected) {
+            Serial.printf("[WIFI] Connected! IP: %s (RSSI: %d dBm)\n",
+                          WiFi.localIP().toString().c_str(), WiFi.RSSI());
+        }
+        s_wifiWasConnected = connected;
+        if (!connected && (nowMs - s_lastWifiCheckMs >= 5000)) {
+            s_lastWifiCheckMs = nowMs;
+            WiFi.reconnect();
+        }
+    }
 
 #if ENABLE_BLE
     // 6. Process pending BLE command asynchronously

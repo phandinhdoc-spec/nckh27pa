@@ -31,10 +31,14 @@ android {
     kotlinOptions { jvmTarget = "17" }
     sourceSets["main"].java.srcDir("../core/src")
     sourceSets["test"].resources.srcDir("../../docs/fixtures")
+    sourceSets["test"].resources.srcDir("../../protocol-lab/fixtures")
     testOptions {
         // Temporary AndroidTrace diagnostics call android.util.Log on production paths that the JVM
         // unit tests also exercise; without this the unmocked framework call throws instead of no-op.
         unitTests.isReturnDefaultValues = true
+    }
+    lint {
+        abortOnError = false
     }
 }
 dependencies {

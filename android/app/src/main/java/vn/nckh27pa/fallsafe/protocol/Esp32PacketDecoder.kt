@@ -35,6 +35,14 @@ class Esp32PacketDecoder {
                 return raw.toLong()
             }
             fun percentage(name: String): Int = integer(name).also { require(it in 0..100) }.toInt()
+            // S3 official firmware reports batteryPercent=-1 when no battery is
+            // present. Accept exactly -1 (unknown); sensorQuality stays 0..100.
+            fun batteryLevel(name: String): Int {
+                val raw = (fields[name] as? NumberToken)?.raw ?: error("Required integer")
+                if (raw == "-1") return -1
+                require(raw.matches(Regex("0|[1-9][0-9]*")))
+                return raw.toLong().also { require(it in 0..100) }.toInt()
+            }
             fun decimal(name: String): Float = ((fields[name] as? NumberToken)?.raw?.toFloatOrNull()
                 ?: error("Required number")).also { require(it.isFinite()) }
             fun optional(name: String): Float? = if (fields[name] == null) null else decimal(name)
@@ -47,7 +55,7 @@ class Esp32PacketDecoder {
                 decimal("accelXMs2"), decimal("accelYMs2"), decimal("accelZMs2"),
                 decimal("gyroXDps"), decimal("gyroYDps"), decimal("gyroZDps"),
                 optional("pressurePa"), optional("temperatureC"), optional("altitudeDeltaM"),
-                percentage("batteryPercent"), voltage, flag("isCharging"), flag("sosButtonPressed"), percentage("sensorQuality"))
+                batteryLevel("batteryPercent"), voltage, flag("isCharging"), flag("sosButtonPressed"), percentage("sensorQuality"))
         } catch (_: Exception) {
             // Do not retain raw payload or exception text in logs.
             null

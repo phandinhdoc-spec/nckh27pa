@@ -37,6 +37,8 @@ import core.State
 import core.Status
 
 import androidx.core.view.WindowCompat
+import vn.nckh27pa.fallsafe.bluetooth.BleTestScreen
+import vn.nckh27pa.fallsafe.bluetooth.FallSafeBleClient
 
 class MainActivity : ComponentActivity() {
     private val callingPermissionRequest = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
@@ -47,6 +49,9 @@ class MainActivity : ComponentActivity() {
     }
     private val locationPermissionRequest = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
         controller.refreshCapabilityTruth()
+    }
+    private val bluetoothPermissionRequest = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        // Bluetooth permissions handled
     }
     private val contactsViewModel by lazy {
         androidx.lifecycle.ViewModelProvider(this, object : androidx.lifecycle.ViewModelProvider.Factory {
@@ -68,8 +73,10 @@ class MainActivity : ComponentActivity() {
             handler.postDelayed(this, 250)
         }
     }
+    private val bleClient by lazy { FallSafeBleClient(this) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestBluetoothPermissions()
         WindowCompat.setDecorFitsSystemWindows(window, true)
         collector = PhoneSensorCollector(this, controller::acceptPhone)
         ownership = SensorOwnership({ collector.start() }, { collector.stop() })
@@ -93,7 +100,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
             MaterialTheme(colorScheme = if (darkTheme) darkColorScheme() else lightColorScheme()) {
-                DemoScreen(controller, contactsViewModel, sensorSummary, ::startBackground, ::stopBackground)
+                DemoScreen(
+                    controller,
+                    contactsViewModel,
+                    bleClient,
+                    sensorSummary,
+                    ::startBackground,
+                    ::stopBackground,
+                    ::requestBluetoothPermissions
+                )
             }
         }
     }
@@ -105,6 +120,20 @@ class MainActivity : ComponentActivity() {
                 messagingPermissionRequest.launch(arrayOf(Manifest.permission.SEND_SMS))
             vn.nckh27pa.fallsafe.permissions.Capability.LOCATION ->
                 locationPermissionRequest.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+        }
+    }
+    fun requestBluetoothPermissions() {
+        if (Build.VERSION.SDK_INT >= 31) {
+            val permissions = mutableListOf<String>()
+            if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
+            }
+            if (checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                permissions.add(Manifest.permission.BLUETOOTH_SCAN)
+            }
+            if (permissions.isNotEmpty()) {
+                bluetoothPermissionRequest.launch(permissions.toTypedArray())
+            }
         }
     }
     override fun onResume() {
@@ -161,20 +190,34 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun DemoScreen(c: DemoController, contactsViewModel: ContactsViewModel, sensorSummary: String, startBackground: () -> Unit, stopBackground: () -> Unit) {
+private fun DemoScreen(
+    c: DemoController,
+    contactsViewModel: ContactsViewModel,
+    bleClient: FallSafeBleClient,
+    sensorSummary: String,
+    startBackground: () -> Unit,
+    stopBackground: () -> Unit,
+    onRequestBluetoothPermissions: () -> Unit
+) {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var inCalibrationScreen by rememberSaveable { mutableStateOf(false) }
+    var inBleTestScreen by rememberSaveable { mutableStateOf(false) }
     val tabs = listOf("Trang chủ", "Sự kiện", "Người thân", "Cài đặt")
     val scrollState = rememberScrollState()
-    LaunchedEffect(tab, c.snapshot.state, inCalibrationScreen) { scrollState.scrollTo(0) }
+    LaunchedEffect(tab, c.snapshot.state, inCalibrationScreen, inBleTestScreen) { scrollState.scrollTo(0) }
+
+    // When back button is pressed in BLE test screen, return to Settings screen
+    androidx.activity.compose.BackHandler(enabled = inBleTestScreen) {
+        inBleTestScreen = false
+    }
 
     // When back button is pressed in calibration, return to Settings screen
-    androidx.activity.compose.BackHandler(enabled = inCalibrationScreen) {
+    androidx.activity.compose.BackHandler(enabled = inCalibrationScreen && !inBleTestScreen) {
         inCalibrationScreen = false
     }
 
     // When back button is pressed on other tabs, navigate back to Home
-    androidx.activity.compose.BackHandler(enabled = !inCalibrationScreen && tab != 0) {
+    androidx.activity.compose.BackHandler(enabled = !inCalibrationScreen && !inBleTestScreen && tab != 0) {
         tab = 0
     }
 
@@ -182,12 +225,13 @@ private fun DemoScreen(c: DemoController, contactsViewModel: ContactsViewModel, 
     LaunchedEffect(c.snapshot.state) {
         if (c.snapshot.state == State.VERIFYING) {
             inCalibrationScreen = false
+            inBleTestScreen = false
             tab = 0
         }
     }
 
     Scaffold(bottomBar = {
-        if (!inCalibrationScreen) {
+        if (!inCalibrationScreen && !inBleTestScreen) {
             val fontScale = LocalDensity.current.fontScale
             val navLabelSize = when {
                 fontScale >= 1.45f -> 10.sp
@@ -221,7 +265,14 @@ private fun DemoScreen(c: DemoController, contactsViewModel: ContactsViewModel, 
             }
         }
     }) { inset ->
-        if (inCalibrationScreen) {
+        if (inBleTestScreen) {
+            BleTestScreen(
+                bleClient = bleClient,
+                onBack = { inBleTestScreen = false },
+                onRequestPermissions = onRequestBluetoothPermissions,
+                modifier = Modifier.fillMaxSize().padding(inset)
+            )
+        } else if (inCalibrationScreen) {
             FallDetectionCalibrationScreen(
                 controller = c,
                 onBack = { inCalibrationScreen = false },
@@ -255,6 +306,7 @@ private fun DemoScreen(c: DemoController, contactsViewModel: ContactsViewModel, 
                         stopBackground = stopBackground,
                         onOpenContacts = { tab = 2 },
                         onOpenCalibration = { inCalibrationScreen = true },
+                        onOpenBleTest = { inBleTestScreen = true },
                         modifier = Modifier.fillMaxSize().padding(inset)
                     )
                 }
@@ -300,6 +352,7 @@ private fun SettingsScreen(
     stopBackground: () -> Unit,
     onOpenContacts: () -> Unit,
     onOpenCalibration: () -> Unit,
+    onOpenBleTest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scroll = rememberScrollState()
@@ -364,6 +417,34 @@ private fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
                 ) {
                     Text("HIỆU CHỈNH THỬ NGHIỆM", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+
+        // Section: BLE ESP32 Test & Control Entry (PHONE_ONLY research build)
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp)
+        ) {
+            Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "KIỂM THỬ BLE ESP32 (NGHIÊN CỨU)",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+                Text(
+                    text = "Quét kết nối phần cứng ESP32, nhận telemetry trực tiếp, chỉnh sửa 14 tham số FallProfile và xem event stream.",
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+                Button(
+                    onClick = onOpenBleTest,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+                ) {
+                    Text("MỞ BẢNG ĐIỀU KHIỂN & KIỂM THỬ BLE", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onTertiary)
                 }
             }
         }

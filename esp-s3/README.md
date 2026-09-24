@@ -22,10 +22,10 @@ Firmware chính thức cho thiết bị đeo phát hiện ngã (fall detection p
 
 | Ngoại vi | Chân ESP32-S3 | Trạng thái xác thực | Ghi chú |
 | :--- | :--- | :--- | :--- |
-| **MPU6050 SDA** | `GPIO 7` | **CONFIRMED** | Bus 0 (`Wire`), 400 kHz |
-| **MPU6050 SCL** | `GPIO 6` | **CONFIRMED** | Bus 0 (`Wire`), 400 kHz |
-| **MS5611 SDA** | `GPIO 3` | **CONFIRMED** | Bus 1 (`Wire1`), 400 kHz |
-| **MS5611 SCL** | `GPIO 2` | **CONFIRMED** | Bus 1 (`Wire1`), 400 kHz |
+| **MPU6050 SDA** | `GPIO 8` | **CONFIRMED** | Bus 0 (`Wire`), 400 kHz |
+| **MPU6050 SCL** | `GPIO 9` | **CONFIRMED** | Bus 0 (`Wire`), 400 kHz |
+| **MS5611 SDA** | `GPIO 7` | **CONFIRMED** | Bus 1 (`Wire1`), 400 kHz |
+| **MS5611 SCL** | `GPIO 6` | **CONFIRMED** | Bus 1 (`Wire1`), 400 kHz |
 | **Nút SOS** | `GPIO 4` | `TODO(HW)` | Active LOW, giữ >= 2s để báo động tức thì |
 | **Nút CANCEL** | `GPIO 5` | `TODO(HW)` | Active LOW, nhấn giữ >= 300ms để hủy báo động |
 | **Còi / Rung** | `GPIO 1` | `TODO(HW)` | PWM / High level output |

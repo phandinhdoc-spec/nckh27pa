@@ -8,10 +8,10 @@ Tài liệu này xác định phân bổ chân GPIO cho sản phẩm chính th�
 
 | GPIO | Tên tín hiệu | Hướng | Nguồn gốc / Cơ sở | Trạng thái | Ghi chú kỹ thuật |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **GPIO 7** | `I2C0_SDA` | I/O | `esp/node/.../node_config.h` | **CONFIRMED** | Bus I2C 0: MPU6050 SDA (GY-521). Kéo trở ngoài 4.7k. Tần số 400 kHz. |
-| **GPIO 6** | `I2C0_SCL` | Out | `esp/node/.../node_config.h` | **CONFIRMED** | Bus I2C 0: MPU6050 SCL (GY-521). Tần số 400 kHz. |
-| **GPIO 3** | `I2C1_SDA` | I/O | `esp/node/.../node_config.h` | **CONFIRMED** | Bus I2C 1: MS5611 SDA (GY-63). Kéo trở ngoài 4.7k. Tần số 400 kHz. |
-| **GPIO 2** | `I2C1_SCL` | Out | `esp/node/.../node_config.h` | **CONFIRMED** | Bus I2C 1: MS5611 SCL (GY-63). Tần số 400 kHz. |
+| **GPIO 8** | `I2C0_SDA` | I/O | Phần cứng chốt (verified) | **CONFIRMED** | Bus I2C 0: MPU6050 SDA (GY-521). Kéo trở ngoài 4.7k. Tần số 400 kHz. |
+| **GPIO 9** | `I2C0_SCL` | Out | Phần cứng chốt (verified) | **CONFIRMED** | Bus I2C 0: MPU6050 SCL (GY-521). Tần số 400 kHz. |
+| **GPIO 7** | `I2C1_SDA` | I/O | Phần cứng chốt (verified) | **CONFIRMED** | Bus I2C 1: MS5611 SDA (GY-63). Kéo trở ngoài 4.7k. Tần số 400 kHz. |
+| **GPIO 6** | `I2C1_SCL` | Out | Phần cứng chốt (verified) | **CONFIRMED** | Bus I2C 1: MS5611 SCL (GY-63). Tần số 400 kHz. |
 | **GPIO 4** | `BTN_SOS` | In | Giả định thiết kế | `TODO(HW)` | Nút nhấn khẩn cấp SOS. Cấu hình `INPUT_PULLUP`, tích cực mức THẤP. Nhấn giữ >= 2s. |
 | **GPIO 5** | `BTN_CANCEL`| In | Giả định thiết kế | `TODO(HW)` | Nút hủy cảnh báo (an toàn). Cấu hình `INPUT_PULLUP`, tích cực mức THẤP. Giữ >= 300ms. |
 | **GPIO 1** | `BUZZER` | Out | Giả định thiết kế | `TODO(HW)` | Tín hiệu điều khiển còi báo động hoặc mô tơ rung. |
@@ -26,10 +26,9 @@ Tài liệu này xác định phân bổ chân GPIO cho sản phẩm chính th�
 ## 2. Nguồn gốc & Phân loại tính xác thực
 
 ### A. Nhóm chân ĐÃ CÓ CĂN CỨ (CONFIRMED)
-Các chân I2C cho 2 cảm biến chính được kế thừa trực tiếp từ cấu hình kiểm thử ổn định của Node ESP32-S3 tại:
-`esp/node/firmware/esp_node/node_config.h`:
-- `I2C0_SDA = 7`, `I2C0_SCL = 6` (cho MPU6050)
-- `I2C1_SDA = 3`, `I2C1_SCL = 2` (cho MS5611)
+Phần cứng chốt (verified):
+- `I2C0_SDA = 8`, `I2C0_SCL = 9` (cho MPU6050)
+- `I2C1_SDA = 7`, `I2C1_SCL = 6` (cho MS5611)
 Việc tách riêng 2 bus I2C vật lý trên ESP32-S3 giúp tránh hiện tượng xung đột địa chỉ, giảm độ trễ và đảm bảo tính độc lập khi một cảm biến gặp sự cố bus.
 
 ### B. Nhóm chân GIẢ ĐỊNH CHỜ SƠ ĐỒ MẠCH (`TODO(HW)`)
