@@ -1,0 +1,80 @@
+=== SO SANH TUNG DONG (code, sau khi ap dung bang doi chieu) ===
+dong chinh thuc=1757 | dong hoc sinh=1757 | bang doi chieu=210 muc
+so dong co CODE khac nhau: 108 / 1029
+  dong 3:
+    chinh thuc: * NCKH27PA — ESP32-S3 Super Mini Fall Detection Official Firmware
+    hoc sinh  : * NCKH27PA — Firmware phát hiện té ngã cho ESP32-S3 Super Mini
+  dong 4:
+    chinh thuc: * Target Hardware: ESP32-S3 Super Mini (esp32:esp32:esp32s3)
+    hoc sinh  : * Phần cứng đích: ESP32-S3 Super Mini (esp32:esp32:esp32s3)
+  dong 5:
+    chinh thuc: * Sensors: MPU6050 (GY-521, I2C0) + MS5611 (GY-63, I2C1)
+    hoc sinh  : * Cảm biến: MPU6050 (GY-521, I2C0) và MS5611 (GY-63, I2C1)
+  dong 6:
+    chinh thuc: * Protocol: BLE GATT (FALLSAFE-xxxx) + Serial CLI / Telemetry
+    hoc sinh  : * Giao thức: BLE GATT (FALLSAFE-xxxx), dòng lệnh Serial và dữ liệu đo 
+  dong 7:
+    chinh thuc: * Plan Reference: esp/esp32-plan.md (§5, §6, §7, §8) & android/android
+    hoc sinh  : * Tham chiếu kế hoạch: esp/esp32-plan.md (§5, §6, §7, §8) và android/a
+  dong 275:
+    chinh thuc: Serial.printf("[I2C] Scan %s: ", busLabel);
+    hoc sinh  : Serial.printf("[I2C] Quet bus %s: ", busLabel);
+  dong 284:
+    chinh thuc: if (!timThayThietBi) Serial.print("(none)");
+    hoc sinh  : if (!timThayThietBi) Serial.print("(khong co)");
+  dong 624:
+    chinh thuc: void onConnect(BLEServer* pServer) override {
+    hoc sinh  : void onConnect(BLEServer* mayChu) override {
+  dong 626:
+    chinh thuc: uint16_t mtu = pServer->getPeerMTU(pServer->getConnId());
+    hoc sinh  : uint16_t mtu = mayChu->getPeerMTU(mayChu->getConnId());
+  dong 630:
+    chinh thuc: Serial.printf("[BLE] Connected (connId=%u, peerMTU=%u)\n",
+    hoc sinh  : Serial.printf("[BLE] Da ket noi (connId=%u, peerMTU=%u)\n",
+  dong 631:
+    chinh thuc: pServer->getConnId(), mtuBle);
+    hoc sinh  : mayChu->getConnId(), mtuBle);
+  dong 633:
+    chinh thuc: void onDisconnect(BLEServer* pServer) override {
+    hoc sinh  : void onDisconnect(BLEServer* mayChu) override {
+  dong 638:
+    chinh thuc: Serial.println(F("[BLE] Disconnected, advertising restarted (MTU reset
+    hoc sinh  : Serial.println(F("[BLE] Da ngat ket noi, khoi dong lai quang ba (MTU d
+  dong 643:
+    chinh thuc: void onWrite(BLECharacteristic *pCharacteristic) override {
+    hoc sinh  : void onWrite(BLECharacteristic *dacTru) override {
+  dong 644:
+    chinh thuc: String rxValue = pCharacteristic->getValue();
+    hoc sinh  : String giaTriNhan = dacTru->getValue();
+  dong 645:
+    chinh thuc: if (rxValue.length() > 0 && rxValue.length() < sizeof(lenhBleChoXuLy))
+    hoc sinh  : if (giaTriNhan.length() > 0 && giaTriNhan.length() < sizeof(lenhBleCho
+  dong 646:
+    chinh thuc: strncpy(lenhBleChoXuLy, rxValue.c_str(), sizeof(lenhBleChoXuLy) - 1);
+    hoc sinh  : strncpy(lenhBleChoXuLy, giaTriNhan.c_str(), sizeof(lenhBleChoXuLy) - 1
+  dong 656:
+    chinh thuc: static void guiBleAck(const char* cmdId, const char* commandStatus, co
+    hoc sinh  : static void guiBleAck(const char* cmdId, const char* trangThaiLenh, co
+  dong 662:
+    chinh thuc: if (errorCode != nullptr) {
+    hoc sinh  : if (maLoi != nullptr) {
+  dong 663:
+    chinh thuc: snprintf(boDemLoi, sizeof(boDemLoi), "\"%s\"", errorCode);
+    hoc sinh  : snprintf(boDemLoi, sizeof(boDemLoi), "\"%s\"", maLoi);
+  dong 668:
+    chinh thuc: if (message != nullptr) {
+    hoc sinh  : if (thongDiep != nullptr) {
+  dong 669:
+    chinh thuc: snprintf(boDemTinNhan, sizeof(boDemTinNhan), "\"%s\"", message);
+    hoc sinh  : snprintf(boDemTinNhan, sizeof(boDemTinNhan), "\"%s\"", thongDiep);
+  dong 675:
+    chinh thuc: "{\"protocolVersion\":1,\"commandId\":\"%s\",\"deviceId\":\"%s\",\"tho
+    hoc sinh  : "{\"protocolVersion\":1,\"commandId\":\"%s\",\"deviceId\":\"%s\",\"tim
+  dong 680:
+    chinh thuc: commandStatus ? commandStatus : "COMPLETED",
+    hoc sinh  : trangThaiLenh ? trangThaiLenh : "COMPLETED",
+  dong 700:
+    chinh thuc: static void guiBleSuKien(const char* eventType, const char* severity, 
+    hoc sinh  : static void guiBleSuKien(const char* loaiSuKien, const char* mucDo, in
+  ... con 83 dong khac nua
+KET QUA: CAN XEM (108 dong)

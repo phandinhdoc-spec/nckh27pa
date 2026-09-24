@@ -1,0 +1,11 @@
+=== KIEM TRA BANG DOI CHIEU TEN ===
+dinh danh tu viet can doi ten : 209
+dong bang doc duoc           : 210
+dong bang SAI SO COT         : 29 [(3, '| Ten cu (KHONG DOI) | Ly do ghi chu | Loai |'), (3, '|------------------------|--------------|------|'), (3, '| false | Gia tri Boolean nguyen thuy C/Arduino | member |'), (3, '| true | Gia tri Boolean nguyen thuy C/Arduino | member |'), (3, '| minimumStillnessSamples | Ten trong struct FallDetectionProfile (do Android/Java dat) | member |'), (3, '| maximumSampleGapMs | Ten trong struct FallDetectionProfile (do Android/Java dat) | member |')]
+[PASS] phu 100%: thieu 0 -> []
+[PASS] ten la khong co trong file goc: 0 -> []
+[PASS] doi ten trong danh sach CAM DOI: 0 -> []
+[PASS] ten moi co dau tieng Viet: 0 -> []
+[FAIL] ten moi bi trung: 1 -> [('thoiGianMs', ['timestampMs', 'durationMs'])]
+[PASS] ten moi khong hop le (ky tu la): 0 -> []
+[INFO] giu nguyen ten (khong doi): 19 -> ['ENABLE_BLE', 'FIRMWARE_VERSION', 'HW_HAS_CELLULAR', 'HW_HAS_FUEL_GAUGE', 'HW_HAS_GNSS', 'PROTOCOL_VERSION', 'UUID_CHAR_ACK', 'UUID_CHAR_COMMAND', 'UUID_CHAR_EVENT', 'UUID_CHAR_STATUS', 'UUID_CHAR_STREAM', 'UUID_SERVICE']

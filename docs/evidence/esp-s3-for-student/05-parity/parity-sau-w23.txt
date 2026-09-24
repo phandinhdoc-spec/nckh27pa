@@ -1,0 +1,12 @@
+dong chinh thuc=1757 | dong hoc sinh=1819
+[PASS] Ten truong JSON (hop dong BLE): chinh thuc=44 hoc sinh=44 | thieu=[] | them=[]
+[PASS] UUID (tap gia tri): thieu=[] them=[]
+[PASS] Ten lenh BLE (strcmp cmdName): chinh thuc=14 hoc sinh=14 | thieu=[]
+[PASS] Nguong so quan trong con nguyen: thieu=[]
+[PASS] Ma loi hop dong con nguyen: thieu=[]
+[PASS] Gia tri trang thai (ACCEPTED/...) con nguyen: thieu=[]
+[PASS] Chan I2C (SDA8/SCL9 + SDA7/SCL6) khong doi: goc=[9, 8, 6, 7] hoc sinh=[9, 8, 6, 7] khac={}
+[PASS] SSID/PASS WiFi khong doi: ssid_giong=True pass_giong=True gia_tri_luu_ngoai_script=True
+[PASS] Moi dong code deu co comment (yeu cau chu du an): so dong thieu comment=0
+
+KET QUA: 9/9 muc PASS

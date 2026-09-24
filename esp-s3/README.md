@@ -120,3 +120,16 @@ Baudrate mặc định: `115200`.
 4. **Địa chỉ I2C thực tế**: MPU6050 (0x68 hoặc 0x69 qua chân AD0); MS5611 (0x77 hoặc 0x76 qua chân CSB). Firmware đã có cơ chế tự quét fallback.
 5. **Nhiễu rung khi lắp vỏ (Mechanical coupling)**: Kiểm tra đệm chống rung cho MPU6050 để tránh hiện tượng va đập giả khi gõ nhẹ vào vỏ thiết bị.
 6. **Mạch quản lý nguồn / đo pin**: Khi bo có IC MAX17048 hoặc cầu phân áp ADC, cần cập nhật hệ số chuyển đổi điện áp sang % pin trong hàm cập nhật pin.
+
+---
+
+## 7. Phiên bản Dành cho Học sinh (Student Edition)
+
+- **Mã nguồn:** [`esp-s3-for-student/esp-s3-for-student.ino`](../esp-s3-for-student/esp-s3-for-student.ino) (1819 dòng mã).
+- **Tài liệu hướng dẫn:** [`esp-s3-for-student/HUONG-DAN-HOC-SINH.md`](../esp-s3-for-student/HUONG-DAN-HOC-SINH.md).
+- **Bảng đối chiếu định danh:** [`esp-s3-for-student/BANG-DOI-TEN.md`](../esp-s3-for-student/BANG-DOI-TEN.md).
+- **Mục đích:** Cung cấp phiên bản mã nguồn đã được chuẩn hóa với tên định danh tiếng Việt không dấu, chú thích chi tiết từng dòng lệnh, tích hợp giao diện dòng lệnh Serial tương tác 8 phím (`r`, `t`, `c`, `s`, `h`, `m`, `p`, `d`) phục vụ học tập, nghiên cứu khoa học cho học sinh THPT.
+
+> [!NOTE]
+> **Ghi chú về Ghi Profile cấu hình qua BLE:**  
+> Ứng dụng Android FallSafe hiện có giao diện gửi cấu hình Profile phát hiện ngã, tuy nhiên **chưa hỗ trợ ghi profile trực tiếp qua BLE vào firmware** vì đặc trưng `7d2a0006-6f45-4c2b-9a1e-38a8f5c10001` là đặc trưng Command ACK chỉ-Notify (dùng để trả kết quả xác nhận lệnh từ vi điều khiển lên điện thoại, không phải đặc trưng nhận ghi cấu hình). Cả bản chính thức và bản học sinh hiện dùng bộ cấu hình ngưỡng chuẩn tích hợp sẵn trong mã nguồn.

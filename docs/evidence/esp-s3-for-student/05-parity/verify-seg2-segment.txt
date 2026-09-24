@@ -1,0 +1,7 @@
+=== KIEM TRA DOAN: phan chua xu ly bat dau o muc 11 ===
+dong ban chinh thuc=1757 | dong ban hoc sinh=1757
+moc muc 11: chinh thuc dong 1029 | hoc sinh dong 1029
+[PASS] Phan chua xu ly (tu muc 11 den het) nguyen xi — kich thuoc chinh thuc=31685 hoc sinh=31685
+[PASS] Moi dong code trong phan da xu ly co comment: thieu 0 dong
+[INFO] Dinh danh CU con sot trong phan da xu ly: 21 -> ['FIRMWARE_VERSION', 'PROTOCOL_VERSION', 'UUID_CHAR_ACK', 'UUID_CHAR_COMMAND', 'UUID_CHAR_EVENT', 'UUID_CHAR_STATUS', 'UUID_CHAR_STREAM', 'UUID_SERVICE', 'WIFI_PASS', 'WIFI_SSID', 'altitudeDeltaM', 'ax', 'az', 'c']
+KET QUA: PASS

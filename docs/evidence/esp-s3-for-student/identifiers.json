@@ -1,0 +1,2814 @@
+{
+ "official": {
+  "s_baro": {
+   "kind": "global",
+   "uses": 92,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "false": {
+   "kind": "member",
+   "uses": 83,
+   "cam_doi": true,
+   "ascii_viet": true
+  },
+  "s_fallState": {
+   "kind": "global",
+   "uses": 48,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_mpu": {
+   "kind": "global",
+   "uses": 38,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "buffer": {
+   "kind": "member",
+   "uses": 38,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "address": {
+   "kind": "member",
+   "uses": 34,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "true": {
+   "kind": "member",
+   "uses": 34,
+   "cam_doi": true,
+   "ascii_viet": true
+  },
+  "s_state": {
+   "kind": "global",
+   "uses": 32,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "cmdId": {
+   "kind": "member",
+   "uses": 29,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "online": {
+   "kind": "member",
+   "uses": 27,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "az": {
+   "kind": "member",
+   "uses": 25,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "ax": {
+   "kind": "member",
+   "uses": 25,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "altitudeDeltaM": {
+   "kind": "member",
+   "uses": 24,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PROFILE_DEFAULT": {
+   "kind": "global",
+   "uses": 23,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "gz": {
+   "kind": "member",
+   "uses": 20,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "sendBleAck": {
+   "kind": "function",
+   "uses": 20,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "pressurePa": {
+   "kind": "member",
+   "uses": 19,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_counters": {
+   "kind": "global",
+   "uses": 19,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "samples": {
+   "kind": "member",
+   "uses": 19,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "s_lastErrorCode": {
+   "kind": "global",
+   "uses": 17,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "cmdName": {
+   "kind": "member",
+   "uses": 17,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "ENABLE_BLE": {
+   "kind": "define",
+   "uses": 16,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "raw": {
+   "kind": "member",
+   "uses": 16,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "hasReadError": {
+   "kind": "member",
+   "uses": 16,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "state": {
+   "kind": "member",
+   "uses": 14,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "s_ringHead": {
+   "kind": "global",
+   "uses": 13,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_batteryPercent": {
+   "kind": "global",
+   "uses": 13,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "preImpactGravity": {
+   "kind": "member",
+   "uses": 13,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_bleDeviceName": {
+   "kind": "global",
+   "uses": 12,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "c": {
+   "kind": "member",
+   "uses": 12,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "errBuf": {
+   "kind": "member",
+   "uses": 12,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "timestampMs": {
+   "kind": "member",
+   "uses": 11,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_ringBuffer": {
+   "kind": "global",
+   "uses": 11,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "n_rem": {
+   "kind": "member",
+   "uses": 11,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "sendBleDeviceStatus": {
+   "kind": "function",
+   "uses": 11,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "blePacketsDropped": {
+   "kind": "member",
+   "uses": 10,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "sendBleEvent": {
+   "kind": "function",
+   "uses": 10,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_BUZZER": {
+   "kind": "global",
+   "uses": 9,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_referencePressurePa": {
+   "kind": "global",
+   "uses": 9,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "inVerificationWindow": {
+   "kind": "member",
+   "uses": 9,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "triggerReasons": {
+   "kind": "member",
+   "uses": 9,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_bleConnected": {
+   "kind": "global",
+   "uses": 9,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_blePeerMtu": {
+   "kind": "global",
+   "uses": 9,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "confidence": {
+   "kind": "member",
+   "uses": 9,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "saturated": {
+   "kind": "member",
+   "uses": 8,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "requestedRate": {
+   "kind": "member",
+   "uses": 8,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "RING_BUFFER_SIZE": {
+   "kind": "define",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "i2cWriteByte": {
+   "kind": "function",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "temperatureC": {
+   "kind": "member",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "promBackup": {
+   "kind": "member",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "stillnessSampleCount": {
+   "kind": "member",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_bleStreaming": {
+   "kind": "global",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_pendingCmdPayload": {
+   "kind": "global",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "quality": {
+   "kind": "member",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "s_rawCsvMode": {
+   "kind": "global",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_stablePressureStartMs": {
+   "kind": "global",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "ep": {
+   "kind": "member",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "DeviceState": {
+   "kind": "enum",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_LED_STATUS": {
+   "kind": "global",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "HW_HAS_FUEL_GAUGE": {
+   "kind": "define",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "impactAccelerationMs2": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "freeFallThresholdMs2": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "deviceStateToString": {
+   "kind": "function",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_ringCount": {
+   "kind": "global",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_lowBatWarned": {
+   "kind": "global",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_criticalBatWarned": {
+   "kind": "global",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "convStartUs": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "preImpactMinAcc": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "stillnessStartMs": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_pCharStream": {
+   "kind": "global",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_pCharEvent": {
+   "kind": "global",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_pCharStatus": {
+   "kind": "global",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_pCharAck": {
+   "kind": "global",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "msgBuf": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "peakBuf": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "orientBuf": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "altBuf": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "inactBuf": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "baroStatusStr": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_BUTTON_SOS": {
+   "kind": "global",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "WIFI_SSID": {
+   "kind": "define",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "getCurrentTimestampMs": {
+   "kind": "function",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "stillnessTargetAccelerationMs2": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "stillnessToleranceMs2": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "postImpactWindowMs": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "postImpactStillnessDurationMs": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "minimumStillnessSamples": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "maximumSampleGapMs": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "highAngularSpeedDps": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_imuSampleRateHz": {
+   "kind": "global",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_isCharging": {
+   "kind": "global",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "who": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "crcValid": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_currentEventId": {
+   "kind": "global",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "imuStatusStr": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_sosPressStartMs": {
+   "kind": "global",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_cancelPressStartMs": {
+   "kind": "global",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "angleChangeDeg": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_lastImuSampleUs": {
+   "kind": "global",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "phonePressureMinimumRisePa": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_sampleDropCount": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_imuSamplePeriodUs": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "gyroBiasX": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "gyroBiasY": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "gyroBiasZ": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "baselineGravityX": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "baselineGravityY": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "baselineGravityZ": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "i2cReadBytes": {
+   "kind": "function",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "readMPU6050": {
+   "kind": "function",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "accelScale": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "gyroScale": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "d1Raw": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "d2Raw": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "lastSampleMs": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_alertStartMs": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_buzzerPatternDeadlineMs": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_pServer": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_lastCommandId": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_pendingCommand": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "performSelfTestAndCalibration": {
+   "kind": "function",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_lastStableCheckPressurePa": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_sosTriggered": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "stillDuration": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "msg": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "mac": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "eventLabel": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "curAx": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_BUTTON_CANCEL": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "FIRMWARE_VERSION": {
+   "kind": "define",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "UUID_SERVICE": {
+   "kind": "define",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_globalSequenceNumber": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_timeSynced": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_deviceEpochTimeMs": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_epochSyncLocalMs": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "postureChangeThresholdDeg": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "SensorSample": {
+   "kind": "struct",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "MPU6050_ADDR_A": {
+   "kind": "define",
+   "uses": 3,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MPU6050_SMPLRT_DIV": {
+   "kind": "define",
+   "uses": 3,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MPU6050_WHO_AM_I": {
+   "kind": "define",
+   "uses": 3,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "scanI2C": {
+   "kind": "function",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "anyFound": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "MS5611_ADDR_A": {
+   "kind": "define",
+   "uses": 3,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MS5611_CMD_ADC_RD": {
+   "kind": "define",
+   "uses": 3,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "pollMS5611": {
+   "kind": "function",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "imuSamplesRead": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "lateLoopSlots": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "fallEventsConfirmed": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "sosTriggers": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "impactTimestampMs": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "peakImpactAcc": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_pCharCommand": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_currentEventSeq": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "seq": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "s_lastHumanLogMs": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "printProfile": {
+   "kind": "function",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "printCsvHeader": {
+   "kind": "function",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "sumGx": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "sumAx": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "sumP": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "vibrationWarnings": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "durationMs": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "mpuFound": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_imuConsecutiveFailures": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_streamDecimator": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_lastBatCheckMs": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_lastWifiCheckMs": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_wifiWasConnected": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_lastBleStatusMs": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_I2C0_SDA": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_I2C0_SCL": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_I2C1_SDA": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_I2C1_SCL": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_LED_BAT_1": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_LED_BAT_2": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_LED_BAT_3": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PROTOCOL_VERSION": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "UUID_CHAR_STREAM": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "UUID_CHAR_EVENT": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "UUID_CHAR_STATUS": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "UUID_CHAR_COMMAND": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "UUID_CHAR_ACK": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "WIFI_PASS": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "getMonotonicTimeMs": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "FallDetectionProfile": {
+   "kind": "struct",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "usePressureFallFilter": {
+   "kind": "member",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "magnitude": {
+   "kind": "member",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "MPU6050_ADDR_B": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MPU6050_CONFIG": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MPU6050_GYRO_CONFIG": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MPU6050_ACCEL_CONFIG": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MPU6050_ACCEL_XOUT_H": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MPU6050_PWR_MGMT_1": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "Mpu6050Driver": {
+   "kind": "struct",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "initMPU6050": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "MS5611_ADDR_B": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MS5611_CMD_RESET": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MS5611_CMD_PROM_RD": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MS5611_CMD_CONV_D1": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MS5611_CMD_CONV_D2": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "Ms5611State": {
+   "kind": "enum",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "Ms5611Driver": {
+   "kind": "struct",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "checkMS5611CRC4": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "crcRead": {
+   "kind": "member",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "initMS5611": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "calculateMS5611": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "SystemCounters": {
+   "kind": "struct",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "baroSamplesRead": {
+   "kind": "member",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_lastState": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "FallVerificationState": {
+   "kind": "struct",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_eventCounter": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "ServerCallbacks": {
+   "kind": "class",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "CommandCallbacks": {
+   "kind": "class",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "hasPeakAcc": {
+   "kind": "member",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "isRetransmit": {
+   "kind": "member",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "sendBleSensorStream": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "SERIAL_RAW_MODE": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "printSystemStatus": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "updatePressureBaselineTracking": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "updateBatteryStatus": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "updateButtons": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "updateBuzzer": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "processFallDetection": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "elapsedMs": {
+   "kind": "member",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "dispatchBleCommand": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "twdt_config": {
+   "kind": "member",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "loop": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": true
+  },
+  "PIN_BAT_ADC": {
+   "kind": "global",
+   "uses": 1,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "HW_HAS_GNSS": {
+   "kind": "define",
+   "uses": 1,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "HW_HAS_CELLULAR": {
+   "kind": "define",
+   "uses": 1,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "postImpactGravity": {
+   "kind": "member",
+   "uses": 1,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "baselineAltitude": {
+   "kind": "member",
+   "uses": 1,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_buzzerPatternId": {
+   "kind": "global",
+   "uses": 1,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "onConnect": {
+   "kind": "function",
+   "uses": 1,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "onDisconnect": {
+   "kind": "function",
+   "uses": 1,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "onWrite": {
+   "kind": "function",
+   "uses": 1,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "setup": {
+   "kind": "function",
+   "uses": 1,
+   "cam_doi": true,
+   "ascii_viet": true
+  }
+ },
+ "student_old": {
+  "camBienKhiAp": {
+   "kind": "global",
+   "uses": 93,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "false": {
+   "kind": "member",
+   "uses": 79,
+   "cam_doi": true,
+   "ascii_viet": true
+  },
+  "trangThaiPhatHienNga": {
+   "kind": "global",
+   "uses": 48,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "camBienMpu": {
+   "kind": "global",
+   "uses": 40,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "buffer": {
+   "kind": "member",
+   "uses": 34,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "diaChi": {
+   "kind": "member",
+   "uses": 33,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "trangThaiThietBi": {
+   "kind": "global",
+   "uses": 32,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "true": {
+   "kind": "member",
+   "uses": 31,
+   "cam_doi": true,
+   "ascii_viet": true
+  },
+  "cmdId": {
+   "kind": "member",
+   "uses": 29,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "dangHoatDong": {
+   "kind": "member",
+   "uses": 28,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "az": {
+   "kind": "member",
+   "uses": 27,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "ax": {
+   "kind": "member",
+   "uses": 27,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "PROFILE_DEFAULT": {
+   "kind": "global",
+   "uses": 23,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "gz": {
+   "kind": "member",
+   "uses": 22,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "guiBleAck": {
+   "kind": "function",
+   "uses": 20,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "maLoiCuoiCung": {
+   "kind": "global",
+   "uses": 17,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "cmdName": {
+   "kind": "member",
+   "uses": 17,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "ENABLE_BLE": {
+   "kind": "define",
+   "uses": 16,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "raw": {
+   "kind": "member",
+   "uses": 16,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "coLoiDoc": {
+   "kind": "member",
+   "uses": 16,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "samples": {
+   "kind": "member",
+   "uses": 16,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "boDem": {
+   "kind": "global",
+   "uses": 15,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "viTriGhi": {
+   "kind": "global",
+   "uses": 14,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "apSuatPa": {
+   "kind": "member",
+   "uses": 14,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "altitudeDeltaM": {
+   "kind": "member",
+   "uses": 13,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "phanTramPin": {
+   "kind": "global",
+   "uses": 13,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "trongLucTruocVaCham": {
+   "kind": "member",
+   "uses": 13,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_bleDeviceName": {
+   "kind": "global",
+   "uses": 12,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "boDemVong": {
+   "kind": "global",
+   "uses": 12,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "errBuf": {
+   "kind": "member",
+   "uses": 12,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "timestampMs": {
+   "kind": "member",
+   "uses": 11,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "chenhLechDoCaoM": {
+   "kind": "member",
+   "uses": 11,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "n_rem": {
+   "kind": "member",
+   "uses": 11,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "guiBleTrangThaiThietBi": {
+   "kind": "function",
+   "uses": 11,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "heSoHieuChuan": {
+   "kind": "member",
+   "uses": 10,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "guiBleSuKien": {
+   "kind": "function",
+   "uses": 10,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_BUZZER": {
+   "kind": "global",
+   "uses": 9,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "apSuatThamChieuPa": {
+   "kind": "global",
+   "uses": 9,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "giaiDoanDoc": {
+   "kind": "member",
+   "uses": 9,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "dangTrongCuaSoXacMinh": {
+   "kind": "member",
+   "uses": 9,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "confidence": {
+   "kind": "member",
+   "uses": 9,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "s_bleConnected": {
+   "kind": "global",
+   "uses": 8,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "requestedRate": {
+   "kind": "member",
+   "uses": 8,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "RING_BUFFER_SIZE": {
+   "kind": "define",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "soMauTrongBoDem": {
+   "kind": "global",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "biBaoHoa": {
+   "kind": "member",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "ghiI2cMotByte": {
+   "kind": "function",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "promBackup": {
+   "kind": "member",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "soMauDungYen": {
+   "kind": "member",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_pServer": {
+   "kind": "global",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_pendingCmdPayload": {
+   "kind": "global",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "quality": {
+   "kind": "member",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "cheDoCsvRaw": {
+   "kind": "global",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_stablePressureStartMs": {
+   "kind": "global",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "ep": {
+   "kind": "member",
+   "uses": 7,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "DeviceState": {
+   "kind": "enum",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_LED_STATUS": {
+   "kind": "global",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "HW_HAS_FUEL_GAUGE": {
+   "kind": "define",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "impactAccelerationMs2": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "freeFallThresholdMs2": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "tenTrangThaiThietBi": {
+   "kind": "function",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "pressurePa": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "daCanhBaoPinYeu": {
+   "kind": "global",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "daCanhBaoPinKiet": {
+   "kind": "global",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "thoiDiemBatDauChuyenDoiUs": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "soGoiBleBiBo": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "giaTocNhoNhatTruocVaCham": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "thoiDiemBatDauDungYenMs": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_bleStreaming": {
+   "kind": "global",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_pCharStream": {
+   "kind": "global",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_pCharEvent": {
+   "kind": "global",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_pCharStatus": {
+   "kind": "global",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_pCharAck": {
+   "kind": "global",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "msgBuf": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "peakBuf": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "orientBuf": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "altBuf": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "inactBuf": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "baroStatusStr": {
+   "kind": "member",
+   "uses": 6,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_BUTTON_SOS": {
+   "kind": "global",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "layThoiGianThucMs": {
+   "kind": "function",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "stillnessTargetAccelerationMs2": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "stillnessToleranceMs2": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "postImpactWindowMs": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "postImpactStillnessDurationMs": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "minimumStillnessSamples": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "maximumSampleGapMs": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "highAngularSpeedDps": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "tanSoLayMauHz": {
+   "kind": "global",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "dangSacPin": {
+   "kind": "global",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "who": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "crcHopLe": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "lyDoKichHoat": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_currentEventId": {
+   "kind": "global",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "imuStatusStr": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "thoiDiemBatDauBamSosMs": {
+   "kind": "global",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "thoiDiemBatDauBamHuyMs": {
+   "kind": "global",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "angleChangeDeg": {
+   "kind": "member",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_lastImuSampleUs": {
+   "kind": "global",
+   "uses": 5,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "phonePressureMinimumRisePa": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "soMauBiBo": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "chuKyLayMauUs": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "saiSoVanTocGocX": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "saiSoVanTocGocY": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "saiSoVanTocGocZ": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "trongLucGocX": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "trongLucGocY": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "trongLucGocZ": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "docI2cNhieuByte": {
+   "kind": "function",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "docMpu6050": {
+   "kind": "function",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "accelScale": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "gyroScale": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "giaTriThoD1": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "giaTriThoD2": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "nhietDoC": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "thoiDiemMauTruocMs": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "thoiDiemBatDauBaoDongMs": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_buzzerPatternDeadlineMs": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_lastCommandId": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_pendingCommand": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "tuKiemTraVaHieuChuan": {
+   "kind": "function",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_lastStableCheckPressurePa": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "daKichHoatSos": {
+   "kind": "global",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "stillDuration": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "msg": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "mac": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "eventLabel": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "curAx": {
+   "kind": "member",
+   "uses": 4,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_BUTTON_CANCEL": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "FIRMWARE_VERSION": {
+   "kind": "define",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "UUID_SERVICE": {
+   "kind": "define",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_globalSequenceNumber": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_timeSynced": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_deviceEpochTimeMs": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_epochSyncLocalMs": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "postureChangeThresholdDeg": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "SensorSample": {
+   "kind": "struct",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "MPU6050_ADDR_A": {
+   "kind": "define",
+   "uses": 3,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MPU6050_SMPLRT_DIV": {
+   "kind": "define",
+   "uses": 3,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MPU6050_WHO_AM_I": {
+   "kind": "define",
+   "uses": 3,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MS5611_ADDR_A": {
+   "kind": "define",
+   "uses": 3,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MS5611_CMD_ADC_RD": {
+   "kind": "define",
+   "uses": 3,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "Ms5611State": {
+   "kind": "enum",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "docMs5611KhongChan": {
+   "kind": "function",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "soMauImuDaDoc": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "soLanTreChuKy": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "soLanXacNhanNga": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "soLanBamSos": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "thoiDiemVaChamMs": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "dinhGiaTocVaCham": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_pCharCommand": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_currentEventSeq": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "seq": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "thoiDiemInDeDocCuoiMs": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "inBangNguong": {
+   "kind": "function",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "inTieuDeCsv": {
+   "kind": "function",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "sumGx": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "sumAx": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "sumP": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "vibrationWarnings": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "durationMs": {
+   "kind": "member",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_imuConsecutiveFailures": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_streamDecimator": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_lastBatCheckMs": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_lastBleStatusMs": {
+   "kind": "global",
+   "uses": 3,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_I2C0_SDA": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_I2C0_SCL": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_I2C1_SDA": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_I2C1_SCL": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_LED_BAT_1": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_LED_BAT_2": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PIN_LED_BAT_3": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "PROTOCOL_VERSION": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "UUID_CHAR_STREAM": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "UUID_CHAR_EVENT": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "UUID_CHAR_STATUS": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "UUID_CHAR_COMMAND": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "UUID_CHAR_ACK": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "layThoiGianChayMs": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "FallDetectionProfile": {
+   "kind": "struct",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "usePressureFallFilter": {
+   "kind": "member",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "magnitude": {
+   "kind": "member",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "MPU6050_ADDR_B": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MPU6050_CONFIG": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MPU6050_GYRO_CONFIG": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MPU6050_ACCEL_CONFIG": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MPU6050_ACCEL_XOUT_H": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MPU6050_PWR_MGMT_1": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "Mpu6050Driver": {
+   "kind": "struct",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "khoiTaoMpu6050": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "MS5611_ADDR_B": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MS5611_CMD_RESET": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MS5611_CMD_PROM_RD": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MS5611_CMD_CONV_D1": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "MS5611_CMD_CONV_D2": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "Ms5611Driver": {
+   "kind": "struct",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "kiemTraCrc4Ms5611": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "crcRead": {
+   "kind": "member",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "khoiTaoMs5611": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "tinhApSuatVaDoCao": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "BoDemHeThong": {
+   "kind": "struct",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "soMauKhiApDaDoc": {
+   "kind": "member",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "trangThaiTruocDo": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "FallVerificationState": {
+   "kind": "struct",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_eventCounter": {
+   "kind": "global",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "ServerCallbacks": {
+   "kind": "class",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "CommandCallbacks": {
+   "kind": "class",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "hasPeakAcc": {
+   "kind": "member",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "isRetransmit": {
+   "kind": "member",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "guiBleDuLieuCamBien": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "SERIAL_RAW_MODE": {
+   "kind": "define",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "inTrangThaiHeThong": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "capNhatApSuatThamChieu": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "capNhatTrangThaiPin": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "capNhatNutBam": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "capNhatCoi": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "xuLyPhatHienTeNga": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "elapsedMs": {
+   "kind": "member",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "xuLyLenhBle": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "twdt_config": {
+   "kind": "member",
+   "uses": 2,
+   "cam_doi": false,
+   "ascii_viet": true
+  },
+  "loop": {
+   "kind": "function",
+   "uses": 2,
+   "cam_doi": true,
+   "ascii_viet": true
+  },
+  "PIN_BAT_ADC": {
+   "kind": "global",
+   "uses": 1,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "HW_HAS_GNSS": {
+   "kind": "define",
+   "uses": 1,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "HW_HAS_CELLULAR": {
+   "kind": "define",
+   "uses": 1,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "trongLucSauVaCham": {
+   "kind": "member",
+   "uses": 1,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "doCaoGoc": {
+   "kind": "member",
+   "uses": 1,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "s_buzzerPatternId": {
+   "kind": "global",
+   "uses": 1,
+   "cam_doi": false,
+   "ascii_viet": false
+  },
+  "onConnect": {
+   "kind": "function",
+   "uses": 1,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "onDisconnect": {
+   "kind": "function",
+   "uses": 1,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "onWrite": {
+   "kind": "function",
+   "uses": 1,
+   "cam_doi": true,
+   "ascii_viet": false
+  },
+  "setup": {
+   "kind": "function",
+   "uses": 1,
+   "cam_doi": true,
+   "ascii_viet": true
+  }
+ }
+}

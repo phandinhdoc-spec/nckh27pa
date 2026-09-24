@@ -1,0 +1,9 @@
+=== KIEM CHUNG XUONG CA (bo ten dinh danh, so sanh so/toan tu/ma dinh dang) ===
+dong chinh thuc=1757 | dong hoc sinh=1757 | pham vi 1-1029
+so dong lech xuong ca: 5
+  dong 3: cau truc: '* _ — _-_ _ _ _ _ _ _' -> '* _ — _ _ _ _ _ _ _-_ _ _'
+  dong 4: cau truc: '* _ _: _-_ _ _ (_:_:_)' -> '* _ _ đí_: _-_ _ _ (_:_:_)'
+  dong 5: cau truc: '* _: _ (_-521, _) + _ (_-63, _)' -> '* _ _: _ (_-521, _) _ _ (_-63, _)'
+  dong 6: cau truc: '* _: _ _ (_-_) + _ _ / _' -> '* _ _: _ _ (_-_), _ _ _ _ _ _ đ_ _ _'
+  dong 7: cau truc: '* _ _: _/_-_._ (§5, §6, §7, §8) & _/_-_._ (§6)' -> '* _ _ _ _: _/_-_._ (§5, §6, §7, §8) _ _/_-_._ (§6)'
+KET QUA: CAN XEM (5 dong)

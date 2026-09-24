@@ -406,9 +406,9 @@ fun BleTestScreen(
                     ) {
                         Button(
                             onClick = {
-                                val success = bleClient.writeRequest("REQ_TELEMETRY")
+                                val success = bleClient.sendStartStream()
                                 requestStatusMessage = if (success) {
-                                    "Đã gửi lệnh REQ_TELEMETRY tới ESP32"
+                                    "Đã gửi START_STREAM (JSON hợp đồng S3)"
                                 } else {
                                     "Gửi thất bại (chưa kết nối hoặc lỗi ghi GATT)"
                                 }
@@ -486,7 +486,7 @@ fun BleTestScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Ghi JSON cấu hình tới Characteristic PROFILE_WRITE (${BleGattUuids.PROFILE_WRITE_UUID})",
+                        text = "Firmware chính thức định nghĩa 7d2a0006 là đặc trưng ACK (chỉ Notify), chưa có đặc trưng/lệnh nhận profile; sẽ bật lại khi firmware bổ sung.",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.outline
                     )
@@ -539,10 +539,10 @@ fun BleTestScreen(
                                     profileStatusMessage = "Lỗi dữ liệu: ${e.message}"
                                 }
                             },
-                            enabled = connectionState is BleConnectionState.Subscribed || connectionState is BleConnectionState.Connected,
+                            enabled = false,
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Gửi Profile")
+                            Text("Gửi Profile (chưa hỗ trợ)")
                         }
 
                         OutlinedButton(

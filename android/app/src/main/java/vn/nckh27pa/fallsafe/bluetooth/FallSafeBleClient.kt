@@ -240,6 +240,7 @@ class FallSafeBleClient(
                 }
                 SubscriptionStage.EVENT -> {
                     // Step 3 (S3 official firmware): ACK 0006 plain JSON.
+                    // PROFILE_WRITE_UUID is retained as a legacy name; 0006 is ACK Notify-only.
                     // Missing char must not break the flow.
                     val ackChar = service?.getCharacteristic(BleGattUuids.PROFILE_WRITE_UUID)
                     if (ackChar != null) {
@@ -504,8 +505,8 @@ class FallSafeBleClient(
 
     /**
      * S3 official firmware stream-control commands (plain JSON over 0005).
-     * START_STREAM is auto-sent after Subscribed; STOP_STREAM is manual
-     * from BleTestScreen. REQ_TELEMETRY button stays for the test-rig.
+     * START_STREAM is auto-sent after Subscribed and can be retried manually;
+     * STOP_STREAM is manual from BleTestScreen.
      */
     fun buildStreamCommand(commandType: String, nowMs: Long = System.currentTimeMillis()): String {
         val cmdId = "cmd-$nowMs"
@@ -522,21 +523,14 @@ class FallSafeBleClient(
         writeRequest(buildStreamCommand("STOP_STREAM"))
 
     /**
-     * Write FallProfile JSON string to profile write characteristic (UUID: 7d2a0006).
+     * Profile writes are unsupported by the official firmware. In
+     * esp-s3/esp-s3.ino:83 and esp/esp32-plan.md:270, 7d2a0006 is the ACK
+     * characteristic and is Notify-only, so writing a profile there always fails.
      */
-    fun writeProfile(profileJson: String): Boolean {
-        val gatt = currentGatt ?: return false
-        val service = gatt.getService(BleGattUuids.SERVICE_UUID) ?: return false
-        val char = service.getCharacteristic(BleGattUuids.PROFILE_WRITE_UUID) ?: return false
-        return writeCharacteristicCompat(gatt, char, profileJson.toByteArray(Charsets.UTF_8))
-    }
+    fun writeProfile(profileJson: String): Boolean = false
 
-    /**
-     * Write FallProfile model to profile write characteristic (UUID: 7d2a0006).
-     */
-    fun writeProfile(profile: BleFallProfile): Boolean {
-        return writeProfile(BleProfilePayload.buildJson(profile))
-    }
+    /** Keep this overload while profile configuration remains unavailable. */
+    fun writeProfile(profile: BleFallProfile): Boolean = false
 
     @SuppressLint("MissingPermission")
     private fun writeCharacteristicCompat(

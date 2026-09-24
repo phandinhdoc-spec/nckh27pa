@@ -1,0 +1,55 @@
+[SERIAL] Mo /dev/cu.usbmodem1101 @ 115200 trong 30 giay ...
+  1.004s | ESP-ROM:esp32s3-20210327
+  1.004s | Build:Mar 27 2021
+  1.004s | rst:0x15 (USB_UART_CHIP_RESET),boot:0x2b (SPI_FAST_FLASH_BOOT)
+  1.004s | Saved PC:0x4037cec2
+  1.004s | SPIWP:0xee
+  1.004s | mode:DIO, clock div:1
+  1.004s | load:0x3fce2820,len:0x10cc
+  1.004s | load:0x403c8700,len:0xc2c
+  1.004s | load:0x403cb700,len:0x30b0
+  1.004s | entry 0x403c88b8
+  1.004s | 
+  1.004s | 
+  1.004s | =======================================================
+  1.004s | NCKH27PA - ESP32-S3 SUPER MINI OFFICIAL FIRMWARE
+  1.004s | Device ID: FALLSAFE-4D4D | Build: Sep 25 2026 01:34:21 | Protocol: 1
+  1.004s | =======================================================
+  1.004s | [I2C] Scan bus0/Wire: 0x68 
+  1.004s | [I2C] Scan bus1/Wire1: (none)
+  1.004s | [BOOT] I2C bus0 MPU6050 (0x68/0x69): PASS
+  1.004s | [BOOT] I2C bus1 GY63 (0x76/0x77): FAIL (continuing, sensor marked OFFLINE if init fails)
+  1.004s | 
+  1.004s | =======================================================
+  1.004s | NCKH27PA ESP32-S3 PRODUCT FALL DETECTION PROFILE
+  1.004s | NOTE: EXPERIMENTAL THRESHOLDS - NOT MEDICALLY VERIFIED
+  1.004s | =======================================================
+  1.004s |   impactAccelerationMs2:            25.00 m/s^2   [Android FallDetectionConfig.DEFAULT]
+  1.004s |   stillnessTargetAccelerationMs2:   9.81 m/s^2   [Android FallDetectionConfig.DEFAULT]
+  1.004s |   stillnessToleranceMs2:            1.00 m/s^2   [Android FallDetectionConfig.DEFAULT]
+  1.004s |   postImpactWindowMs:               3000 ms       [Android FallDetectionConfig.DEFAULT]
+  1.004s |   postImpactStillnessDurationMs:    1000 ms       [Android FallDetectionConfig.DEFAULT]
+  1.004s |   minimumStillnessSamples:          6 samples  [Android FallDetectionConfig.DEFAULT]
+  1.004s |   maximumSampleGapMs:               250 ms       [Android FallDetectionConfig.DEFAULT]
+  1.004s |   phonePressureMinimumRisePa:       12.0 Pa     [Android (flag disabled in decision)]
+  1.004s |   freeFallThresholdMs2:             3.00 m/s^2   [Heuristic telemetry logging only]
+  1.004s |   highAngularSpeedDps:              200.0 dps    [Heuristic telemetry logging only]
+  1.004s | =======================================================
+  1.004s | 
+  1.004s | [BOOT] Starting Hardware Self-Test...
+  1.004s | [BOOT] IMU MPU6050 on I2C0 (SDA 8, SCL 9): PASS (addr: 0x68)
+  1.004s | [BOOT] Barometer MS5611 on I2C1 (SDA 7, SCL 6): UNAVAILABLE (addr: 0x76, CRC: FAIL/UNVERIFIED)
+  1.004s | [CALIB] Calibrating gyro bias & baseline gravity (keep device STILL for 2 sec)...
+  3.014s | [CALIB] Calibration complete. Gravity vector stabilized.
+  3.014s | [SYSTEM] Transitioned to STATE_MONITORING. Ready.
+  4.014s | [BLE] GATT Server initialized. Device name: FALLSAFE-4D4D
+  4.014s | [WIFI] Connecting to SSID: Pdmq (non-blocking, BLE unaffected)
+  4.014s | [SYSTEM] Initialization complete. System active.
+  4.014s | [T=002853 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  4.014s | [T=003103 ms] State: MONITORING     | |a|:  8.71 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  4.014s | [T=003353 ms] State: MONITORING     | |a|:  8.73 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  4.014s | [T=003603 ms] State: MONITORING     | |a|:  8.70 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  5.017s | [T=003853 ms] State: MONITORING     | |a|:  8.71 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  5.017s | [T=004103 ms] State: MONITORING     | |a|:  8.68 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  5.017s | [T=004353 ms] State: MONITORING     | |a|:  8.62 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  5.017s | [T=004603 ms] State: MONITORING     | |a|:  8.68 m/s^2 | AltDelta:   0.00 m | BLE: ADV

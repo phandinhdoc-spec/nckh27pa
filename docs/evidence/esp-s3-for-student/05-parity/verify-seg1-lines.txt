@@ -1,0 +1,25 @@
+=== SO SANH TUNG DONG (code, sau khi ap dung bang doi chieu) ===
+dong chinh thuc=1757 | dong hoc sinh=1757 | bang doi chieu=210 muc
+so dong co CODE khac nhau: 7 / 561
+  dong 3:
+    chinh thuc: * NCKH27PA — ESP32-S3 Super Mini Fall Detection Official Firmware
+    hoc sinh  : * NCKH27PA — Firmware phát hiện té ngã cho ESP32-S3 Super Mini
+  dong 4:
+    chinh thuc: * Target Hardware: ESP32-S3 Super Mini (esp32:esp32:esp32s3)
+    hoc sinh  : * Phần cứng đích: ESP32-S3 Super Mini (esp32:esp32:esp32s3)
+  dong 5:
+    chinh thuc: * Sensors: MPU6050 (GY-521, I2C0) + MS5611 (GY-63, I2C1)
+    hoc sinh  : * Cảm biến: MPU6050 (GY-521, I2C0) và MS5611 (GY-63, I2C1)
+  dong 6:
+    chinh thuc: * Protocol: BLE GATT (FALLSAFE-xxxx) + Serial CLI / Telemetry
+    hoc sinh  : * Giao thức: BLE GATT (FALLSAFE-xxxx), dòng lệnh Serial và dữ liệu đo 
+  dong 7:
+    chinh thuc: * Plan Reference: esp/esp32-plan.md (§5, §6, §7, §8) & android/android
+    hoc sinh  : * Tham chiếu kế hoạch: esp/esp32-plan.md (§5, §6, §7, §8) và android/a
+  dong 275:
+    chinh thuc: Serial.printf("[I2C] Scan %s: ", busLabel);
+    hoc sinh  : Serial.printf("[I2C] Quet bus %s: ", busLabel);
+  dong 284:
+    chinh thuc: if (!timThayThietBi) Serial.print("(none)");
+    hoc sinh  : if (!timThayThietBi) Serial.print("(khong co)");
+KET QUA: CAN XEM (7 dong)

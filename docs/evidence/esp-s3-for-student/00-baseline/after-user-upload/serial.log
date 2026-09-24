@@ -1,0 +1,198 @@
+[SERIAL] Mo /dev/cu.usbmodem1101 @ 115200 trong 40 giay ...
+  1.007s | ESP-ROM:esp32s3-20210327
+  1.007s | Build:Mar 27 2021
+  1.007s | rst:0x15 (USB_UART_CHIP_RESET),boot:0x2b (SPI_FAST_FLASH_BOOT)
+  1.007s | Saved PC:0x403800fa
+  1.007s | SPIWP:0xee
+  1.007s | mode:DIO, clock div:1
+  1.007s | load:0x3fce2820,len:0x10cc
+  1.007s | load:0x403c8700,len:0xc2c
+  1.007s | load:0x403cb700,len:0x30b0
+  1.007s | entry 0x403c88b8
+  1.007s | 
+  1.007s | 
+  1.007s | =======================================================
+  1.007s | NCKH27PA - ESP32-S3 SUPER MINI OFFICIAL FIRMWARE
+  1.007s | Device ID: FALLSAFE-4D4D | Build: Sep 25 2026 01:34:21 | Protocol: 1
+  1.007s | =======================================================
+  1.007s | [I2C] Scan bus0/Wire: 0x68 
+  1.007s | [I2C] Scan bus1/Wire1: (none)
+  1.007s | [BOOT] I2C bus0 MPU6050 (0x68/0x69): PASS
+  1.007s | [BOOT] I2C bus1 GY63 (0x76/0x77): FAIL (continuing, sensor marked OFFLINE if init fails)
+  1.007s | 
+  1.007s | =======================================================
+  1.007s | NCKH27PA ESP32-S3 PRODUCT FALL DETECTION PROFILE
+  1.007s | NOTE: EXPERIMENTAL THRESHOLDS - NOT MEDICALLY VERIFIED
+  1.007s | =======================================================
+  1.007s |   impactAccelerationMs2:            25.00 m/s^2   [Android FallDetectionConfig.DEFAULT]
+  1.007s |   stillnessTargetAccelerationMs2:   9.81 m/s^2   [Android FallDetectionConfig.DEFAULT]
+  1.007s |   stillnessToleranceMs2:            1.00 m/s^2   [Android FallDetectionConfig.DEFAULT]
+  1.007s |   postImpactWindowMs:               3000 ms       [Android FallDetectionConfig.DEFAULT]
+  1.007s |   postImpactStillnessDurationMs:    1000 ms       [Android FallDetectionConfig.DEFAULT]
+  1.007s |   minimumStillnessSamples:          6 samples  [Android FallDetectionConfig.DEFAULT]
+  1.007s |   maximumSampleGapMs:               250 ms       [Android FallDetectionConfig.DEFAULT]
+  1.007s |   phonePressureMinimumRisePa:       12.0 Pa     [Android (flag disabled in decision)]
+  1.007s |   freeFallThresholdMs2:             3.00 m/s^2   [Heuristic telemetry logging only]
+  1.007s |   highAngularSpeedDps:              200.0 dps    [Heuristic telemetry logging only]
+  1.007s | =======================================================
+  1.007s | 
+  1.007s | [BOOT] Starting Hardware Self-Test...
+  1.007s | [BOOT] IMU MPU6050 on I2C0 (SDA 8, SCL 9): PASS (addr: 0x68)
+  1.007s | [BOOT] Barometer MS5611 on I2C1 (SDA 7, SCL 6): UNAVAILABLE (addr: 0x76, CRC: FAIL/UNVERIFIED)
+  1.007s | [CALIB] Calibrating gyro bias & baseline gravity (keep device STILL for 2 sec)...
+  3.011s | [CALIB] Calibration complete. Gravity vector stabilized.
+  3.012s | [SYSTEM] Transitioned to STATE_MONITORING. Ready.
+  4.016s | [BLE] GATT Server initialized. Device name: FALLSAFE-4D4D
+  4.016s | [WIFI] Connecting to SSID: Pdmq (non-blocking, BLE unaffected)
+  4.016s | [SYSTEM] Initialization complete. System active.
+  4.016s | [T=002896 ms] State: MONITORING     | |a|:  8.72 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  4.016s | [T=003146 ms] State: MONITORING     | |a|:  8.67 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  4.016s | [T=003396 ms] State: MONITORING     | |a|:  8.69 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  4.016s | [T=003646 ms] State: MONITORING     | |a|:  8.68 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  5.018s | [T=003896 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  5.018s | [T=004146 ms] State: MONITORING     | |a|:  8.61 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  5.018s | [T=004396 ms] State: MONITORING     | |a|:  8.64 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  5.018s | [T=004646 ms] State: MONITORING     | |a|:  8.68 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  6.019s | [T=004896 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  6.019s | E (10217) wifi:sta is connecting, return error
+  6.019s | [T=005146 ms] State: MONITORING     | |a|:  8.57 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  6.019s | [T=005396 ms] State: MONITORING     | |a|:  8.64 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  6.019s | [T=005646 ms] State: MONITORING     | |a|:  8.61 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  7.023s | [T=005896 ms] State: MONITORING     | |a|:  8.70 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  7.023s | [T=006146 ms] State: MONITORING     | |a|:  8.60 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  7.023s | [T=006396 ms] State: MONITORING     | |a|:  8.64 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  7.023s | [T=006646 ms] State: MONITORING     | |a|:  8.69 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  8.023s | [WIFI] Connected! IP: 10.139.245.190 (RSSI: -45 dBm)
+  8.023s | [T=006896 ms] State: MONITORING     | |a|:  8.63 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  8.023s | [T=007146 ms] State: MONITORING     | |a|:  8.64 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  8.023s | [T=007396 ms] State: MONITORING     | |a|:  8.73 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  8.023s | [T=007646 ms] State: MONITORING     | |a|:  8.73 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  9.027s | [T=007896 ms] State: MONITORING     | |a|:  8.73 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  9.027s | [T=008146 ms] State: MONITORING     | |a|:  8.73 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  9.027s | [T=008396 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+  9.027s | [T=008646 ms] State: MONITORING     | |a|:  8.72 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 10.029s | [T=008896 ms] State: MONITORING     | |a|:  8.67 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 10.030s | [T=009146 ms] State: MONITORING     | |a|:  8.67 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 10.030s | [T=009396 ms] State: MONITORING     | |a|:  8.67 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 10.030s | [T=009646 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 11.033s | [T=009896 ms] State: MONITORING     | |a|:  8.73 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 11.033s | [T=010146 ms] State: MONITORING     | |a|:  8.62 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 11.033s | [T=010396 ms] State: MONITORING     | |a|:  8.65 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 11.033s | [T=010646 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 12.034s | [T=010896 ms] State: MONITORING     | |a|:  8.64 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 12.034s | [T=011146 ms] State: MONITORING     | |a|:  8.63 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 12.034s | [T=011396 ms] State: MONITORING     | |a|:  8.64 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 12.034s | [T=011646 ms] State: MONITORING     | |a|:  8.69 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 13.037s | [T=011896 ms] State: MONITORING     | |a|:  8.67 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 13.037s | [T=012146 ms] State: MONITORING     | |a|:  8.72 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 13.037s | [T=012396 ms] State: MONITORING     | |a|:  8.68 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 13.037s | [T=012646 ms] State: MONITORING     | |a|:  8.64 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 14.040s | [T=012896 ms] State: MONITORING     | |a|:  8.62 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 14.040s | [T=013146 ms] State: MONITORING     | |a|:  8.67 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 14.040s | [T=013396 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 14.040s | [T=013646 ms] State: MONITORING     | |a|:  8.69 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 15.044s | [T=013896 ms] State: MONITORING     | |a|:  8.75 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 15.044s | [T=014146 ms] State: MONITORING     | |a|:  8.73 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 15.044s | [T=014396 ms] State: MONITORING     | |a|:  8.72 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 15.044s | [T=014646 ms] State: MONITORING     | |a|:  8.68 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 16.049s | [T=014896 ms] State: MONITORING     | |a|:  8.71 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 16.049s | [T=015146 ms] State: MONITORING     | |a|:  8.65 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 16.049s | [T=015396 ms] State: MONITORING     | |a|:  8.71 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 16.049s | [T=015646 ms] State: MONITORING     | |a|:  8.62 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 17.054s | [T=015896 ms] State: MONITORING     | |a|:  8.68 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 17.054s | [T=016146 ms] State: MONITORING     | |a|:  8.68 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 17.054s | [T=016396 ms] State: MONITORING     | |a|:  8.61 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 17.054s | [T=016646 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 18.059s | [T=016896 ms] State: MONITORING     | |a|:  8.68 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 18.059s | [T=017146 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 18.059s | [T=017396 ms] State: MONITORING     | |a|:  8.68 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 18.059s | [T=017646 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 19.065s | [T=017896 ms] State: MONITORING     | |a|:  8.72 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 19.065s | [T=018146 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 19.065s | [T=018396 ms] State: MONITORING     | |a|:  8.67 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 19.065s | [T=018646 ms] State: MONITORING     | |a|:  8.64 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 20.069s | [T=018896 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 20.069s | [T=019146 ms] State: MONITORING     | |a|:  8.69 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 20.069s | [T=019396 ms] State: MONITORING     | |a|:  8.74 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 20.069s | [T=019646 ms] State: MONITORING     | |a|:  8.67 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 21.072s | [T=019896 ms] State: MONITORING     | |a|:  8.69 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 21.072s | [T=020146 ms] State: MONITORING     | |a|:  8.70 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 21.072s | [T=020396 ms] State: MONITORING     | |a|:  8.73 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 21.072s | [T=020646 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 22.076s | [T=020896 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 22.076s | [T=021146 ms] State: MONITORING     | |a|:  8.61 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 22.076s | [T=021396 ms] State: MONITORING     | |a|:  8.56 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 22.076s | [T=021646 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 23.078s | [T=021896 ms] State: MONITORING     | |a|:  8.65 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 23.079s | [T=022146 ms] State: MONITORING     | |a|:  8.70 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 23.079s | [T=022396 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 23.079s | [T=022646 ms] State: MONITORING     | |a|:  8.64 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 24.084s | [T=022896 ms] State: MONITORING     | |a|:  8.61 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 24.084s | [T=023146 ms] State: MONITORING     | |a|:  8.63 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 24.084s | [T=023396 ms] State: MONITORING     | |a|:  8.58 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 24.084s | [T=023646 ms] State: MONITORING     | |a|:  8.63 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 25.086s | [T=023896 ms] State: MONITORING     | |a|:  8.69 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 25.086s | [T=024146 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 25.086s | [T=024396 ms] State: MONITORING     | |a|:  8.63 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 25.086s | [T=024646 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 26.089s | [T=024896 ms] State: MONITORING     | |a|:  8.75 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 26.089s | [T=025146 ms] State: MONITORING     | |a|:  8.68 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 26.089s | [T=025396 ms] State: MONITORING     | |a|:  8.68 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 26.089s | [T=025646 ms] State: MONITORING     | |a|:  8.65 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 27.089s | [T=025896 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 27.089s | [T=026146 ms] State: MONITORING     | |a|:  8.69 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 27.089s | [T=026396 ms] State: MONITORING     | |a|:  8.67 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 27.089s | [T=026646 ms] State: MONITORING     | |a|:  8.71 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 28.092s | [T=026896 ms] State: MONITORING     | |a|:  8.70 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 28.092s | [T=027146 ms] State: MONITORING     | |a|:  8.76 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 28.092s | [T=027396 ms] State: MONITORING     | |a|:  8.71 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 28.092s | [T=027646 ms] State: MONITORING     | |a|:  8.63 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 29.094s | [T=027896 ms] State: MONITORING     | |a|:  8.72 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 29.094s | [T=028146 ms] State: MONITORING     | |a|:  8.65 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 29.094s | [T=028396 ms] State: MONITORING     | |a|:  8.67 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 29.094s | [T=028646 ms] State: MONITORING     | |a|:  8.64 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 30.097s | [T=028896 ms] State: MONITORING     | |a|:  8.70 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 30.097s | [T=029146 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 30.097s | [T=029396 ms] State: MONITORING     | |a|:  8.68 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 30.097s | [T=029646 ms] State: MONITORING     | |a|:  8.65 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 31.102s | [T=029896 ms] State: MONITORING     | |a|:  8.61 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 31.102s | [T=030146 ms] State: MONITORING     | |a|:  8.65 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 31.102s | [T=030396 ms] State: MONITORING     | |a|:  8.60 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 31.102s | [T=030646 ms] State: MONITORING     | |a|:  8.69 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 32.103s | [T=030896 ms] State: MONITORING     | |a|:  8.65 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 32.103s | [T=031146 ms] State: MONITORING     | |a|:  8.68 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 32.103s | [T=031396 ms] State: MONITORING     | |a|:  8.60 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 32.103s | [T=031646 ms] State: MONITORING     | |a|:  8.64 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 33.107s | [T=031896 ms] State: MONITORING     | |a|:  8.72 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 33.107s | [T=032146 ms] State: MONITORING     | |a|:  8.64 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 33.107s | [T=032396 ms] State: MONITORING     | |a|:  8.67 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 33.107s | [T=032646 ms] State: MONITORING     | |a|:  8.55 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 34.111s | [T=032896 ms] State: MONITORING     | |a|:  8.65 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 34.111s | [T=033146 ms] State: MONITORING     | |a|:  8.72 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 34.111s | [T=033396 ms] State: MONITORING     | |a|:  8.67 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 34.112s | [T=033646 ms] State: MONITORING     | |a|:  8.61 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 35.116s | [T=033896 ms] State: MONITORING     | |a|:  8.69 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 35.116s | [T=034146 ms] State: MONITORING     | |a|:  8.63 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 35.116s | [T=034396 ms] State: MONITORING     | |a|:  8.62 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 35.116s | [T=034646 ms] State: MONITORING     | |a|:  8.67 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 36.120s | [T=034896 ms] State: MONITORING     | |a|:  8.73 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 36.121s | [T=035146 ms] State: MONITORING     | |a|:  8.72 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 36.121s | [T=035396 ms] State: MONITORING     | |a|:  8.70 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 36.121s | [T=035646 ms] State: MONITORING     | |a|:  8.72 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 37.123s | [T=035896 ms] State: MONITORING     | |a|:  8.68 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 37.123s | [T=036146 ms] State: MONITORING     | |a|:  8.65 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 37.123s | [T=036396 ms] State: MONITORING     | |a|:  8.76 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 37.123s | [T=036646 ms] State: MONITORING     | |a|:  8.68 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 38.125s | [T=036896 ms] State: MONITORING     | |a|:  8.71 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 38.125s | [T=037146 ms] State: MONITORING     | |a|:  8.67 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 38.125s | [T=037396 ms] State: MONITORING     | |a|:  8.72 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 38.125s | [T=037646 ms] State: MONITORING     | |a|:  8.63 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 39.129s | [T=037896 ms] State: MONITORING     | |a|:  8.65 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 39.129s | [T=038146 ms] State: MONITORING     | |a|:  8.57 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 39.129s | [T=038396 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 39.129s | [T=038646 ms] State: MONITORING     | |a|:  8.66 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 40.130s | [T=038896 ms] State: MONITORING     | |a|:  8.73 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 40.130s | [T=039146 ms] State: MONITORING     | |a|:  8.65 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 40.130s | [T=039396 ms] State: MONITORING     | |a|:  8.65 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+ 40.130s | [T=039646 ms] State: MONITORING     | |a|:  8.69 m/s^2 | AltDelta:   0.00 m | BLE: ADV
+[SERIAL] Ket thuc: 196 dong trong 40.1s

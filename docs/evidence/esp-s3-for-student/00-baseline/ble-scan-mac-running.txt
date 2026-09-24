@@ -1,0 +1,13 @@
+[SCAN] Bat dau quet CoreBluetooth trong 25 giay ...
+[SCAN] Ket thuc sau 25.1s. So thiet bi thay duoc: 5
+[SCAN] Danh sach thiet bi:
+  - name='FALLSAFE-4D4D' addr=796FA933-80E3-61F9-9771-975DDDE7F5D8 rssi=-55 services=['7d2a0001-6f45-4c2b-9a1e-38a8f5c10001']
+  - name='TY' addr=15EA91F9-77B4-A18D-22AF-85B0018D3F32 rssi=-84 services=['0000a201-0000-1000-8000-00805f9b34fb']
+  - name='(khong ten)' addr=76F47EE9-905F-29A6-3436-BEB0F660E684 rssi=-86 services=[]
+  - name='BG0268598' addr=1DF54605-65F9-52B2-8BB8-C4618773B528 rssi=-91 services=[]
+  - name='(khong ten)' addr=4F307797-20C0-9003-7543-B9B39A948C85 rssi=-93 services=[]
+
+[KETQUA] Thay thiet bi ten FALLSAFE-xxxx : CO
+          -> FALLSAFE-4D4D addr=796FA933-80E3-61F9-9771-975DDDE7F5D8 rssi=-55
+[KETQUA] Thay service 7d2a0001-6f45-4c2b-9a1e-38a8f5c10001 : CO
+          -> FALLSAFE-4D4D addr=796FA933-80E3-61F9-9771-975DDDE7F5D8 rssi=-55

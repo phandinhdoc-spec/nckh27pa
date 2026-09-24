@@ -1,0 +1,95 @@
+[SERIAL] Mo /dev/cu.usbmodem1101 @ 115200 trong 40 giay ...
+  1.007s | ESP-ROM:esp32s3-20210327
+  1.007s | Build:Mar 27 2021
+  1.007s | rst:0x15 (USB_UART_CHIP_RESET),boot:0x2b (SPI_FAST_FLASH_BOOT)
+  1.007s | Saved PC:0x4037f87e
+  1.007s | SPIWP:0xee
+  1.007s | mode:DIO, clock div:1
+  1.007s | load:0x3fce2820,len:0x10cc
+  1.007s | load:0x403c8700,len:0xc2c
+  1.007s | load:0x403cb700,len:0x30b0
+  1.007s | entry 0x403c88b8
+  1.007s | 
+  1.007s | 
+  1.007s | =======================================================
+  1.007s | NCKH27PA - ESP32-S3 SUPER MINI OFFICIAL FIRMWARE
+  1.007s | Device ID: FALLSAFE-4D4D | Build: Sep 25 2026 01:23:06 | Protocol: 1
+  1.007s | =======================================================
+  1.007s | 
+  1.007s | =======================================================
+  1.007s | NCKH27PA ESP32-S3 PRODUCT FALL DETECTION PROFILE
+  1.007s | NOTE: EXPERIMENTAL THRESHOLDS - NOT MEDICALLY VERIFIED
+  1.007s | =======================================================
+  1.007s |   impactAccelerationMs2:            25.00 m/s^2   [Android FallDetectionConfig.DEFAULT]
+  1.007s |   stillnessTargetAccelerationMs2:   9.81 m/s^2   [Android FallDetectionConfig.DEFAULT]
+  1.007s |   stillnessToleranceMs2:            1.00 m/s^2   [Android FallDetectionConfig.DEFAULT]
+  1.007s |   postImpactWindowMs:               0 ms       [Android FallDetectionConfig.DEFAULT]
+  1.007s |   postImpactStillnessDurationMs:    1000 ms       [Android FallDetectionConfig.DEFAULT]
+  1.007s |   minimumStillnessSamples:          6 samples  [Android FallDetectionConfig.DEFAULT]
+  1.007s |   maximumSampleGapMs:               250 ms       [Android FallDetectionConfig.DEFAULT]
+  1.007s |   phonePressureMinimumRisePa:       12.0 Pa     [Android (flag disabled in decision)]
+  1.007s |   freeFallThresholdMs2:             3.00 m/s^2   [Heuristic telemetry logging only]
+  1.007s |   highAngularSpeedDps:              200.0 dps    [Heuristic telemetry logging only]
+  1.007s | =======================================================
+  1.007s | 
+  1.007s | [BOOT] Starting Hardware Self-Test...
+  1.007s | [BOOT] IMU MPU6050 on I2C0 (SDA 7, SCL 6): FAIL (addr: 0x69)
+  1.007s | [BOOT] Barometer MS5611 on I2C1 (SDA 3, SCL 2): UNAVAILABLE (addr: 0x76, CRC: FAIL/UNVERIFIED)
+  1.007s | [CRITICAL] IMU failed self-test. System transitioning to DEGRADED mode.
+  1.007s | [BLE] GATT Server initialized. Device name: FALLSAFE-4D4D
+  1.007s | [SYSTEM] Initialization complete. System active.
+  1.007s | === DU LIEU CAM BIEN ===
+  1.007s | Gia toc tong : 0.00 g
+  1.007s | Van toc goc  : 0.0 do/s
+  1.007s | Ap suat      : 1013.25 hPa
+  1.007s | Chenh cao    : +0.00 m
+  1.007s | Trang thai   : TRANG_THAI_SUY_GIAM
+  2.012s | === DU LIEU CAM BIEN ===
+  2.012s | Gia toc tong : 0.00 g
+  2.012s | Van toc goc  : 0.0 do/s
+  2.012s | Ap suat      : 1013.25 hPa
+  2.012s | Chenh cao    : +0.00 m
+  2.012s | Trang thai   : TRANG_THAI_SUY_GIAM
+  2.012s | === DU LIEU CAM BIEN ===
+  2.012s | Gia toc tong : 0.00 g
+  2.012s | Van toc goc  : 0.0 do/s
+  2.012s | Ap suat      : 1013.25 hPa
+  2.012s | Chenh cao    : +0.00 m
+  2.012s | Trang thai   : TRANG_THAI_SUY_GIAM
+  2.012s | === DU LIEU CAM BIEN ===
+  2.012s | Gia toc tong : 0.00 g
+  2.012s | Van toc goc  : 0.0 do/s
+  2.012s | Ap suat      : 1013.25 hPa
+  2.012s | Chenh cao    : +0.00 m
+  2.012s | Trang thai   : TRANG_THAI_SUY_GIAM
+  2.012s | === DU LIEU CAM BIEN ===
+  2.012s | Gia toc tong : 0.00 g
+  2.012s | Van toc goc  : 0.0 do/s
+  2.012s | Ap suat      : 1013.25 hPa
+  2.012s | Chenh cao    : +0.00 m
+  2.012s | Trang thai   : TRANG_THAI_SUY_GIAM
+  3.017s | === DU LIEU CAM BIEN ===
+  3.017s | Gia toc tong : 0.00 g
+  3.017s | Van toc goc  : 0.0 do/s
+  3.017s | Ap suat      : 1013.25 hPa
+  3.017s | Chenh cao    : +0.00 m
+  3.017s | Trang thai   : TRANG_THAI_SUY_GIAM
+  3.017s | === DU LIEU CAM BIEN ===
+  3.017s | Gia toc tong : 0.00 g
+  3.017s | Van toc goc  : 0.0 do/s
+  3.017s | Ap suat      : 1013.25 hPa
+  3.017s | Chenh cao    : +0.00 m
+  3.017s | Trang thai   : TRANG_THAI_SUY_GIAM
+  3.017s | === DU LIEU CAM BIEN ===
+  3.017s | Gia toc tong : 0.00 g
+  3.017s | Van toc goc  : 0.0 do/s
+  3.017s | Ap suat      : 1013.25 hPa
+  3.017s | Chenh cao    : +0.00 m
+  3.017s | Trang thai   : TRANG_THAI_SUY_GIAM
+  3.017s | === DU LIEU CAM BIEN ===
+  3.017s | Gia toc tong : 0.00 g
+  3.017s | Van toc goc  : 0.0 do/s
+  3.017s | Ap suat      : 1013.25 hPa
+  3.017s | Chenh cao    : +0.00 m
+  3.017s | Trang thai   : TRANG_THAI_SUY_GIAM
+  4.018s | === DU LIEU CAM BIEN ===
