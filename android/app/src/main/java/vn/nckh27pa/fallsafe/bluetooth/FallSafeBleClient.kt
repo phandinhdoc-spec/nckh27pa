@@ -345,6 +345,8 @@ class FallSafeBleClient(
                     _latestSensorPacket.value = packet
                     _sensorPackets.tryEmit(packet)
                     onSensorPacket?.invoke(packet)
+                    // Keep BLE callback lightweight: telemetry display/streaming must never
+                    // be blocked by fall detection. Detector work is queued on the main thread.
                     routeTelemetryIntoMainAlertFlow(packet)
                 }
             }
@@ -392,11 +394,8 @@ class FallSafeBleClient(
         )
         mainHandler.post {
             val controller = app.controller
-            controller.setDeviceConnectedState(true)
             controller.session.accept(sensorPacket)
             if (packet.sosButtonPressed) controller.help()
-            // Refresh Compose/controller state after the detector consumes telemetry.
-            controller.setDeviceConnectedState(true)
         }
     }
 
