@@ -26,6 +26,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import vn.nckh27pa.fallsafe.DemoApplication
+import vn.nckh27pa.fallsafe.PhoneSensorPacket
 import vn.nckh27pa.fallsafe.protocol.Esp32PacketDecoder
 import vn.nckh27pa.fallsafe.protocol.Esp32SensorPacket
 import java.util.UUID
@@ -130,9 +132,6 @@ class FallSafeBleClient(
         @SuppressLint("MissingPermission")
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             if (status != BluetoothGatt.GATT_SUCCESS) {
-                // W2.1-S3: connection error (notably status 133). Safely refresh,
-                // close the stale gatt, then bound-retry with backoff. Report
-                // Error only after retries are exhausted.
                 safeRefresh(gatt)
                 closeGatt(gatt)
                 scheduleReconnect(gatt.device)
@@ -141,20 +140,15 @@ class FallSafeBleClient(
 
             when (newState) {
                 BluetoothProfile.STATE_CONNECTED -> {
-                    // W2.1-S3: successful connection resets the retry budget.
                     connectAttempts = 0
                     mtuResolved = false
                     _connectionState.value = BleConnectionState.Connecting(gatt.device.address)
                     onConnectionStateChanged?.invoke(_connectionState.value)
-                    // W2.1-S2: MTU negotiation gates discovery. discoverServices
-                    // runs from onMtuChanged (any status); fallback below covers
-                    // stacks that never invoke the callback.
+                    updateMainAppConnection(true)
                     try {
                         gatt.requestMtu(512)
                     } catch (_: Exception) {
                     }
-                    // Fallback covers stacks that never invoke onMtuChanged;
-                    // flag-gated so discovery runs at most once via fallback.
                     scheduleMtuFallback(gatt)
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
@@ -170,14 +164,13 @@ class FallSafeBleClient(
                     subscriptionStage = SubscriptionStage.NONE
                     _connectionState.value = BleConnectionState.Disconnected
                     onConnectionStateChanged?.invoke(_connectionState.value)
+                    updateMainAppConnection(false)
                 }
             }
         }
 
         @SuppressLint("MissingPermission")
         override fun onMtuChanged(gatt: BluetoothGatt, mtu: Int, status: Int) {
-            // W2.1-S2: discover on every MTU outcome; flag prevents a second
-            // discovery if the delayed fallback already fired.
             if (!mtuResolved) {
                 mtuResolved = true
                 cancelMtuFallback()
@@ -202,14 +195,13 @@ class FallSafeBleClient(
 
             _connectionState.value = BleConnectionState.Connected(gatt.device.address)
             onConnectionStateChanged?.invoke(_connectionState.value)
+            updateMainAppConnection(true)
 
-            // Step 1 of sequential CCCD subscription: Telemetry
             val telemetryChar = service.getCharacteristic(BleGattUuids.TELEMETRY_NOTIFY_UUID)
             if (telemetryChar != null) {
                 subscriptionStage = SubscriptionStage.TELEMETRY
                 subscribeCharacteristic(gatt, telemetryChar)
             } else {
-                // If no telemetry char, try event directly
                 val eventChar = service.getCharacteristic(BleGattUuids.EVENT_NOTIFY_UUID)
                 if (eventChar != null) {
                     subscriptionStage = SubscriptionStage.EVENT
@@ -229,7 +221,6 @@ class FallSafeBleClient(
             val service = gatt.getService(BleGattUuids.SERVICE_UUID)
             when (subscriptionStage) {
                 SubscriptionStage.TELEMETRY -> {
-                    // Step 2 of sequential CCCD subscription: Event
                     val eventChar = service?.getCharacteristic(BleGattUuids.EVENT_NOTIFY_UUID)
                     if (eventChar != null) {
                         subscriptionStage = SubscriptionStage.EVENT
@@ -239,9 +230,6 @@ class FallSafeBleClient(
                     }
                 }
                 SubscriptionStage.EVENT -> {
-                    // Step 3 (S3 official firmware): ACK 0006 plain JSON.
-                    // PROFILE_WRITE_UUID is retained as a legacy name; 0006 is ACK Notify-only.
-                    // Missing char must not break the flow.
                     val ackChar = service?.getCharacteristic(BleGattUuids.PROFILE_WRITE_UUID)
                     if (ackChar != null) {
                         subscriptionStage = SubscriptionStage.ACK
@@ -250,9 +238,7 @@ class FallSafeBleClient(
                         completeSubscription(gatt)
                     }
                 }
-                SubscriptionStage.ACK -> {
-                    completeSubscription(gatt)
-                }
+                SubscriptionStage.ACK -> completeSubscription(gatt)
                 else -> {}
             }
         }
@@ -288,8 +274,6 @@ class FallSafeBleClient(
         try {
             gatt.setCharacteristicNotification(characteristic, true)
             val descriptor = characteristic.getDescriptor(BleGattUuids.CCCD_UUID) ?: return
-            // S3 Event char is INDICATE: pick the CCCD value from the
-            // characteristic properties so Indicate actually arrives.
             val enableValue =
                 if ((characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0) {
                     BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
@@ -315,20 +299,12 @@ class FallSafeBleClient(
         subscriptionStage = SubscriptionStage.COMPLETE
         _connectionState.value = BleConnectionState.Subscribed(gatt.device.address)
         onConnectionStateChanged?.invoke(_connectionState.value)
-        // S3 official firmware only streams after START_STREAM command.
-        // Best-effort: ignore the result, user can retry from BleTestScreen.
+        updateMainAppConnection(true)
         try {
             sendStartStream()
         } catch (_: Exception) {}
     }
 
-    /**
-     * Feed incoming notification/indication into the right path:
-     * - Plain JSON starting with '{' (S3 official firmware) bypasses the
-     *   IF-003 Reassembler and decodes directly; telemetry via
-     *   packetDecoder.decodeSensor, event via BleEventPacket.parse.
-     * - Otherwise keep the legacy IF-003 path (test-rig compatibility).
-     */
     fun processNotification(uuid: UUID, value: ByteArray) {
         val kind = when (uuid) {
             BleGattUuids.TELEMETRY_NOTIFY_UUID -> BleGattUuids.KIND_TELEMETRY
@@ -349,7 +325,6 @@ class FallSafeBleClient(
         }
     }
 
-    /** First non-whitespace byte is '{' -> plain JSON (maybe with trailing NUL/space). */
     private fun isPlainJson(value: ByteArray): Boolean {
         for (b in value) {
             when (b.toInt().toChar()) {
@@ -377,29 +352,81 @@ class FallSafeBleClient(
                 if (event != null) {
                     _eventPackets.tryEmit(event)
                     onEventPacket?.invoke(event)
+                    routeEventIntoMainAlertFlow(event)
                 }
             }
-            BleGattUuids.KIND_ACK -> {
-                onAckJson?.invoke(payloadJson)
-            }
+            BleGattUuids.KIND_ACK -> onAckJson?.invoke(payloadJson)
         }
     }
 
     /**
-     * Start scanning for FallSafe ESP32 service and connect to first match.
+     * Bridge ESP32 hardware-confirmed fall events into the existing Android AlertCore.
+     * We intentionally reuse DemoSession's validated detector path instead of creating
+     * a second alert state machine. Synthetic timestamps satisfy the same active profile:
+     * one impact, then six still samples spanning 1000 ms with <=250 ms sample gaps.
      */
+    private fun routeEventIntoMainAlertFlow(event: BleEventPacket) {
+        val app = context?.applicationContext as? DemoApplication ?: return
+        mainHandler.post {
+            val controller = app.controller
+            controller.setDeviceConnectedState(true)
+
+            when (event.eventType) {
+                "INACTIVITY_DETECTED" -> {
+                    if (!event.severity.equals("CRITICAL", ignoreCase = true)) return@post
+
+                    val baseNs = System.nanoTime()
+                    val wallMs = System.currentTimeMillis()
+                    controller.session.accept(
+                        PhoneSensorPacket(
+                            timestampNs = baseNs,
+                            wallClockTimestampMs = wallMs,
+                            accelXMs2 = 0f,
+                            accelYMs2 = 0f,
+                            accelZMs2 = 30f
+                        )
+                    )
+                    val stillOffsetsMs = longArrayOf(100, 300, 500, 700, 900, 1100)
+                    for (offsetMs in stillOffsetsMs) {
+                        controller.session.accept(
+                            PhoneSensorPacket(
+                                timestampNs = baseNs + offsetMs * 1_000_000L,
+                                wallClockTimestampMs = wallMs + offsetMs,
+                                accelXMs2 = 0f,
+                                accelYMs2 = 0f,
+                                accelZMs2 = 9.81f
+                            )
+                        )
+                    }
+                    // setDeviceConnectedState() calls refresh(), exposing the new VERIFYING state
+                    // to Compose so the existing 10-second countdown becomes visible immediately.
+                    controller.setDeviceConnectedState(true)
+                }
+                "SOS_PRESSED" -> controller.help()
+                "SOS_CANCELLED" -> controller.safe()
+            }
+        }
+    }
+
+    private fun updateMainAppConnection(connected: Boolean) {
+        val app = context?.applicationContext as? DemoApplication ?: return
+        mainHandler.post { app.controller.setDeviceConnectedState(connected) }
+    }
+
     @SuppressLint("MissingPermission")
     fun startScan(timeoutMs: Long = 10000L): Boolean {
         val adapter = bluetoothAdapter
         if (adapter == null || !adapter.isEnabled) {
             _connectionState.value = BleConnectionState.Error("Bluetooth not available or disabled")
             onConnectionStateChanged?.invoke(_connectionState.value)
+            updateMainAppConnection(false)
             return false
         }
         val scanner = adapter.bluetoothLeScanner
         if (scanner == null) {
             _connectionState.value = BleConnectionState.Error("BluetoothLeScanner unavailable")
             onConnectionStateChanged?.invoke(_connectionState.value)
+            updateMainAppConnection(false)
             return false
         }
 
@@ -430,6 +457,7 @@ class FallSafeBleClient(
             isScanning = false
             _connectionState.value = BleConnectionState.Error("Failed to start scan: ${e.message}")
             onConnectionStateChanged?.invoke(_connectionState.value)
+            updateMainAppConnection(false)
             return false
         }
     }
@@ -443,11 +471,6 @@ class FallSafeBleClient(
         } catch (_: Exception) {}
     }
 
-    /**
-     * Connect directly to a BluetoothDevice. Coalesces rapid calls: any pending
-     * delayed connect is cancelled and the new one fires 250ms after teardown
-     * so stopScan()/disconnect() can settle first.
-     */
     @SuppressLint("MissingPermission")
     fun connect(device: BluetoothDevice): Boolean {
         cancelPendingConnect()
@@ -470,6 +493,7 @@ class FallSafeBleClient(
             } catch (e: Exception) {
                 _connectionState.value = BleConnectionState.Error("Connect failed: ${e.message}")
                 onConnectionStateChanged?.invoke(_connectionState.value)
+                updateMainAppConnection(false)
             }
         }
         pendingConnectRunnable = runnable
@@ -477,9 +501,6 @@ class FallSafeBleClient(
         return true
     }
 
-    /**
-     * Connect directly by device MAC address.
-     */
     @SuppressLint("MissingPermission")
     fun connect(address: String): Boolean {
         val adapter = bluetoothAdapter ?: return false
@@ -493,9 +514,6 @@ class FallSafeBleClient(
         return connect(device)
     }
 
-    /**
-     * Write raw string to request characteristic (UUID: 7d2a0005).
-     */
     fun writeRequest(request: String): Boolean {
         val gatt = currentGatt ?: return false
         val service = gatt.getService(BleGattUuids.SERVICE_UUID) ?: return false
@@ -503,11 +521,6 @@ class FallSafeBleClient(
         return writeCharacteristicCompat(gatt, char, request.toByteArray(Charsets.UTF_8))
     }
 
-    /**
-     * S3 official firmware stream-control commands (plain JSON over 0005).
-     * START_STREAM is auto-sent after Subscribed and can be retried manually;
-     * STOP_STREAM is manual from BleTestScreen.
-     */
     fun buildStreamCommand(commandType: String, nowMs: Long = System.currentTimeMillis()): String {
         val cmdId = "cmd-$nowMs"
         return "{\"protocolVersion\":1," +
@@ -522,14 +535,8 @@ class FallSafeBleClient(
     fun sendStopStream(): Boolean =
         writeRequest(buildStreamCommand("STOP_STREAM"))
 
-    /**
-     * Profile writes are unsupported by the official firmware. In
-     * esp-s3/esp-s3.ino:83 and esp/esp32-plan.md:270, 7d2a0006 is the ACK
-     * characteristic and is Notify-only, so writing a profile there always fails.
-     */
     fun writeProfile(profileJson: String): Boolean = false
 
-    /** Keep this overload while profile configuration remains unavailable. */
     fun writeProfile(profile: BleFallProfile): Boolean = false
 
     @SuppressLint("MissingPermission")
@@ -556,9 +563,6 @@ class FallSafeBleClient(
         }
     }
 
-    /**
-     * Cleanly disconnects and resets the reassembler session.
-     */
     @SuppressLint("MissingPermission")
     fun disconnect() {
         cancelPendingConnect()
@@ -572,9 +576,8 @@ class FallSafeBleClient(
         mtuResolved = false
         _connectionState.value = BleConnectionState.Disconnected
         onConnectionStateChanged?.invoke(_connectionState.value)
+        updateMainAppConnection(false)
     }
-
-    // ---- W2.1 connection-lifecycle helpers (no UUID/protocol changes) ----
 
     private fun cancelPendingConnect() {
         pendingConnectRunnable?.let { mainHandler.removeCallbacks(it) }
@@ -611,7 +614,6 @@ class FallSafeBleClient(
         }
     }
 
-    /** Best-effort cache refresh via hidden API; ignored when unavailable. */
     private fun safeRefresh(gatt: BluetoothGatt) {
         try {
             val method = gatt.javaClass.getMethod("refresh")
@@ -642,6 +644,7 @@ class FallSafeBleClient(
             _connectionState.value =
                 BleConnectionState.Error("GATT connection failed after $MAX_RETRY_ATTEMPTS retries")
             onConnectionStateChanged?.invoke(_connectionState.value)
+            updateMainAppConnection(false)
             return
         }
         val backoff = RETRY_BACKOFF_MS.getOrElse(connectAttempts) { RETRY_BACKOFF_MS.last() }
@@ -653,6 +656,7 @@ class FallSafeBleClient(
                 connectAttempts = 0
                 _connectionState.value = BleConnectionState.Error("Context required for BLE connection")
                 onConnectionStateChanged?.invoke(_connectionState.value)
+                updateMainAppConnection(false)
                 return@Runnable
             }
             try {
