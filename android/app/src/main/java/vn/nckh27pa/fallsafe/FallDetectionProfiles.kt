@@ -53,7 +53,9 @@ data class FallDetectionConfig(
         const val MAX_MAXIMUM_SAMPLE_GAP_MS = 2_000L
         const val DEFAULT_PHONE_PRESSURE_MINIMUM_RISE_PA = 12f
 
-        val DEFAULT = FallDetectionConfig(25f, 9.81f, 1f, 3_000L, 1_000L, 6, 250L)
+        // Experimental bench profile: short hand-drop -> catch -> hold still.
+        // Deliberately sensitive; tune upward after the BLE/Android SOS path is verified.
+        val DEFAULT = FallDetectionConfig(14f, 9.81f, 3f, 4_000L, 500L, 4, 500L)
     }
 }
 
