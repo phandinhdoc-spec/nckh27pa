@@ -345,6 +345,7 @@ class FallSafeBleClient(
                     _latestSensorPacket.value = packet
                     _sensorPackets.tryEmit(packet)
                     onSensorPacket?.invoke(packet)
+                    routeTelemetryIntoMainAlertFlow(packet)
                 }
             }
             BleGattUuids.KIND_EVENT -> {
@@ -365,6 +366,40 @@ class FallSafeBleClient(
      * a second alert state machine. Synthetic timestamps satisfy the same active profile:
      * one impact, then six still samples spanning 1000 ms with <=250 ms sample gaps.
      */
+    /**
+     * Telemetry is the primary fall-detection input.
+     * Every valid ESP32 sample is converted to the same PhoneSensorPacket used by
+     * AlertCore/DemoDetector. Android therefore decides when to start SOS; an ESP32
+     * FALL_CONFIRMED event is not required.
+     */
+    private fun routeTelemetryIntoMainAlertFlow(packet: Esp32SensorPacket) {
+        val app = context?.applicationContext as? DemoApplication ?: return
+        val nowNs = System.nanoTime()
+        val wallMs = System.currentTimeMillis()
+        val sensorPacket = PhoneSensorPacket(
+            timestampNs = nowNs,
+            wallClockTimestampMs = wallMs,
+            accelXMs2 = packet.accelXMs2,
+            accelYMs2 = packet.accelYMs2,
+            accelZMs2 = packet.accelZMs2,
+            gyroXDps = packet.gyroXDps,
+            gyroYDps = packet.gyroYDps,
+            gyroZDps = packet.gyroZDps,
+            pressurePa = packet.pressurePa,
+            altitudeDeltaM = packet.altitudeDeltaM,
+            sensorQuality = packet.sensorQuality,
+            gyroTimestampNs = nowNs
+        )
+        mainHandler.post {
+            val controller = app.controller
+            controller.setDeviceConnectedState(true)
+            controller.session.accept(sensorPacket)
+            if (packet.sosButtonPressed) controller.help()
+            // Refresh Compose/controller state after the detector consumes telemetry.
+            controller.setDeviceConnectedState(true)
+        }
+    }
+
     private fun routeEventIntoMainAlertFlow(event: BleEventPacket) {
         val app = context?.applicationContext as? DemoApplication ?: return
         mainHandler.post {
