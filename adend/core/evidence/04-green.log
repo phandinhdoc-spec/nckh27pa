@@ -1,0 +1,7 @@
+PASS suspected, clear, confirmed and duplicate callbacks
+PASS deadline 10s, no response, absent location, one send
+PASS SAFE before deadline cancels; at and after deadline preserves alert
+PASS immediate NEED_HELP and SOS, dedup, completion permits new event
+PASS 4 tests
+
+EXIT 0

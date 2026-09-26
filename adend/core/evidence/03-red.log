@@ -1,0 +1,9 @@
+PASS suspected, clear, confirmed and duplicate callbacks
+PASS deadline 10s, no response, absent location, one send
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at core.CoreTestsKt.main$lambda$2(CoreTests.kt:31)
+	at core.CoreTestsKt.main$test(CoreTests.kt:6)
+	at core.CoreTestsKt.main(CoreTests.kt:26)
+	at core.CoreTestsKt.main(CoreTests.kt)
+
+EXIT 1

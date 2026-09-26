@@ -1,0 +1,97 @@
+error: source file or directory not found: android/app/src/main/java/vn/nckh27pa/fallsafe/DemoLogic.kt
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:9:17: error: unresolved reference 'PhoneNormalizer'.
+        val n = PhoneNormalizer()
+                ^^^^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:11:18: error: unresolved reference 'SensorKind'.
+        n.update(SensorKind.ACCEL, 0, floatArrayOf(0f, 0f, 9.81f))
+                 ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:13:22: error: unresolved reference 'gyroXDps'.
+        assertNull(p.gyroXDps)
+                     ^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:14:35: error: unresolved reference 'phoneMotionState'.
+        assertEquals("UNKNOWN", p.phoneMotionState)
+                                  ^^^^^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:15:27: error: unresolved reference 'phonePlacementConfidence'.
+        assertEquals(0, p.phonePlacementConfidence)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:16:30: error: unresolved reference 'wallClockTimestampMs'.
+        assertEquals(123L, p.wallClockTimestampMs)
+                             ^^^^^^^^^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:17:18: error: unresolved reference 'SensorKind'.
+        n.update(SensorKind.GYRO, 0, floatArrayOf(Math.PI.toFloat(), 0f, 0f))
+                 ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:18:18: error: unresolved reference 'SensorKind'.
+        n.update(SensorKind.PRESSURE, 0, floatArrayOf(1013.25f))
+                 ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:20:30: error: unresolved reference 'gyroXDps'.
+        assertEquals(180f, p.gyroXDps!!, 0.001f)
+                             ^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:21:33: error: unresolved reference 'pressurePa'.
+        assertEquals(101325f, p.pressurePa!!, 0.1f)
+                                ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:22:22: error: unresolved reference 'stepCount'.
+        assertNull(p.stepCount)
+                     ^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:23:22: error: unresolved reference 'altitudeDeltaM'.
+        assertNull(p.altitudeDeltaM)
+                     ^^^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:24:18: error: unresolved reference 'SensorKind'.
+        n.update(SensorKind.ACCEL, 600_000_000, floatArrayOf(0f, 0f, 9.81f))
+                 ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:25:47: error: unresolved reference 'pressurePa'.
+        assertNull(n.packet(600_000_000, 0)!!.pressurePa)
+                                              ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:29:17: error: unresolved reference 'PhoneNormalizer'.
+        val n = PhoneNormalizer()
+                ^^^^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:30:18: error: unresolved reference 'SensorKind'.
+        n.update(SensorKind.ACCEL, 10, floatArrayOf(Float.NaN, 0f, 0f))
+                 ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:32:18: error: unresolved reference 'SensorKind'.
+        n.update(SensorKind.ACCEL, 20, floatArrayOf(0f, 0f, 9.81f))
+                 ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:34:18: error: unresolved reference 'SensorKind'.
+        n.update(SensorKind.GYRO, 20, floatArrayOf(Float.POSITIVE_INFINITY, 0f, 0f))
+                 ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:35:38: error: unresolved reference 'gyroXDps'.
+        assertNull(n.packet(20, 0)!!.gyroXDps)
+                                     ^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:36:18: error: unresolved reference 'SensorKind'.
+        n.update(SensorKind.ACCEL, 21, floatArrayOf(1f))
+                 ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:40:17: error: unresolved reference 'DemoDetector'.
+        val d = DemoDetector()
+                ^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:56:20: error: unresolved reference 'LocalDemoSink'.
+        val sink = LocalDemoSink()
+                   ^^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:57:23: error: unresolved reference 'DemoSession'.
+        val session = DemoSession(MonotonicClock { now }, sink)
+                      ^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:58:22: error: unresolved reference 'DemoReplay'.
+        val replay = DemoReplay(0)
+                     ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:61:17: error: unresolved reference 'DemoReplay'.
+        val r = DemoReplay(0)
+                ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:64:47: error: unresolved reference 'it'.
+            r.due(t).forEach { session.accept(it) }
+                                              ^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:83:20: error: unresolved reference 'LocalDemoSink'.
+        val sink = LocalDemoSink()
+                   ^^^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:84:17: error: unresolved reference 'DemoSession'.
+        val s = DemoSession(MonotonicClock { now }, sink)
+                ^^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:85:9: error: unresolved reference 'DemoReplay'.
+        DemoReplay(0).due(1600).forEach { s.accept(it) }
+        ^^^^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:85:52: error: unresolved reference 'it'.
+        DemoReplay(0).due(1600).forEach { s.accept(it) }
+                                                   ^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:101:17: error: unresolved reference 'SosHold'.
+        val h = SosHold()
+                ^^^^^^^
+android/app/src/test/java/vn/nckh27pa/fallsafe/DemoTests.kt:110:46: error: unresolved reference 'PhoneSensorPacket'.
+    private fun sample(ms: Long, z: Float) = PhoneSensorPacket(
+                                             ^^^^^^^^^^^^^^^^^

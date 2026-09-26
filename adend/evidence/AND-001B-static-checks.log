@@ -1,0 +1,4 @@
+PASS manifest XML; no uses-permission
+PASS no external transport API in Kotlin source
+JUnit tests: 9
+Kotlin files: 5
