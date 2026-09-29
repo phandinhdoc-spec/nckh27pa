@@ -175,6 +175,15 @@ class MainLoopTests(unittest.TestCase):
                 "needsImage": "cầm gì" in text,
             }
 
+        def fake_runtime(config, client, stream, conversation):
+            def run():
+                try:
+                    for pcm in stream.segments():
+                        conversation(pcm, lambda: True, None)
+                except KeyboardInterrupt:
+                    pass
+            return SimpleNamespace(run=run)
+
         with (
             patch.object(app.Config, "load", return_value=config),
             patch.object(app, "_startup"),
@@ -183,6 +192,7 @@ class MainLoopTests(unittest.TestCase):
                 app, "MacClient", return_value=SimpleNamespace(plan=fake_plan, command=fake_command)
             ),
             patch.object(app, "VoiceStream", return_value=_ScriptedStream(segments)),
+            patch.object(app, "Runtime", side_effect=fake_runtime),
             patch.object(app, "mp3_from_pcm", return_value=b"mp3-segment"),
             patch.object(app, "transcribe", side_effect=transcripts) as transcribe,
             patch.object(app, "capture_jpeg", return_value=b"jpeg") as camera,

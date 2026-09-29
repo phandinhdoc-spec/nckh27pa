@@ -44,8 +44,14 @@ class Config:
 
     @classmethod
     def load(cls, path: Path | None = None) -> "Config":
-        values = _read_env(path or Path(__file__).with_name(".env"))
+        env_path = path or Path(__file__).with_name(".env")
+        values = _read_env(env_path)
+        # A populated .api is authoritative even when systemd exports .env.
+        # A blank template must not shadow an existing .env value.
+        api_key = _read_env(env_path.with_name(".api")).get("GROQ_API_KEY", "").strip()
         values.update(os.environ)
+        if api_key:
+            values["GROQ_API_KEY"] = api_key
 
         server_url = _required(values, "MAC_SERVER_URL").rstrip("/")
         if not server_url.startswith(("http://", "https://")):

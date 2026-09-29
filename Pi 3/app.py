@@ -19,6 +19,7 @@ from groq_stt import GroqError, transcribe
 from history import History
 from mac_client import MacClient, MacClientError
 from sensors import read_sensors
+from part2_runtime import Runtime
 
 
 _STARTUP_RETRY_SECONDS = 5
@@ -85,19 +86,17 @@ def main() -> int:
         flush=True,
     )
     awaiting_command = False
+    def conversation(pcm, valid, speaker):
+        nonlocal awaiting_command
+        next_state = _handle_utterance(pcm, config, client, history,
+                                       awaiting_command, valid=valid, speaker=speaker)
+        if valid():
+            awaiting_command = next_state
     try:
-        for pcm in stream.segments():
-            try:
-                awaiting_command = _handle_utterance(
-                    pcm, config, client, history, awaiting_command
-                )
-            except (DeviceError, GroqError, MacClientError) as error:
-                print(f"Lỗi: {error}", file=sys.stderr, flush=True)
-                _announce("operation-error.mp3", config.onboard_playback_device)
-                time.sleep(2)
-            except Exception as error:  # noqa: BLE001 - giữ service sống, chờ lượt nói kế tiếp
-                print(f"Lỗi bất ngờ: {error}", file=sys.stderr, flush=True)
-                time.sleep(2)
+        Runtime(config, client, stream, conversation).run()
+    except ImportError as error:
+        print(f"[GPIO25] Cần gpiozero: {error}", file=sys.stderr, flush=True)
+        return 1
     except KeyboardInterrupt:
         print("Đã dừng.")
     finally:
@@ -112,6 +111,8 @@ def _handle_utterance(
     client: MacClient,
     history: History,
     awaiting_command: bool,
+    valid=lambda: True,
+    speaker=None,
 ) -> bool:
     """Xử lý một đoạn giọng nói; trả về trạng thái 'đang chờ câu lệnh' mới."""
     mp3 = mp3_from_pcm(pcm, config.mic_sample_rate)
@@ -126,6 +127,8 @@ def _handle_utterance(
     )
     del mp3
     print(f"[GROQ] {text}", flush=True)
+    if not valid():
+        return False
     if not text:
         return awaiting_command
 
@@ -150,7 +153,7 @@ def _handle_utterance(
         _announce("usage-guide.mp3", config.onboard_playback_device)
         return False
 
-    _send_command(command, config, client, history)
+    _send_command(command, config, client, history, valid=valid, speaker=speaker)
     return False
 
 
@@ -159,8 +162,12 @@ def _send_command(
     config: Config,
     client: MacClient,
     history: History,
+    valid=lambda: True,
+    speaker=None,
 ) -> None:
     plan = client.plan(text)
+    if not valid():
+        return
     command_text = str(plan["command"])
     mode = str(plan["mode"])
     needs_image = bool(plan["needsImage"])
@@ -168,6 +175,8 @@ def _send_command(
 
     image = None
     if needs_image:
+        if not valid():
+            return
         _announce("taking-photo.mp3", config.onboard_playback_device)
         print("[CAMERA] Đang chụp ảnh theo nội dung câu lệnh...", flush=True)
         image = capture_jpeg()
@@ -178,6 +187,8 @@ def _send_command(
     sensor_payload = _read_sensor_payload(config)
     print("[LỆNH] Đang gửi transcript (không gửi audio) đến Mac...", flush=True)
     mp3, answer_text = client.command(command_text, image, mode, sensor_payload)
+    if not valid():
+        return
     print(f"[GEMINI] {answer_text or '(Mac không gửi text)'}", flush=True)
     if image is not None:
         history.add_image(image, transmitted_at)
@@ -185,7 +196,15 @@ def _send_command(
 
     device = config.onboard_playback_device
     print(f"[PHÁT] Đang phát phản hồi ({len(mp3)} byte) qua {device}.", flush=True)
-    play_mp3(mp3, device)
+    if speaker is None:
+        play_mp3(mp3, device)
+    else:
+        with speaker:
+            if not valid():
+                return
+            play_mp3(mp3, device, cancelled=lambda: not valid())
+    if not valid():
+        return
     history.add_sound(mp3, time.time())
     del mp3
 

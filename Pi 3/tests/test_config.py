@@ -51,6 +51,20 @@ class ConfigDefaultsTests(unittest.TestCase):
 
 
 class ConfigOverrideTests(unittest.TestCase):
+    def test_groq_key_from_separate_api_file(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = _write_env(directory)
+            (Path(directory) / ".api").write_text("GROQ_API_KEY=from-api\n", encoding="utf-8")
+            with patch.dict(os.environ, {}, clear=True):
+                self.assertEqual(Config.load(path).groq_api_key, "from-api")
+
+    def test_api_file_overrides_service_environment(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = _write_env(directory)
+            (Path(directory) / ".api").write_text("GROQ_API_KEY=from-api\n", encoding="utf-8")
+            with patch.dict(os.environ, {"GROQ_API_KEY": "from-environment"}, clear=True):
+                self.assertEqual(Config.load(path).groq_api_key, "from-api")
+
     def test_sensor_fields_override_defaults(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             config = _load(

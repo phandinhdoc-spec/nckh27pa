@@ -11,7 +11,7 @@ from array import array
 from collections import deque
 from math import isqrt
 from pathlib import Path
-from typing import Iterator
+from typing import Callable, Iterator
 
 
 class DeviceError(RuntimeError):
@@ -333,10 +333,48 @@ def try_connect_headset_fast(mac: str, attempts: int = 2, attempt_seconds: int =
     return False
 
 
-def play_mp3(data: bytes, device: str, timeout: int = 120) -> None:
+def play_mp3(data: bytes, device: str, timeout: int = 120,
+             cancelled: Callable[[], bool] | None = None) -> None:
     if not data:
         raise DeviceError("Dữ liệu MP3 đang trống.")
     command = [_command("mpg123"), "-q", "-a", device, "-"]
+    if cancelled is not None:
+        if cancelled():
+            return
+        # A seekable temporary input avoids blocking on a full stdin pipe.
+        with tempfile.TemporaryFile() as source, tempfile.TemporaryFile() as errors:
+            source.write(data)
+            source.seek(0)
+            try:
+                process = subprocess.Popen(command, stdin=source,
+                                           stdout=subprocess.DEVNULL, stderr=errors)
+            except OSError as error:
+                raise DeviceError(f"Không thể chạy mpg123: {error}") from error
+            deadline = time.monotonic() + timeout
+            try:
+                while process.poll() is None:
+                    if cancelled() or time.monotonic() >= deadline:
+                        process.terminate()
+                        try:
+                            process.wait(timeout=1)
+                        except subprocess.TimeoutExpired:
+                            process.kill()
+                            process.wait()
+                        if not cancelled():
+                            raise DeviceError("Phát MP3 quá thời gian cho phép.")
+                        return
+                    try:
+                        process.wait(timeout=0.1)
+                    except subprocess.TimeoutExpired:
+                        pass
+                if process.returncode != 0 and not cancelled():
+                    errors.seek(0)
+                    raise DeviceError(_message(command[0], errors.read()))
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait()
+        return
     try:
         result = subprocess.run(
             command,

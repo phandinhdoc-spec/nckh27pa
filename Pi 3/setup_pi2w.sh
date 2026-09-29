@@ -85,6 +85,7 @@ apt_install_minimal() {
         bluez-alsa-utils \
         libasound2-plugin-bluez \
         python3 \
+        python3-gpiozero \
         python3-serial \
         python3-smbus2
 
@@ -394,15 +395,21 @@ install_application_service() {
     install -d -o thiennhan -g thiennhan -m 0755 "${INSTALL_DIR}/sounds"
     install -o thiennhan -g thiennhan -m 0644 \
         "${SCRIPT_DIR}/app.py" \
+        "${SCRIPT_DIR}/button_runtime.py" \
         "${SCRIPT_DIR}/config.py" \
         "${SCRIPT_DIR}/devices.py" \
+        "${SCRIPT_DIR}/groq_stt.py" \
         "${SCRIPT_DIR}/history.py" \
         "${SCRIPT_DIR}/mac_client.py" \
+        "${SCRIPT_DIR}/part2_runtime.py" \
         "${SCRIPT_DIR}/sensors.py" \
         "${INSTALL_DIR}/"
     cp -a "${SCRIPT_DIR}/sounds/." "${INSTALL_DIR}/sounds/"
     chown -R thiennhan:thiennhan "${INSTALL_DIR}/sounds"
     install -o thiennhan -g thiennhan -m 0600 "${SCRIPT_DIR}/.env" "${INSTALL_DIR}/.env"
+    if [[ -f "${SCRIPT_DIR}/.api" ]]; then
+        install -o thiennhan -g thiennhan -m 0600 "${SCRIPT_DIR}/.api" "${INSTALL_DIR}/.api"
+    fi
     install -o root -g root -m 0755 "${SCRIPT_DIR}/play-audio" /usr/local/bin/play-audio
     install -o root -g root -m 0644 "${SCRIPT_DIR}/thiennhan.service" "/etc/systemd/system/${SERVICE_NAME}"
 

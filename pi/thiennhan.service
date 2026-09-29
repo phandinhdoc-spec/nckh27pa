@@ -1,0 +1,24 @@
+[Unit]
+Description=Thien Nhan plans 1, 2 and experimental 3
+Wants=network-online.target
+Requires=tailscaled.service tailscale-wait-online.service
+After=network-online.target tailscale-wait-online.service
+
+[Service]
+Type=simple
+User=dietpi
+Group=dietpi
+SupplementaryGroups=audio video gpio i2c
+WorkingDirectory=/home/dietpi/pi
+Environment=PYTHONUNBUFFERED=1
+Environment=GPIOZERO_PIN_FACTORY=lgpio
+ExecStart=/home/dietpi/.venvs/thiennhan-sensors/bin/python /home/dietpi/pi/app.py
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+NoNewPrivileges=true
+ProtectSystem=full
+ReadWritePaths=/home/dietpi/pi /dev/shm
+
+[Install]
+WantedBy=multi-user.target

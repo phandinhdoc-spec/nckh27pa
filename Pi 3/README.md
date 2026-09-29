@@ -4,7 +4,7 @@ Client Python cho Raspberry Pi Zero 2 W chạy DietPi Trixie ARM64 (Python 3.10+
 
 ## Kiến trúc âm thanh
 
-- **Mic = mic USB rời**, mở một lần bằng `arecord` (`S16_LE`, mono, `MIC_SAMPLE_RATE`) và giữ mở suốt thời gian chạy. Không thu từng đoạn ngắn, không dùng button/GPIO.
+- **Mic = mic USB rời**, mở một lần bằng `arecord` (`S16_LE`, mono, `MIC_SAMPLE_RATE`) và giữ mở suốt thời gian chạy. VAD tách từng đoạn giọng nói; GPIO25 chuyển chế độ sau khi khởi động.
 - **VAD cục bộ:** đo nền 0,5 s, ngưỡng = `max(SILENCE_RMS, 2 × RMS nền)`, cần vượt ngưỡng liên tục 0,3 s để bắt đầu một utterance, tự kết thúc sau `SILENCE_SECONDS` im lặng (tối đa `MAX_RECORD_SECONDS`).
 - **STT:** đoạn PCM được mã hoá MP3 bằng `lame` rồi gửi tới Groq Whisper (`GROQ_STT_MODEL`, mặc định `whisper-large-v3-turbo`). Ngôn ngữ mặc định `vi`.
 - **Phát âm thanh:** mọi prompt và câu trả lời luôn phát qua loa **MAX98357A** (`ONBOARD_PLAYBACK_DEVICE`).
@@ -62,8 +62,24 @@ HTTP_RETRIES=2
 
 - GY25 (UART): `GY25 TX → Pi RX (GPIO15)`, `GY25 RX → Pi TX (GPIO14)`, chung GND.
 - GY63 / MS5611 (I2C bus 1): SCL GPIO3, SDA GPIO2, địa chỉ `0x76`.
+- GY53 / VL53L1X (I2C bus 1): SCL GPIO3, SDA GPIO2, địa chỉ 
 
-Button GPIO25 không còn được dùng.
+GPIO25 dùng một bộ phân loại chung (kéo lên, nút nối GND): hai lần nhấn chuyển
+giữa hội thoại và chế độ nhìn; một lần nhấn trong chế độ nhìn ngắt tác vụ đang
+phát/đợi phản hồi; từ ba lần nhấn trở lên chỉ được ghi nhận, chưa điều hướng.
+Các lần nhấn cách nhau tối đa 1,5 giây (bao gồm biên), chống dội 60 ms;
+chỉ phân loại sau 1,51 giây yên lặng. Cần `python3-gpiozero` trên Pi.
+
+Chế độ nhìn: nói yêu cầu trực tiếp, không cần từ khóa; sau transcript không rỗng
+Pi chụp **một** JPEG và gửi `/command` với `mode=observe`, rồi tiếp tục chờ.
+Không mở camera liên tục, không lưu ảnh/âm thanh của chế độ này vào history.
+Phản hồi trễ bị loại bằng token phiên/tác vụ; tiến trình `mpg123` của phần trả
+lời đang phát có thể bị dừng. Đây mới là kiểm thử giả lập trên macOS, **chưa**
+kiểm tra GPIO, camera, tiếng vọng mic, tư thế ảnh hoặc Gemini trên Pi. Các lời
+nhắc âm thanh cũ của hội thoại và thao tác chụp/encode, HTTP đang chạy chưa bị
+hủy ngay ở tầng OS; HTTP có thể hoàn tất ở Mac dù Pi bỏ kết quả. Máy chủ cần
+xác nhận prompt cho tìm vật/đọc tài liệu, chính sách lưu dữ liệu và hỗ trợ hủy
+từ xa trước khi dùng với trang riêng tư. Chưa có MP3 hướng dẫn chế độ nhìn.
 
 ## Cài đặt chính thức
 

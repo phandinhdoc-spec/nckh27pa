@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 650" role="img" aria-label="Sơ đồ camera O, góc nhìn 70 độ, người tại T và khoảng cách TH">
+  <style>
+    text{font-family:Arial,'DejaVu Sans',sans-serif;fill:#17243b;font-size:22px} .small{font-size:17px} .point{font-weight:700;font-size:24px}
+  </style>
+  <rect width="1120" height="650" fill="#fff"/>
+  <text x="560" y="44" text-anchor="middle" font-size="27" font-weight="700">SƠ ĐỒ XÁC ĐỊNH KHOẢNG CÁCH TỪ CAMERA ĐẾN NGƯỜI</text>
+  <path d="M170 122 L990 510 L303 510 Z" fill="#e5f3ff" opacity=".7"/>
+  <path d="M55 510 H1050" stroke="#334155" stroke-width="3"/>
+  <path d="M170 122 V510" stroke="#64748b" stroke-width="2.5" stroke-dasharray="8 7"/>
+  <path d="M170 122 L303 510 M170 122 L990 510" stroke="#15803d" stroke-width="3.5"/>
+  <path d="M170 122 L520 510" stroke="#1457ad" stroke-width="3.5"/>
+  <path d="M170 122 L711 510" stroke="#d97706" stroke-width="2.5" stroke-dasharray="11 8"/>
+  <path d="M303 510 L607 236" stroke="#7c3aed" stroke-width="2.8"/>
+  <path d="M413 394 L423 402 L431 393" fill="none" stroke="#7c3aed" stroke-width="2"/>
+  <circle cx="423" cy="402" r="5" fill="#7c3aed"/><circle cx="484" cy="347" r="5" fill="#7c3aed"/>
+  <text x="390" y="391" class="point" fill="#7c3aed">G′</text>
+  <text x="491" y="337" class="point" fill="#7c3aed">T′</text>
+  <text x="612" y="234" class="point" fill="#7c3aed">x</text>
+  <path d="M170 495 H185 V510" fill="none" stroke="#475569" stroke-width="2.5"/>
+  <path d="M170 197 A75 75 0 0 0 220 178" fill="none" stroke="#8b5cf6" stroke-width="2.5"/>
+  <path d="M231 297 A185 185 0 0 0 302 268" fill="none" stroke="#15803d" stroke-width="2.5"/>
+  <path d="M311 279 A185 185 0 0 0 355 210" fill="none" stroke="#15803d" stroke-width="2.5"/>
+  <path d="M209 235 A120 120 0 0 0 276 179" fill="none" stroke="#0f766e" stroke-width="2"/>
+  <circle cx="170" cy="122" r="6" fill="#17243b"/>
+  <g fill="#17243b"><circle cx="170" cy="510" r="5"/><circle cx="303" cy="510" r="5"/><circle cx="520" cy="510" r="5"/><circle cx="711" cy="510" r="5"/><circle cx="990" cy="510" r="5"/></g>
+  <text x="148" y="108" class="point">O</text><text x="145" y="550" class="point">H</text><text x="293" y="550" class="point">N</text><text x="509" y="550" class="point">G</text><text x="700" y="550" class="point">T</text><text x="980" y="550" class="point">M</text>
+  <text x="218" y="214" fill="#8b5cf6">α = ∠HOG</text><text x="259" y="295" fill="#15803d">35°</text><text x="337" y="261" fill="#15803d">35°</text>
+  <text x="490" y="449" fill="#1457ad">Trục chính OG</text>
+  <text x="542" y="370" fill="#d97706">Tia nhìn đến người OT</text>
+  <path d="M185 477 H700" stroke="#dc2626" stroke-width="2.5" marker-start="url(#arr)" marker-end="url(#arr)"/>
+  <text x="443" y="465" text-anchor="middle" fill="#dc2626">TH — khoảng cách cần tìm</text>
+  <text x="560" y="611" text-anchor="middle" class="small">Hình sơ đồ: vị trí các điểm minh họa, không dùng độ dài vẽ để đo góc hoặc khoảng cách.</text>
+  <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse"><path d="M1 1 L7 4 L1 7" fill="none" stroke="#dc2626" stroke-width="1.5"/></marker></defs>
+</svg>
